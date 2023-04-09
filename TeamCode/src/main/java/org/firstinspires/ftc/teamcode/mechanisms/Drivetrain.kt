@@ -1,5 +1,6 @@
-package com.atk
+package org.firstinspires.ftc.teamcode.mechanisms
 
+import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.HardwareMap
 import org.firstinspires.ftc.teamcode.utils.Robot
@@ -18,12 +19,16 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
         "backRight" to hardwareMap.get(DcMotorEx::class.java, "backRight")
     )
 
+    init {
+        for (motor in motors.values) {
+            motor.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
+        }
+    }
+
     //Robot Centric - Determine Motor Powers
     fun robotDMP(pos: Vector2, mod: Float, turn: Float = 0f) {
         //Create Motor Powers HashMap
         val setPowers: HashMap<String, Float> = HashMap(4)
-
-        val heading: Float = robot.pose.rotation
 
         //Finds the ratio to scale the motor powers to
         val ratio: Float = max(abs(pos.x) + abs(pos.y) + abs(turn), 1f)
