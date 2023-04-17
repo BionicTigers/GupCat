@@ -8,7 +8,7 @@ class GamepadEx(private val gamepad: Gamepad) {
     enum class Buttons {
         DPAD_UP, DPAD_DOWN, DPAD_RIGHT, A, B, X, Y, START,
         BACK, LEFT_BUMPER, RIGHT_BUMPER, LEFT_STICK_BUTTON,
-        RIGHT_STICK_BUTTON, LEFT_TRIGGER, RIGHT_TRIGGER
+        RIGHT_STICK_BUTTON//, LEFT_TRIGGER, RIGHT_TRIGGER
     }
 
     //Gamepad Joysticks
@@ -26,7 +26,7 @@ class GamepadEx(private val gamepad: Gamepad) {
     //Assign BoolButtons to array
     init {
         for (button in Buttons.values()) {
-            boolButtons[button.ordinal] = BoolButton()
+            boolButtons.add(button.ordinal, BoolButton())
         }
     }
 

@@ -10,8 +10,8 @@ object Scheduler {
      * Run's all the commands in order of priority
      */
     fun update() {
-        for (command in schedule) {
-            command?.run()
+        for (command in schedule.toArray()) {
+            command?.let {(it as Command).run()}
         }
     }
     /**
