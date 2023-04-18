@@ -65,7 +65,7 @@ class PortTest : LinearOpMode() {
             setPower(power)
         }
 
-        //Move Forwards in the list
+        //Move Forward in the list
         gamepad.getButton(GamepadEx.Buttons.RIGHT_BUMPER).onStart {
             reset()
             selected = min(if (useMotors) motors.size-1 else servos.size-1, selected + 1)
