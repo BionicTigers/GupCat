@@ -7,9 +7,12 @@ import org.firstinspires.ftc.teamcode.utils.command.Scheduler
 import org.firstinspires.ftc.teamcode.utils.input.GamepadEx
 
 class Robot(opMode: LinearOpMode) {
-    var pose: Pose = Pose()
+    val pose: Pose
+        get() {
+            return odometry.globalPose
+        }
 
-    private val odometry: Odometry = Odometry()
+    private val odometry: Odometry = Odometry(opMode.hardwareMap)
 
     private val gamepad1: GamepadEx = GamepadEx(opMode.gamepad1)
     private val gamepad2: GamepadEx = GamepadEx(opMode.gamepad2)
@@ -24,8 +27,7 @@ class Robot(opMode: LinearOpMode) {
         Scheduler.add(ContinuousCommand
         {
             odometry.update()
-            pose = odometry.globalPose
-        }, 2)
+        }, 1000)
     }
 
     fun getGamepads(): Pair<GamepadEx, GamepadEx> {
