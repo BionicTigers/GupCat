@@ -22,9 +22,9 @@ class UltrasonicLocalizer (hardwareMap: HardwareMap) {
 
         // slope of the wall compared to the robot
         val slope = (side2Dist - side1Dist) / lateralOffset
+
         // changes the slope into the angle of the robot
         val angle = atan(slope)
-
         // robot position
         val x = cos(angle) * (side1Dist + (side1Dist - side2Dist))
         val y = cos(angle) * backDist
