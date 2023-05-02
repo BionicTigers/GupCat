@@ -26,12 +26,12 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
     }
 
     //Robot Centric - Determine Motor Powers
-    fun robotDMP(pos: Vector2, mod: Float, turn: Float = 0f) {
+    fun robotDMP(pos: Vector2, mod: Double, turn: Double = 0.0) {
         //Create Motor Powers HashMap
-        val setPowers: HashMap<String, Float> = HashMap(4)
+        val setPowers: HashMap<String, Double> = HashMap(4)
 
         //Finds the ratio to scale the motor powers to
-        val ratio: Float = max(abs(pos.x) + abs(pos.y) + abs(turn), 1f)
+        val ratio: Double = max(abs(pos.x) + abs(pos.y) + abs(turn), 1.0)
 
         setPowers["frontLeft"] = mod * (pos.y + pos.x + turn)
         setPowers["frontRight"] = mod * (pos.y - pos.x - turn)
@@ -42,23 +42,23 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
         setPowers.forEach { (name, value) -> motors[name]!!.power = (value / ratio).toDouble() }
     }
 
-    fun robotDMP(pos: Vector2, turn: Float = 0f) {
+    fun robotDMP(pos: Vector2, turn: Double = 0.0) {
         robotDMP(pos, pos.magnitude(), turn)
     }
 
     //Field Centric - Determine Motor Powers
-    fun fieldDMP(pos: Vector2, mod: Float, turn: Float = 0f) {
+    fun fieldDMP(pos: Vector2, mod: Double, turn: Double = 0.0) {
         //Create Motor Powers HashMap
-        val setPowers: HashMap<String, Float> = HashMap(4)
+        val setPowers: HashMap<String, Double> = HashMap(4)
 
-        val heading: Float = robot.pose.rotation
+        val heading: Double = robot.pose.rotation
 
         //Defines the movement direction
-        val angleX: Float = pos.x * cos(heading) - pos.y * sin(heading)
-        val angleY: Float = pos.x * sin(heading) + pos.y * cos(heading)
+        val angleX: Double = pos.x * cos(heading) - pos.y * sin(heading)
+        val angleY: Double = pos.x * sin(heading) + pos.y * cos(heading)
 
         //Finds the ratio to scale the motor powers to
-        val ratio: Float = max(abs(angleX) + abs(angleY) + abs(turn), 1f)
+        val ratio: Double = max(abs(angleX) + abs(angleY) + abs(turn), 1.0)
 
         setPowers["frontLeft"] = mod * (angleY + angleX + turn)
         setPowers["frontRight"] = mod * (angleY - angleX - turn)
@@ -66,10 +66,10 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
         setPowers["backRight"] = mod * (angleY + angleX - turn)
 
         //Set motor powers scaled to the ratio
-        setPowers.forEach { (name, value) -> motors[name]!!.power = (value / ratio).toDouble() }
+        setPowers.forEach { (name, value) -> motors[name]!!.power = (value / ratio) }
     }
 
-    fun fieldDMP(pos: Vector2, turn: Float = 0f) {
+    fun fieldDMP(pos: Vector2, turn: Double = 0.0) {
         fieldDMP(pos, pos.magnitude(), turn)
     }
 
