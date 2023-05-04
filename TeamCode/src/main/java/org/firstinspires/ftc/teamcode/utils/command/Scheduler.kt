@@ -43,7 +43,7 @@ object Scheduler {
     }
 
     //Adds a command to the next free index
-    fun add(command: Command) {
+    fun add(command: ContinuousCommand) {
         schedule.add(command)
     }
 

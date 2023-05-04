@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode.utils.input
 
 import com.qualcomm.robotcore.hardware.Gamepad
 
-class BoolButton() {
+class BoolButton {
     var state: Boolean = false
 
     //Assign sets for the callbacks

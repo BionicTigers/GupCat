@@ -4,7 +4,7 @@ import com.qualcomm.robotcore.hardware.Gamepad
 import org.firstinspires.ftc.teamcode.utils.Vector2
 import kotlin.math.abs
 
-class Joystick() {
+class Joystick {
     var state: Vector2? = null
     private var deadzone: Float = 0.05f
 
@@ -29,15 +29,21 @@ class Joystick() {
 
     //Update State and call Callbacks
     fun update(newState: Vector2) {
-        if (state != newState && abs(newState.magnitude()) <= deadzone) //Rest Once Callbacks
+
+        if (state != newState && abs(newState.magnitude()) <= deadzone) { //Rest Once Callbacks
             for (callback in restOnceCallbacks)
                 callback.invoke(newState)
-        else if (abs(newState.magnitude()) < deadzone) //Rest Callbacks
+        }
+
+        if (abs(newState.magnitude()) < deadzone) {//Rest Callbacks
             for (callback in restCallbacks)
                 callback.invoke(newState)
-        else if (state != newState) //Changed Callbacks
-            for (callback in restCallbacks)
+        }
+
+        if (state != newState) {//Changed Callbacks
+            for (callback in changeCallbacks)
                 callback.invoke(newState)
+        }
 
         state = newState
     }

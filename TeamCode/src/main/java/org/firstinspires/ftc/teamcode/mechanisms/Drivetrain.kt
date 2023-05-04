@@ -5,6 +5,9 @@ import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.HardwareMap
 import org.firstinspires.ftc.teamcode.utils.Robot
 import org.firstinspires.ftc.teamcode.utils.Vector2
+import org.firstinspires.ftc.teamcode.utils.command.ContinuousCommand
+import org.firstinspires.ftc.teamcode.utils.command.Scheduler
+import org.firstinspires.ftc.teamcode.utils.input.GamepadEx
 import kotlin.collections.HashMap
 import kotlin.math.abs
 import kotlin.math.cos
@@ -39,7 +42,7 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
         setPowers["backRight"] = mod * (pos.y + pos.x - turn)
 
         //Set motor powers scaled to the ratio
-        setPowers.forEach { (name, value) -> motors[name]!!.power = (value / ratio).toDouble() }
+        setPowers.forEach { (name, value) -> motors[name]!!.power = (value / ratio) }
     }
 
     fun robotDMP(pos: Vector2, turn: Double = 0.0) {
@@ -71,6 +74,15 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
 
     fun fieldDMP(pos: Vector2, turn: Double = 0.0) {
         fieldDMP(pos, pos.magnitude(), turn)
+    }
+
+    fun setup() {
+        val (gamepad1, gamepad2) = robot.getGamepads()
+        val left = gamepad1.getJoystick(GamepadEx.Joysticks.LEFT_JOYSTICK)
+        val right = gamepad1.getJoystick(GamepadEx.Joysticks.RIGHT_JOYSTICK)
+        Scheduler.add(ContinuousCommand {
+            robotDMP(left.state!!, right.state!!.x)
+        })
     }
 
     override fun toString(): String {

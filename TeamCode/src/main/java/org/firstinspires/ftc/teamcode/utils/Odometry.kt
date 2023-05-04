@@ -17,7 +17,7 @@ class Odometry(hardware: HardwareMap) {
     private val rightOffset: Double = 162.0
     private val backOffset: Double = 80.0
 
-    private val hub = ControlHub(hardware, hardware.get("ControlHub") as LynxDcMotorController)
+    private val hub = ControlHub(hardware, hardware.get("Control Hub") as LynxDcMotorController)
 
     var globalPose: Pose = Pose()
         private set

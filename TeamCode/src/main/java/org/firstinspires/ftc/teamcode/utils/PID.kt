@@ -13,14 +13,14 @@ class PID(
 ) {
     private val sampleTime = 20 // in ms
 
-    var PV1: Double = 0.0
-    var PV2: Double = 0.0
+    private var pv1: Double = 0.0
+    private var pv2: Double = 0.0
 
-    var E1: Double = 0.0
+    private var e1: Double = 0.0
 
-    var CV: Double = 0.0
+    private var cv: Double = 0.0
 
-    private val previousCall =  ElapsedTime(ElapsedTime.Resolution.MILLISECONDS)
+    private val previousCall = ElapsedTime(ElapsedTime.Resolution.MILLISECONDS)
     fun calculate(setPoint: Double, processValue: Double): Double {
         val dt = previousCall.milliseconds() / 1000
 
@@ -28,25 +28,25 @@ class PID(
             val scaledPV = processValue / (pvMax - pvMin)
             val e = (setPoint - processValue) / (pvMax - pvMin)
 
-            val p = e - E1
+            val p = e - e1
 
-            val i = if (Ti == 0.0) 0.0 else (e * dt) / (60 * Ti) // Can't divide by 0 so we set to 0
+            val i = if (Ti == 0.0) 0.0 else e * dt / 60 * Ti // Can't divide by 0 so we set to 0
 
-            val d = 60 * Td * ((scaledPV - 2 * PV1 + PV2) / dt)
+            val d = 60 * Td * (scaledPV - 2 * pv1 + pv2) / dt
 
             //Clamp CV to the min and the max
-            CV = Math.max(cvMin, Math.min(cvMax, CV + kP * (p + i + d)))
+            cv = (cv + kP * (p + i + d)).coerceIn(cvMin, cvMax)
 
             //Set Futures
-            E1 = e
+            e1 = e
 
-            PV2 = PV1
-            PV1 = scaledPV
+            pv2 = pv1
+            pv1 = scaledPV
 
             //Reset Elapsed Time
             previousCall.reset()
         }
 
-        return CV
+        return cv
     }
 }

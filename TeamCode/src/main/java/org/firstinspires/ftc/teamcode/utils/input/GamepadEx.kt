@@ -52,7 +52,7 @@ class GamepadEx(private val gamepad: Gamepad) {
             button.update(gamepad.javaClass.getDeclaredField(name).getBoolean(gamepad))
         }
 
-        leftJoystick.update(Vector2(gamepad.left_stick_x, gamepad.left_stick_y))
-        rightJoystick.update(Vector2(gamepad.right_stick_x, gamepad.right_stick_y))
+        leftJoystick.update(Vector2(gamepad.left_stick_x.toDouble(), gamepad.left_stick_y.toDouble()))
+        rightJoystick.update(Vector2(gamepad.right_stick_x.toDouble(), gamepad.right_stick_y.toDouble()))
     }
 }

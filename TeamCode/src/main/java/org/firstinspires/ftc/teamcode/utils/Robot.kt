@@ -20,17 +20,21 @@ class Robot(opMode: LinearOpMode) {
     init {
         Scheduler.add(ContinuousCommand
         {
-            gamepad1.update()
-            gamepad2.update()
-        }, 1)
+            odometry.update()
+        }, 0)
 
         Scheduler.add(ContinuousCommand
         {
-            odometry.update()
-        }, 1000)
+            gamepad1.update()
+            gamepad2.update()
+        }, 1)
     }
 
     fun getGamepads(): Pair<GamepadEx, GamepadEx> {
         return Pair(gamepad1, gamepad2)
+    }
+
+    fun update() {
+        Scheduler.update()
     }
 }
