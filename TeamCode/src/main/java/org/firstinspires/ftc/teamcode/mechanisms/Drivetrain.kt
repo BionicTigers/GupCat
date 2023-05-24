@@ -34,12 +34,12 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
         val ratio: Double = max(abs(pos.x) + abs(pos.y) + abs(turn), 1.0)
 
         setPowers["frontLeft"] = mod * (pos.y + pos.x + turn)
-        setPowers["frontRight"] = mod * (pos.y - pos.x - turn)
+        setPowers["frontRight"] = -mod * (pos.y - pos.x - turn)
         setPowers["backLeft"] = mod * (pos.y - pos.x + turn)
-        setPowers["backRight"] = mod * (pos.y + pos.x - turn)
+        setPowers["backRight"] = -mod * (pos.y + pos.x - turn)
 
         //Set motor powers scaled to the ratio
-        setPowers.forEach { (name, value) -> motors[name]!!.power = (value / ratio).toDouble() }
+        setPowers.forEach { (name, value) -> motors[name]!!.power = (value / ratio) }
     }
 
     fun robotDMP(pos: Vector2, turn: Double = 0.0) {
