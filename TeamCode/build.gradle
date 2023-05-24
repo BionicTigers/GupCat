@@ -33,7 +33,8 @@ android {
 
 dependencies {
     implementation project(':FtcRobotController')
-    implementation 'androidx.core:core-ktx:1.10.0'
+    implementation 'androidx.core:core-ktx:1.10.1'
+    implementation 'androidx.core:core-ktx:+'
     annotationProcessor files('lib/OpModeAnnotationProcessor.jar')
     implementation "org.jetbrains.kotlin:kotlin-reflect:1.8.10"
 }

@@ -35,6 +35,11 @@ object Scheduler {
         schedule.removeAt(priority)
     }
 
+    fun test() {
+
+        return
+    }
+
     /**
      * Removes a command from the scheduler while pushing the index's ahead back one.
      */
