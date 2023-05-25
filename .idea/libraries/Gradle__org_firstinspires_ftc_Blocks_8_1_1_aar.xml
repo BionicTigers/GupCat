@@ -1,0 +1,15 @@
+<component name="libraryTable">
+  <library name="Gradle: org.firstinspires.ftc:Blocks:8.1.1@aar">
+    <CLASSES>
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/70efd86e536487fc815b2d5a0a15b84f/transformed/Blocks-8.1.1/AndroidManifest.xml" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/70efd86e536487fc815b2d5a0a15b84f/transformed/Blocks-8.1.1/res" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/70efd86e536487fc815b2d5a0a15b84f/transformed/Blocks-8.1.1/jars/classes.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.firstinspires.ftc/Blocks/8.1.1/d23a33613ab218aacc3971356459fc8f44a335fe/Blocks-8.1.1-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.firstinspires.ftc/Blocks/8.1.1/8bee4c3b0834deb42b7bf5a1fe96c05ecda699b5/Blocks-8.1.1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

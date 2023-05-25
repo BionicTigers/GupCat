@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="Gradle: org.firstinspires.ftc:Tfod:8.1.1@aar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/94ea1a7e9fbc866ceca63198bc71373d/transformed/Tfod-8.1.1/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/94ea1a7e9fbc866ceca63198bc71373d/transformed/Tfod-8.1.1/AndroidManifest.xml" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.firstinspires.ftc/Tfod/8.1.1/5f610f4ebf4ece0232e27f95ea323c4fef1723cd/Tfod-8.1.1-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.firstinspires.ftc/Tfod/8.1.1/25bf61156ed22f6fb91b00cf0515d69a16e427d8/Tfod-8.1.1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
