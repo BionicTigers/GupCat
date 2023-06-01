@@ -6,7 +6,7 @@ import org.firstinspires.ftc.teamcode.utils.Vector2
 class GamepadEx(private val gamepad: Gamepad) {
     //Gamepad Buttons
     enum class Buttons {
-        DPAD_UP, DPAD_DOWN, DPAD_RIGHT, A, B, X, Y, START,
+        DPAD_UP, DPAD_DOWN, DPAD_RIGHT, DPAD_LEFT, A, B, X, Y, START,
         BACK, LEFT_BUMPER, RIGHT_BUMPER, LEFT_STICK_BUTTON,
         RIGHT_STICK_BUTTON//, LEFT_TRIGGER, RIGHT_TRIGGER
     }
