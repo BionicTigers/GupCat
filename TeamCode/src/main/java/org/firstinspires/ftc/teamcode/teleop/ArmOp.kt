@@ -19,7 +19,7 @@ class ArmOp : LinearOpMode() {
         var power: Double = 0.0
 
         gamepad2.getButton(GamepadEx.Buttons.DPAD_UP).onStart {
-            arm.move(90.0)
+            arm.move(30.0)
         }
     }
 }
