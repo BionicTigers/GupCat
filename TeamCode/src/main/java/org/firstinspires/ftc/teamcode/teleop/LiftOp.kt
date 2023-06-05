@@ -5,6 +5,7 @@ import org.firstinspires.ftc.teamcode.mechanisms.Arm
 import org.firstinspires.ftc.teamcode.utils.Robot
 import org.firstinspires.ftc.teamcode.utils.input.GamepadEx
 import org.firstinspires.ftc.teamcode.mechanisms.lift
+import org.firstinspires.ftc.teamcode.utils.Vector2
 
 class LiftOp : LinearOpMode() {
     override fun runOpMode() {
@@ -12,6 +13,7 @@ class LiftOp : LinearOpMode() {
         val robot = Robot(this)
         val (gamepad1, gamepad2) = robot.getGamepads()
         val lift = lift(hardwareMap, robot)
+        var vector = gamepad2.getJoystick(GamepadEx.Joysticks.RIGHT_JOYSTICK).state
 
         gamepad2.getButton(GamepadEx.Buttons.DPAD_UP).onStart{
             lift.nae(-800, false)
@@ -26,8 +28,16 @@ class LiftOp : LinearOpMode() {
             lift.nae(50, true)
         }
 
-        gamepad2.getJoystick(GamepadEx.Joysticks.RIGHT_JOYSTICK).state{
-            lift.notTrim()
+        gamepad2.getJoystick(GamepadEx.Joysticks.RIGHT_JOYSTICK).onChange{
+            vector
+            if (vector != null) {
+                if(vector.magnitude() >= 0.3){
+                    lift.notTrim(10)
+                } else if(vector.magnitude() <= -0.3){
+                    lift.notTrim(-10)
+                }
+
+            }
         }
     }
 }
