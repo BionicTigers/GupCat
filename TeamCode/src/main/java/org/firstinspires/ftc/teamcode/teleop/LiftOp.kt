@@ -16,16 +16,16 @@ class LiftOp : LinearOpMode() {
         var vector = gamepad2.getJoystick(GamepadEx.Joysticks.RIGHT_JOYSTICK).state
 
         gamepad2.getButton(GamepadEx.Buttons.DPAD_UP).onStart{
-            lift.nae(-800, false)
+            lift.determineHeightLift(-800, false)
         }
         gamepad2.getButton(GamepadEx.Buttons.DPAD_LEFT).onStart{
-            lift.nae(-400, false)
+            lift.determineHeightLift(-400, false)
         }
         gamepad2.getButton(GamepadEx.Buttons.DPAD_DOWN).onStart{
-            lift.nae(0, false)
+            lift.determineHeightLift(0, false)
         }
         gamepad2.getButton(GamepadEx.Buttons.DPAD_RIGHT).onStart{
-            lift.nae(50, true)
+            lift.determineHeightLift(50, true)
         }
 
         gamepad2.getJoystick(GamepadEx.Joysticks.RIGHT_JOYSTICK).onChange{

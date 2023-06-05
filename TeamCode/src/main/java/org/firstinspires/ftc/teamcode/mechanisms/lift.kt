@@ -20,7 +20,7 @@ class lift(hardwareMap: HardwareMap, private val robot: Robot) {
     public var killPower: Boolean = true
     public var activelyDown: Boolean = false
 
-    fun nae (tarHight: Int, kPower: Boolean){
+    fun determineHeightLift (tarHight: Int, kPower: Boolean){
         targetHeight = tarHight
         killPower = kPower
     }
