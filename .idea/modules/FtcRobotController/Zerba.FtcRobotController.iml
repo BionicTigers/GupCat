@@ -4,7 +4,7 @@
     <facet type="android-gradle" name="Android-Gradle">
       <configuration>
         <option name="GRADLE_PROJECT_PATH" value=":FtcRobotController" />
-        <option name="LAST_SUCCESSFUL_SYNC_AGP_VERSION" value="8.0.2" />
+        <option name="LAST_SUCCESSFUL_SYNC_AGP_VERSION" value="8.0.1" />
         <option name="LAST_KNOWN_AGP_VERSION" value="8.0.2" />
       </configuration>
     </facet>
@@ -29,7 +29,7 @@
       <excludeFolder url="file://$MODULE_DIR$/../../../FtcRobotController/.gradle" />
       <excludeFolder url="file://$MODULE_DIR$/../../../FtcRobotController/build" />
     </content>
-    <orderEntry type="jdk" jdkName="Android API 33 Platform" jdkType="Android SDK" />
+    <orderEntry type="jdk" jdkName="Android API 33, extension level 3 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
 </module>
