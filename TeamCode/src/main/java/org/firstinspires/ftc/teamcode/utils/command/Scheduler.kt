@@ -5,11 +5,16 @@ package org.firstinspires.ftc.teamcode.utils.command
  */
 object Scheduler {
     private val schedule: ArrayList<Command?> = ArrayList()
+    private var previousTime = 0.0
+    var deltaTime = 0.0
+        internal set
 
     /**
      * Run's all the commands in order of priority
      */
     fun update() {
+        deltaTime = (System.currentTimeMillis() - previousTime) / 1000
+
         for (command in schedule.toArray()) {
             command?.let {(it as Command).run()}
         }

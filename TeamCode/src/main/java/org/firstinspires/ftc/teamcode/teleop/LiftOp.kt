@@ -1,43 +1,41 @@
 package org.firstinspires.ftc.teamcode.teleop
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
-import org.firstinspires.ftc.teamcode.mechanisms.Arm
 import org.firstinspires.ftc.teamcode.utils.Robot
 import org.firstinspires.ftc.teamcode.utils.input.GamepadEx
-import org.firstinspires.ftc.teamcode.mechanisms.lift
-import org.firstinspires.ftc.teamcode.utils.Vector2
+import org.firstinspires.ftc.teamcode.mechanisms.Lift
+import org.firstinspires.ftc.teamcode.utils.command.Scheduler
+import kotlin.math.withSign
 
 class LiftOp : LinearOpMode() {
     override fun runOpMode() {
 
         val robot = Robot(this)
-        val (gamepad1, gamepad2) = robot.getGamepads()
-        val lift = lift(hardwareMap, robot)
-        var vector = gamepad2.getJoystick(GamepadEx.Joysticks.RIGHT_JOYSTICK).state
+        val (_, gamepad2) = robot.getGamepads()
+        val lift = Lift(hardwareMap, robot)
 
         gamepad2.getButton(GamepadEx.Buttons.DPAD_UP).onStart{
-            lift.determineHeightLift(-800, false)
+            lift.targetHeight = 800
+            lift.killPower = false
         }
         gamepad2.getButton(GamepadEx.Buttons.DPAD_LEFT).onStart{
-            lift.determineHeightLift(-400, false)
+            lift.targetHeight = 400
+            lift.killPower = false
         }
         gamepad2.getButton(GamepadEx.Buttons.DPAD_DOWN).onStart{
-            lift.determineHeightLift(0, false)
+            lift.targetHeight = 0
+            lift.killPower = false
         }
         gamepad2.getButton(GamepadEx.Buttons.DPAD_RIGHT).onStart{
-            lift.determineHeightLift(50, true)
+            lift.targetHeight = 50
+            lift.killPower = true
         }
 
-        gamepad2.getJoystick(GamepadEx.Joysticks.RIGHT_JOYSTICK).onChange{
-            vector
-            if (vector != null) {
-                if(vector.magnitude() >= 0.3){
-                    lift.notTrim(10)
-                } else if(vector.magnitude() <= -0.3){
-                    lift.notTrim(-10)
-                }
+        val rightJoystick = gamepad2.getJoystick(GamepadEx.Joysticks.RIGHT_JOYSTICK)
 
-            }
+        rightJoystick.deadzone = 0.3
+        rightJoystick.onChange {
+            lift.trim += it.y.withSign(300 * Scheduler.deltaTime)
         }
     }
 }

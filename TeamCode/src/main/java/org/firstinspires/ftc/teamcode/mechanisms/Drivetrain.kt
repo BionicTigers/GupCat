@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.mechanisms
 
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
+import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.HardwareMap
 import org.firstinspires.ftc.teamcode.utils.Robot
 import org.firstinspires.ftc.teamcode.utils.Vector2
@@ -26,6 +27,9 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
         for (motor in motors.values) {
             motor.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
         }
+
+        motors["frontRight"]?.direction = DcMotorSimple.Direction.REVERSE
+        motors["backRight"]?.direction = DcMotorSimple.Direction.REVERSE
     }
 
     //Robot Centric - Determine Motor Powers
@@ -36,17 +40,19 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
         //Finds the ratio to scale the motor powers to
         val ratio: Double = max(abs(pos.x) + abs(pos.y) + abs(turn), 1.0)
 
-        setPowers["frontLeft"] = mod * (pos.y + pos.x + turn)
-        setPowers["frontRight"] = -mod * (pos.y - pos.x - turn)
-        setPowers["backLeft"] = mod * (pos.y - pos.x + turn)
-        setPowers["backRight"] = -mod * (pos.y + pos.x - turn)
+        setPowers["frontLeft"] = mod * (pos.y + -pos.x + turn)
+        setPowers["frontRight"] = mod * (pos.y - -pos.x - turn)
+        setPowers["backLeft"] = mod * (pos.y - -pos.x + turn)
+        setPowers["backRight"] = mod * (pos.y + -pos.x - turn)
+
+        println(setPowers)
 
         //Set motor powers scaled to the ratio
         setPowers.forEach { (name, value) -> motors[name]!!.power = (value / ratio) }
     }
 
     fun robotDMP(pos: Vector2, turn: Double = 0.0) {
-        robotDMP(pos, pos.magnitude(), turn)
+        robotDMP(pos, pos.magnitude() + turn, turn)
     }
 
     //Field Centric - Determine Motor Powers
