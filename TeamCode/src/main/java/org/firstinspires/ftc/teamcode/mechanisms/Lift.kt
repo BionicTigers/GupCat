@@ -5,6 +5,8 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.DigitalChannel
 import com.qualcomm.robotcore.hardware.HardwareMap
 import org.firstinspires.ftc.teamcode.utils.PID
+import org.firstinspires.ftc.teamcode.utils.PIDTerms
+import org.firstinspires.ftc.teamcode.utils.oldPID
 import org.firstinspires.ftc.teamcode.utils.Robot
 
 class Lift(hardwareMap: HardwareMap, private val robot: Robot) {
@@ -17,7 +19,7 @@ class Lift(hardwareMap: HardwareMap, private val robot: Robot) {
     )
     private val limitSwitch = hardwareMap.get(DigitalChannel::class.java, "limitSwitch")
 
-    private val pid = PID(1.0, 0.0, 0.0, -1.0, 1.0, 0.0, maximumHeight.toDouble())
+    private val pid = PID(PIDTerms(), -1.0, 1.0, 0.0, maximumHeight.toDouble())
 
     var trim: Double = 0.0
     var killPower: Boolean = true

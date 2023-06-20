@@ -3,50 +3,52 @@ package org.firstinspires.ftc.teamcode.utils
 import com.qualcomm.robotcore.util.ElapsedTime
 
 class PID(
-    private val kP: Double,
-    private val Ti: Double, // in minutes
-    private val Td: Double, // in minutes
-    private val cvMin: Double,
-    private val cvMax: Double,
+    val kP: Double,
+    val tI: Double,
+    val tD: Double,
     private val pvMin: Double,
-    private val pvMax: Double
-) {
-    private val sampleTime = 20 // in ms
+    private val pvMax: Double,
+    private val cvMin: Double,
+    private val cvMax: Double)
+{
+    private val sampleTime = 20 //In Milliseconds
 
-    var PV1: Double = 0.0
-    var PV2: Double = 0.0
+    private val elapsedTime = ElapsedTime(ElapsedTime.Resolution.MILLISECONDS)
 
-    var E1: Double = 0.0
+    //Expose P, I, D, E, CV variables to outside the class
+    var p: Double = 0.0
+        internal set
+    var i: Double = 0.0
+        internal set
+    var d: Double = 0.0
+        internal set
+    var previousError: Double = 0.0
+        internal set
+    var cv: Double = 0.0
+        internal set
 
-    var CV: Double = 0.0
+    constructor(terms: PIDTerms,
+                pvMin: Double,
+                pvMax: Double,
+                cvMin: Double,
+                cvMax: Double): this(terms.kP, terms.tI, terms.tD, pvMin, pvMax, cvMin, cvMax)
 
-    private val previousCall =  ElapsedTime(ElapsedTime.Resolution.MILLISECONDS)
     fun calculate(setPoint: Double, processValue: Double): Double {
-        val dt = previousCall.milliseconds() / 1000
+        val dt = elapsedTime.seconds()
 
-        if (dt > sampleTime / 1000) {
-            val scaledPV = processValue / (pvMax - pvMin)
-            val e = (setPoint - processValue) / (pvMax - pvMin)
+        if (dt < sampleTime / 1000) {
+            val error = (setPoint - processValue) / (pvMax - pvMin)
 
-            val p = e - E1
+            p = kP * error
+            i += if (cv > cvMin && cv < cvMax && tI != 0.0) 1 / 60 * tI * error else 0.0
+            d = kP * tD / 60 * (previousError - error)
 
-            val i = if (Ti == 0.0) 0.0 else (e * dt) / (60 * Ti) // Can't divide by 0 so we set to 0
+            cv = p + kP * i + d
 
-            val d = 60 * Td * ((scaledPV - 2 * PV1 + PV2) / dt)
-
-            //Clamp CV to the min and the max
-            CV = (CV + kP * (p + i + d)).coerceIn(cvMin, cvMax)
-
-            //Set Futures
-            E1 = e
-
-            PV2 = PV1
-            PV1 = scaledPV
-
-            //Reset Elapsed Time
-            previousCall.reset()
+            previousError = error
+            elapsedTime.reset()
         }
 
-        return CV
+        return cv
     }
 }

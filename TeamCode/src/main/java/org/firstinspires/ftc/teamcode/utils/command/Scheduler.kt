@@ -52,7 +52,9 @@ object Scheduler {
         command.priority?.let {schedule.removeAt(it)}
     }
 
-    //Adds a command to the next free index
+    /**
+     * Adds a command to the next free index
+     */
     fun add(command: ContinuousCommand) {
         schedule.add(command)
     }
