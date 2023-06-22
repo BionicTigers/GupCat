@@ -4,13 +4,43 @@ import android.annotation.SuppressLint
 import android.graphics.Rect
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl
+import org.opencv.core.Mat
+import org.opencv.core.MatOfPoint
+import org.opencv.imgproc.Imgproc
 import org.openftc.easyopencv.OpenCvCamera
 import org.openftc.easyopencv.OpenCvCameraFactory
+import org.openftc.easyopencv.OpenCvCameraRotation
+import org.openftc.easyopencv.OpenCvPipeline
 import org.openftc.easyopencv.OpenCvWebcam
-import java.util.HashMap
-import java.util.SimpleTimeZone
+import java.util.concurrent.TimeUnit
 
+public final class Pipeline : OpenCvPipeline() {
+    var injection: OpenCv? = null
+    private val detection = "None"
 
+    fun Pipeline(injection: OpenCv?) { this.injection = injection }
+
+    //This is essentially the Main method for the pipeline
+    //On every new frame from the camera, this is ran
+    override fun processFrame(input: Mat?): Mat {
+        val hsvMatUncropped = Mat()
+
+        val contours = ArrayList<MatOfPoint>()
+
+        //Convert the input image into HSV
+        Imgproc.cvtColor(input, hsvMatUncropped, Imgproc.COLOR_RGB2HSV)
+
+        val hsvMat =
+            hsvMatUncropped.submat(injection!!.crop)
+
+        //Highest Area found during every signal process
+        val high: Double = 0.0
+
+        for (entry in injection!!.signals.entries){
+
+        }
+    }
+}
 class OpenCv {
     private lateinit var camera: OpenCvWebcam
     lateinit var signals: HashMap<String, Color>
@@ -42,17 +72,30 @@ class OpenCv {
 
     fun stopDetection() {camera.stopStreaming()}
 
-
     private fun startCameraStream () {
         //Start the camera asynchronously to prevent yielding
         //This creates a new thread but it won't cause any issues with hardware ownership
-        camera.openCameraDeviceAsync({
+        camera.openCameraDeviceAsync(object : OpenCvCamera.AsyncCameraOpenListener{
             @Override
-            fun onOpened() {
+            override fun onOpened() {
                 camera.getExposureControl().setMode(ExposureControl.Mode.Manual)
+                camera.exposureControl.setExposure(VisionConstants.EXPOSURE, TimeUnit.MILLISECONDS)
+                //Start streaming at 1280x720, in the upright orientation
+                //Start the detection pipeline
+                camera.startStreaming(1280, 720, OpenCvCameraRotation.UPRIGHT)
+                camera.setPipeline(pipeline)
+
+                //Used to give realtime camera feed to FTC Dashboard
             }
+
+            @Override
+            override fun onError(errorCode: Int){
+                throw RuntimeException(String.format("Camera Initialization Failed: %d", errorCode))
+            }
+
         })
 
 
     }
 }
+
