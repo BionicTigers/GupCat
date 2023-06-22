@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.teleop
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.CRServo
 import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.Servo
@@ -11,6 +12,7 @@ import org.firstinspires.ftc.teamcode.utils.command.ContinuousCommand
 import org.firstinspires.ftc.teamcode.utils.command.Scheduler
 import org.firstinspires.ftc.teamcode.utils.input.GamepadEx
 
+@TeleOp(name="ArmOp")
 class ArmOp : LinearOpMode() {
     override fun runOpMode() {
         val robot = Robot(this)
@@ -25,5 +27,11 @@ class ArmOp : LinearOpMode() {
         }
 
         Scheduler.add(ContinuousCommand { arm.update() })
+
+        waitForStart()
+
+        while (opModeIsActive()) {
+            robot.update()
+        }
     }
 }

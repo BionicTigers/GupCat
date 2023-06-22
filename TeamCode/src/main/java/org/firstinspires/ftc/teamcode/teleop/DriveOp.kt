@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.utils.command.ContinuousCommand
 import org.firstinspires.ftc.teamcode.utils.command.Scheduler
 import org.firstinspires.ftc.teamcode.utils.input.GamepadEx
 
-@TeleOp(name="DriveOpMode")
+@TeleOp(name="DriveOp")
 class DriveOp : LinearOpMode() {
     override fun runOpMode() {
         val robot = Robot(this)

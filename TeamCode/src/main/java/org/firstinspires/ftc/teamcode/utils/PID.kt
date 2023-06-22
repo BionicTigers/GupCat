@@ -50,7 +50,7 @@ class PID(
         val dt = elapsedTime.seconds()
 
         //Check if pid should calculate again
-        if (dt < sampleTime / 1000) {
+        if (dt > sampleTime / 1000) {
             //Error in terms of processValue (percentage)
             val error = (setPoint - processValue) / (pvMax - pvMin)
 
@@ -78,6 +78,6 @@ class PID(
     }
 
     fun log() {
-        println("P: $p, I: $i, D: $d, E: $previousError")
+        println("P: $p, I: $i, D: $d, E: $previousError, CV: $cv")
     }
 }

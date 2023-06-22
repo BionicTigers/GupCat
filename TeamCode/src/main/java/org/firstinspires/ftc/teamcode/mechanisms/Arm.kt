@@ -11,7 +11,7 @@ class Arm(hardwareMap: HardwareMap, private val robot: Robot) {
     private val right = hardwareMap.get(CRServo::class.java, "right")
     private val left = hardwareMap.get(CRServo::class.java, "left")
     private val controlHub = ControlHub(hardwareMap, hardwareMap.get(LynxDcMotorController::class.java, "Control Hub"))
-    private val pid = PID(PIDTerms(), -1.0, 1.0, 0.0, 270.0)
+    private val pid = PID(PIDTerms(), 0.0, 270.0, -1.0, 1.0)
 
     private var targetDegrees: Double = 0.0
     private val angleOffset: Double = 0.0
@@ -29,6 +29,7 @@ class Arm(hardwareMap: HardwareMap, private val robot: Robot) {
 
         val degrees = controlHub.getEncoderTicks(0).toDouble() * (360/8192)
         val power = pid.calculate(targetDegrees, degrees)
+        pid.log()
 
         left.power = power
         right.power = power
