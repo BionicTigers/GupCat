@@ -31,6 +31,6 @@ class Claw(hardwareMap: HardwareMap, private val robot: Robot) {
         }
         return dist
     }
-    fun coneDetected(): Boolean {return getDist() > 5}
+    fun coneDetected(): Boolean {return getDist() < 5}
 
 }
