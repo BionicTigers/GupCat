@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.utils.input.GamepadEx
 import kotlin.math.withSign
 
 @TeleOp(name="MainOp")
-class MainOp : LinearOpMode{
+class MainOp : LinearOpMode(){
     override fun runOpMode() {
 
         val robot = Robot(this)

@@ -9,12 +9,12 @@ import org.opencv.core.Size
 import org.opencv.imgproc.Imgproc
 
 class Color(
-    private val lower: Scalar,
-    private val upper: Scalar,
-    private val minArea: Int,
-    private val maxArea: Int = Int.MAX_VALUE
+    val lower: Scalar,
+    val upper: Scalar,
+    val minArea: Int,
+    val maxArea: Int = Int.MAX_VALUE
 ) {
-    private lateinit var contours: ArrayList<MatOfPoint>
+    lateinit var contours: ArrayList<MatOfPoint>
 
     fun getArea(input: Mat): Double {
         var mask: Mat = Mat()
@@ -51,5 +51,5 @@ class Color(
         return area
     }
 
-    fun detect(area: Double) { area > minArea && area < maxArea }
+    fun detect(area: Double): Boolean { area > minArea && area < maxArea }
 }
