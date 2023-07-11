@@ -4,12 +4,9 @@ import android.annotation.SuppressLint
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl
 import org.opencv.core.Rect
-import org.openftc.easyopencv.OpenCvCamera
 import org.openftc.easyopencv.OpenCvCamera.AsyncCameraOpenListener
 import org.openftc.easyopencv.OpenCvCameraFactory
 import org.openftc.easyopencv.OpenCvWebcam
-import java.util.HashMap
-import java.util.SimpleTimeZone
 
 
 class OpenCv {
@@ -24,7 +21,7 @@ class OpenCv {
     @SuppressLint("NotConstructor")
 
 
-    fun OpenCv(webcamName: WebcamName, signals: HashMap<String, Color>, monitorId: Int ){
+    fun openCv(webcamName: WebcamName, signals: HashMap<String, Color>, monitorId: Int ){
         this.camera = OpenCvCameraFactory.getInstance()
             .createWebcam(webcamName, monitorId)
 
@@ -49,11 +46,11 @@ class OpenCv {
         //This creates a new thread but it won't cause any issues with hardware ownership
         camera.openCameraDeviceAsync(object : AsyncCameraOpenListener{
             override fun onOpened() {
-                camera.getExposureControl().setMode(ExposureControl.Mode.Manual)
+                camera.exposureControl.mode = ExposureControl.Mode.Manual
             }
 
             override fun onError(errorCode: Int) {
-                TODO("Not yet implemented")
+                throw RuntimeException(String.format("Camera Initialization Failed: %d", errorCode))
             }
         })
 
