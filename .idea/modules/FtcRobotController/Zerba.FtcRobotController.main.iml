@@ -33,7 +33,7 @@
       <sourceFolder url="file://$MODULE_DIR$/../../../FtcRobotController/src/main/java" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/../../../FtcRobotController/src/main/res" type="java-resource" />
     </content>
-    <orderEntry type="jdk" jdkName="Android API 33, extension level 3 Platform" jdkType="Android SDK" />
+    <orderEntry type="jdk" jdkName="Android API 34, extension level 7 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Gradle: org.threeten:threetenbp:1.5.1" level="project" />
     <orderEntry type="library" name="Gradle: org.checkerframework:checker-qual:2.5.8" level="project" />

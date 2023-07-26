@@ -9,23 +9,16 @@ import org.openftc.easyopencv.OpenCvCameraFactory
 import org.openftc.easyopencv.OpenCvWebcam
 
 
-class OpenCv {
-    private lateinit var camera: OpenCvWebcam
-    lateinit var signals: HashMap<String, Color>
+class OpenCv(webcamName: WebcamName, val signals: HashMap<String, Color>) {
+    private var camera: OpenCvWebcam
     var crop: Rect? = null
-    private lateinit var pipeline: Pipeline
+    private var pipeline: Pipeline
     //Create a new OpenCV Wrapper WITH a live monitor view
     //Useful for debugging but slows down cpu cycles
 
-    //thi can be removed
-    @SuppressLint("NotConstructor")
-
-
-    fun openCv(webcamName: WebcamName, signals: HashMap<String, Color>, monitorId: Int ){
+    init {
         this.camera = OpenCvCameraFactory.getInstance()
-            .createWebcam(webcamName, monitorId)
-
-        this.signals = signals
+            .createWebcam(webcamName)
 
         //Use dependency injection for real-time updating
         pipeline = Pipeline(this)
@@ -33,7 +26,6 @@ class OpenCv {
         startCameraStream()
     }
 
-    fun setCrop(zone: Rect) {crop = zone}
 
     //Return the current detection from the pipeline, NONE if there isn't a detection
     fun getDetection(): String? {return pipeline.getDetection()}
