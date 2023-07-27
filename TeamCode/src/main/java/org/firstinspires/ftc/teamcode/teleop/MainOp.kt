@@ -80,7 +80,7 @@ class MainOp : LinearOpMode(){
             println("cone")
         }
 
-        //scheduler stuff
+        //scheduler
         Scheduler.add(ContinuousCommand { lift.update() })
         Scheduler.add(ContinuousCommand { arm.update() })
 

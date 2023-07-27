@@ -41,8 +41,6 @@ dependencies {
     implementation 'org.openftc:easyopencv:1.6.0'
     implementation 'androidx.core:core-ktx:+'
     annotationProcessor files('lib/OpModeAnnotationProcessor.jar')
-    implementation('com.acmerobotics.dashboard:dashboard:0.4.10') {
-        exclude group: 'org.firstinspires.ftc'
-    }
+    implementation('com.acmerobotics.dashboard:dashboard:0.4.9')
     implementation "org.jetbrains.kotlin:kotlin-reflect:1.8.10"
 }

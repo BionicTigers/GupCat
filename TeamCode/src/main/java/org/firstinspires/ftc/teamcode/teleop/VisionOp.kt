@@ -1,11 +1,11 @@
 package org.firstinspires.ftc.teamcode.teleop
 
-import android.graphics.Rect
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName
 import org.firstinspires.ftc.teamcode.utils.vision.Color
 import org.firstinspires.ftc.teamcode.utils.vision.OpenCv
+import org.firstinspires.ftc.teamcode.utils.vision.Pipeline
 import org.firstinspires.ftc.teamcode.utils.vision.VisionConstants
 
 @TeleOp(name = "VisionOp")
@@ -21,5 +21,12 @@ class VisionOp : LinearOpMode(){
             hardwareMap.get(WebcamName::class.java, "Webcam 1"),
             signals
         )
+
+        waitForStart()
+
+        while (opModeIsActive()) {
+            telemetry.addData("Reading", openCv.getDetection())
+            telemetry.update()
+        }
     }
 }

@@ -1,11 +1,10 @@
 package org.firstinspires.ftc.teamcode.utils.vision
 
-import android.annotation.SuppressLint
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName
-import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl
 import org.opencv.core.Rect
 import org.openftc.easyopencv.OpenCvCamera.AsyncCameraOpenListener
 import org.openftc.easyopencv.OpenCvCameraFactory
+import org.openftc.easyopencv.OpenCvCameraRotation
 import org.openftc.easyopencv.OpenCvWebcam
 
 
@@ -38,7 +37,8 @@ class OpenCv(webcamName: WebcamName, val signals: HashMap<String, Color>) {
         //This creates a new thread but it won't cause any issues with hardware ownership
         camera.openCameraDeviceAsync(object : AsyncCameraOpenListener{
             override fun onOpened() {
-                camera.exposureControl.mode = ExposureControl.Mode.Manual
+                camera.startStreaming(1280, 720, OpenCvCameraRotation.UPRIGHT)
+                camera.setPipeline(pipeline)
             }
 
             override fun onError(errorCode: Int) {

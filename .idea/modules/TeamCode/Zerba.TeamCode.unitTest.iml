@@ -61,7 +61,7 @@
     <orderEntry type="library" scope="TEST" name="Gradle: androidx.collection:collection:1.1.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Gradle: org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Gradle: org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.6.1" level="project" />
-    <orderEntry type="library" scope="TEST" name="Gradle: com.acmerobotics.dashboard:core:0.4.10" level="project" />
+    <orderEntry type="library" scope="TEST" name="Gradle: com.acmerobotics.dashboard:core:0.4.9" level="project" />
     <orderEntry type="library" scope="TEST" name="Gradle: org.nanohttpd:nanohttpd-websocket:2.3.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Gradle: org.jetbrains.kotlin:kotlin-reflect:1.8.10" level="project" />
     <orderEntry type="library" scope="TEST" name="Gradle: org.firstinspires.ftc:Inspection:8.1.1@aar" level="project" />
@@ -103,7 +103,7 @@
     <orderEntry type="library" scope="TEST" name="Gradle: org.firstinspires.ftc:gameAssets-PowerPlay:1.0.0@aar" level="project" />
     <orderEntry type="library" scope="TEST" name="Gradle: org.openftc:easyopencv:1.6.0@aar" level="project" />
     <orderEntry type="library" scope="TEST" name="Gradle: org.openftc:opencv-repackaged-bundled-dylibs:4.5.3-C@aar" level="project" />
-    <orderEntry type="library" scope="TEST" name="Gradle: com.acmerobotics.dashboard:dashboard:0.4.10@aar" level="project" />
+    <orderEntry type="library" scope="TEST" name="Gradle: com.acmerobotics.dashboard:dashboard:0.4.9@aar" level="project" />
   </component>
   <component name="TestModuleProperties" production-module="Zerba.TeamCode.main" />
 </module>
