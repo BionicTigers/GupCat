@@ -18,16 +18,16 @@ class Robot(opMode: LinearOpMode) {
     private val gamepad2: GamepadEx = GamepadEx(opMode.gamepad2)
 
     init {
-        Scheduler.add(ContinuousCommand
-        {
-            odometry.update()
-        }, 0)
+//        Scheduler.add(ContinuousCommand
+//        {
+//            odometry.update()
+//        }, 0)
 
         Scheduler.add(ContinuousCommand
         {
             gamepad1.update()
             gamepad2.update()
-        }, 1)
+        })
     }
 
     fun getGamepads(): Pair<GamepadEx, GamepadEx> {

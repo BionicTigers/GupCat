@@ -10,7 +10,7 @@ import kotlin.math.sin
 
 class Odometry(hardware: HardwareMap) {
     //Odometry Wheels
-    private val odoDiameter: Double = 35.0
+    private val odoDiameter: Double = 35.0 //MM
     private val gearRatio: Double = 2.5
     private val circumference: Double = odoDiameter * gearRatio * PI
 

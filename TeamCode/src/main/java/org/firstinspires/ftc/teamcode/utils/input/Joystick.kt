@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.utils.input
 
-import com.qualcomm.robotcore.hardware.Gamepad
 import org.firstinspires.ftc.teamcode.utils.Vector2
 import kotlin.math.abs
 
@@ -8,7 +7,7 @@ class Joystick {
     var state: Vector2? = null
     var deadzone: Double = 0.05
 
-    private val changeCallbacks = mutableSetOf<((Vector2) -> Unit)>()
+    private val changeCallbacks = arrayListOf<((Vector2) -> Unit)>()
     private val restCallbacks = mutableSetOf<((Vector2) -> Unit)>()
     private val restOnceCallbacks = mutableSetOf<((Vector2) -> Unit)>()
 

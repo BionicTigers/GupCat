@@ -20,9 +20,6 @@ class ClawOp : LinearOpMode() {
         gamepad2.getButton(GamepadEx.Buttons.A).onEnd{
             claw.close()
         }
-        if (claw.coneDetected()){
-            println("cone")
-        }
 
         waitForStart()
 

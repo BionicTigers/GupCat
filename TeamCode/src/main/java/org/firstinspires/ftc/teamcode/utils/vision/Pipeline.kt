@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.utils.vision
 
 import org.opencv.core.Mat
 import org.opencv.core.MatOfPoint
-import org.opencv.core.Rect
 import org.opencv.core.Scalar
 import org.opencv.imgproc.Imgproc
 import org.openftc.easyopencv.OpenCvPipeline

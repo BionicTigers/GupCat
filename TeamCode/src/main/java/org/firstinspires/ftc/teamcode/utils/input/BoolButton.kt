@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.utils.input
 
-import com.qualcomm.robotcore.hardware.Gamepad
-
 class BoolButton {
     var state: Boolean = false
 

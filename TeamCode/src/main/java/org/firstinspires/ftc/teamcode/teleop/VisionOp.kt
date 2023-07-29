@@ -5,7 +5,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName
 import org.firstinspires.ftc.teamcode.utils.vision.Color
 import org.firstinspires.ftc.teamcode.utils.vision.OpenCv
-import org.firstinspires.ftc.teamcode.utils.vision.Pipeline
 import org.firstinspires.ftc.teamcode.utils.vision.VisionConstants
 
 @TeleOp(name = "VisionOp")
@@ -19,7 +18,8 @@ class VisionOp : LinearOpMode(){
 
         val openCv = OpenCv(
             hardwareMap.get(WebcamName::class.java, "Webcam 1"),
-            signals
+            signals,
+            hardwareMap.appContext.resources.getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.packageName)
         )
 
         waitForStart()

@@ -8,7 +8,7 @@ import org.openftc.easyopencv.OpenCvCameraRotation
 import org.openftc.easyopencv.OpenCvWebcam
 
 
-class OpenCv(webcamName: WebcamName, val signals: HashMap<String, Color>) {
+class OpenCv(webcamName: WebcamName, val signals: HashMap<String, Color>, monitorId: Int? = null) {
     private var camera: OpenCvWebcam
     var crop: Rect? = null
     private var pipeline: Pipeline
@@ -16,8 +16,12 @@ class OpenCv(webcamName: WebcamName, val signals: HashMap<String, Color>) {
     //Useful for debugging but slows down cpu cycles
 
     init {
-        this.camera = OpenCvCameraFactory.getInstance()
-            .createWebcam(webcamName)
+        if (monitorId != null)
+            this.camera = OpenCvCameraFactory.getInstance()
+                .createWebcam(webcamName, monitorId)
+        else
+            this.camera = OpenCvCameraFactory.getInstance()
+                .createWebcam(webcamName)
 
         //Use dependency injection for real-time updating
         pipeline = Pipeline(this)

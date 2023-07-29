@@ -9,7 +9,6 @@ import org.firstinspires.ftc.teamcode.utils.Vector2
 import org.firstinspires.ftc.teamcode.utils.command.ContinuousCommand
 import org.firstinspires.ftc.teamcode.utils.command.Scheduler
 import org.firstinspires.ftc.teamcode.utils.input.GamepadEx
-import kotlin.collections.HashMap
 import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.max
@@ -52,7 +51,7 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
     }
 
     fun robotDMP(pos: Vector2, turn: Double = 0.0) {
-        robotDMP(pos, pos.magnitude() + turn, turn)
+        robotDMP(pos, 1.0, turn)
     }
 
     //Field Centric - Determine Motor Powers
@@ -83,15 +82,16 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
     }
 
     fun setup() {
-        val (gamepad1, gamepad2) = robot.getGamepads()
+        val (gamepad1, _) = robot.getGamepads()
         val left = gamepad1.getJoystick(GamepadEx.Joysticks.LEFT_JOYSTICK)
         val right = gamepad1.getJoystick(GamepadEx.Joysticks.RIGHT_JOYSTICK)
+
         Scheduler.add(ContinuousCommand {
             robotDMP(left.state!!, right.state!!.x)
         })
     }
 
     override fun toString(): String {
-        return "Front { ${motors["frontLeft"]}, ${motors["frontRight"]} }\nBack { ${motors["backLeft"]}, ${motors["backRight"]} }"
+        return "Drivetrain { Front { ${motors["frontLeft"]}, ${motors["frontRight"]} }, Back { ${motors["backLeft"]}, ${motors["backRight"]} } }"
     }
 }
