@@ -9,10 +9,10 @@ import org.opencv.core.Size
 import org.opencv.imgproc.Imgproc
 
 class Color(
-    private val lower: Scalar,
-    private val upper: Scalar,
-    private val minArea: Int,
-    private val maxArea: Int = Int.MAX_VALUE
+        private val lower: Scalar,
+        private val upper: Scalar,
+        private val minArea: Int,
+        private val maxArea: Int = Int.MAX_VALUE
 ) {
     lateinit var contours: ArrayList<MatOfPoint>
 
@@ -33,11 +33,11 @@ class Color(
 
         contours = ArrayList()
         Imgproc.findContours(
-            mask,
-            contours,
-            temp,
-            Imgproc.RETR_TREE,
-            Imgproc.CHAIN_APPROX_SIMPLE
+                mask,
+                contours,
+                temp,
+                Imgproc.RETR_TREE,
+                Imgproc.CHAIN_APPROX_SIMPLE
         )
 
         for (contour in contours) {
