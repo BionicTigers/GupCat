@@ -37,10 +37,11 @@ class GamepadEx(private val gamepad: Gamepad) {
 
     //Get a Joystick
     fun getJoystick(joystick: Joysticks): Joystick {
-        return if (joystick == Joysticks.LEFT_JOYSTICK)
+        return if (joystick == Joysticks.LEFT_JOYSTICK) {
             leftJoystick
-        else
+        } else {
             rightJoystick
+        }
     }
 
     //Update every button and joystick
@@ -52,7 +53,9 @@ class GamepadEx(private val gamepad: Gamepad) {
             button.update(gamepad.javaClass.getDeclaredField(name).getBoolean(gamepad))
         }
 
+        println("Left Update")
         leftJoystick.update(Vector2(gamepad.left_stick_x.toDouble(), gamepad.left_stick_y.toDouble()))
+        println("Right Update")
         rightJoystick.update(Vector2(gamepad.right_stick_x.toDouble(), gamepad.right_stick_y.toDouble()))
     }
 }

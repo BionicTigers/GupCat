@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.utils
 
-import java.lang.RuntimeException
-
 class Matrix(private val rows: Int, private val columns: Int, value: Double = 0.0) {
     //Create a 2d array of rows x columns with the default value being 0
     private val matrix: Array<Array<Double>> = Array(rows) { Array(columns) { value } }

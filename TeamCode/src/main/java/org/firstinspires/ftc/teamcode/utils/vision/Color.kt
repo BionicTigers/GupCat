@@ -14,14 +14,14 @@ class Color(
     private val minArea: Int,
     private val maxArea: Int = Int.MAX_VALUE
 ) {
-    private lateinit var contours: ArrayList<MatOfPoint>
+    lateinit var contours: ArrayList<MatOfPoint>
 
     fun getArea(input: Mat): Double {
-        var mask: Mat = Mat()
-        var temp: Mat = Mat()
-        var area: Double = 0.0
+        var mask = Mat()
+        val temp = Mat()
+        var area = 0.0
 
-        val kernel: Mat = Mat(Size(5.0, 5.0), CvType.CV_8UC1, Scalar(255.0))
+        val kernel = Mat(Size(5.0, 5.0), CvType.CV_8UC1, Scalar(255.0))
 
         Core.inRange(input, lower, upper, mask)
 
@@ -51,5 +51,5 @@ class Color(
         return area
     }
 
-    fun detect(area: Double) { area > minArea && area < maxArea }
+    fun detect(area: Double): Boolean {return area > minArea && area < maxArea }
 }

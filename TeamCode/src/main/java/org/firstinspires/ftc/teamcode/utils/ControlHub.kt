@@ -48,4 +48,6 @@ class ControlHub(hardware: HardwareMap, private val hub: LynxDcMotorController) 
     fun getEncoderTicks(motor: Int): Int {
         return bulkDataCache[motor]
     }
+
+    //TODO (Erin): toString
 }

@@ -50,13 +50,13 @@ class PID(
         val dt = elapsedTime.seconds()
 
         //Check if pid should calculate again
-        if (dt > sampleTime / 1000) {
+        if (dt > sampleTime / 1000.0) {
             //Error in terms of processValue (percentage)
             val error = (setPoint - processValue) / (pvMax - pvMin)
 
             p = kP * error
-            i += if (cv > cvMin && cv < cvMax && tI != 0.0) 1 / 60 * tI * error else 0.0
-            d = kP * tD / 60 * (previousError - error)
+            i += if (cv > cvMin && cv < cvMax && tI != 0.0) 1.0 / 60.0 * tI * error else 0.0
+            d = kP * tD / 60.0 * (previousError - error)
 
             //Multiply I by kP last to allow for real time editing
             cv = p + kP * i + d
@@ -66,7 +66,7 @@ class PID(
             elapsedTime.reset()
         }
 
-        return cv
+        return cv.coerceIn(cvMin, cvMax)
     }
 
     /**
@@ -78,6 +78,6 @@ class PID(
     }
 
     fun log() {
-        println("P: $p, I: $i, D: $d, E: $previousError, CV: $cv")
+        println("P: $p, I: $i, D: $d, E: $previousError")
     }
 }
