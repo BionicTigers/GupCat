@@ -12,7 +12,7 @@ class ClawOp : LinearOpMode() {
 
         val robot = Robot(this)
         val (_, gamepad2) = robot.getGamepads()
-        val claw = Claw(hardwareMap, robot)
+        val claw = Claw(hardwareMap)
 
         gamepad2.getButton(GamepadEx.Buttons.A).onStart{
             claw.open()
