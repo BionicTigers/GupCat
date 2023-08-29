@@ -21,6 +21,7 @@ object VisionConstants {
     @JvmField
     val PURPLE: Color = Color(PURPLE_LOWER, PURPLE_UPPER, 1000)
 
+
     const val EXPOSURE: Long = 20
     const val GAIN = 0
     const val WHITE_BALANCE = 0
