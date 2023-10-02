@@ -1,22 +1,22 @@
 package org.firstinspires.ftc.teamcode.teleop
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
+import org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap
 import org.firstinspires.ftc.teamcode.mechanisms.Intake
 import org.firstinspires.ftc.teamcode.utils.Robot
+import org.firstinspires.ftc.teamcode.utils.input.GamepadEx
 
-class IntakeOpBlue : LinearOpMode(){
+class IntakeOp : LinearOpMode() {
     override fun runOpMode() {
         val robot = Robot(this)
         val (gamepad1, gamepad2) = robot.getGamepads()
         val intake = Intake(hardwareMap)
 
-        waitForStart()
-
-        if(intake.colorSensor.blue() >= 100 && intake.colorSensor.green() <= 50 && intake.colorSensor.red() <= 50) {
-            intake.start(
-        } else {
+        gamepad2.getButton(GamepadEx.Buttons.A).onStart {
+            intake.start()
+        }
+        gamepad2.getButton(GamepadEx.Buttons.B).onStart {
             intake.stop()
         }
-
     }
 }
