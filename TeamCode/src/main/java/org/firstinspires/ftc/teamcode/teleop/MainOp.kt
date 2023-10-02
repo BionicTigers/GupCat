@@ -20,7 +20,7 @@ class MainOp : LinearOpMode() {
         val drivetrain = Drivetrain(hardwareMap, robot)
         val lift = Lift(hardwareMap, robot)
         val arm = Arm(hardwareMap)
-        val claw = Claw(hardwareMap, robot)
+        val claw = Claw(hardwareMap)
 
         //drivetrain stuff
         gamepad1.getJoystick(GamepadEx.Joysticks.LEFT_JOYSTICK).onChange { pos ->
