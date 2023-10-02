@@ -32,5 +32,4 @@ class Claw(hardwareMap: HardwareMap) {
         return dist
     }
     fun coneDetected(): Boolean {return getDist() < 5}
-
 }

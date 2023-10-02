@@ -4,8 +4,12 @@ import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.HardwareMap
+import org.firstinspires.ftc.teamcode.utils.PID
+import org.firstinspires.ftc.teamcode.utils.PIDTerms
+import org.firstinspires.ftc.teamcode.utils.Pose
 import org.firstinspires.ftc.teamcode.utils.Robot
 import org.firstinspires.ftc.teamcode.utils.Vector2
+import org.firstinspires.ftc.teamcode.utils.command.ConditionalCommand
 import org.firstinspires.ftc.teamcode.utils.command.ContinuousCommand
 import org.firstinspires.ftc.teamcode.utils.command.Scheduler
 import org.firstinspires.ftc.teamcode.utils.input.GamepadEx
@@ -79,6 +83,23 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
 
     fun fieldDMP(pos: Vector2, turn: Double = 0.0) {
         fieldDMP(pos, pos.magnitude(), turn)
+    }
+
+    fun moveToPosition(target: Pose): ConditionalCommand {
+        val xPid = PID(PIDTerms(), 0.0, 3657.6, -1.0, 1.0)
+        val yPid = PID(PIDTerms(), 0.0, 3657.6, -1.0, 1.0)
+        val rPid = PID(PIDTerms(), -360.0, 360.0, -1.0, 1.0)
+
+        return ConditionalCommand({
+            val current = robot.pose
+            robotDMP(
+                Vector2(
+                    xPid.calculate(target.x, current.x),
+                    yPid.calculate(target.y, current.y)
+                ),
+                rPid.calculate(target.rotation, current.rotation)
+            )
+        }, { (robot.pose - target).compare(5.0, 5.0, 5.0) })
     }
 
     fun setup() {
