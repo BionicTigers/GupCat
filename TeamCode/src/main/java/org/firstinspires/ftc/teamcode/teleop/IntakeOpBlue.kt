@@ -13,7 +13,7 @@ class IntakeOpBlue : LinearOpMode(){
         waitForStart()
 
         if(intake.colorSensor.blue() >= 100 && intake.colorSensor.green() <= 50 && intake.colorSensor.red() <= 50) {
-            intake.start(
+            intake.start()
         } else {
             intake.stop()
         }
