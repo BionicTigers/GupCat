@@ -96,7 +96,7 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
                 Vector2(
                     xPid.calculate(target.x, current.x),
                     yPid.calculate(target.y, current.y)
-                ),
+                ).normalize(),
                 rPid.calculate(target.rotation, current.rotation)
             )
         }, { (robot.pose - target).compare(5.0, 5.0, 5.0) })

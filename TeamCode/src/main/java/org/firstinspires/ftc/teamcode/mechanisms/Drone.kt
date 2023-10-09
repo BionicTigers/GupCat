@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap
  * launches drones from robot
  */
 class Drone(hardwareMap: HardwareMap) {
-    val drone = hardwareMap.get(DcMotorEx::class.java, "motor")
+    private val drone = hardwareMap.get(DcMotorEx::class.java, "motor")
 
     fun start() {
         drone.power = 1.0

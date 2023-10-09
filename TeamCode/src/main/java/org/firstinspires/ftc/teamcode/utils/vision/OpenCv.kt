@@ -53,3 +53,4 @@ class OpenCv(webcamName: WebcamName, val signals: HashMap<String, Color>, monito
 
     }
 }
+

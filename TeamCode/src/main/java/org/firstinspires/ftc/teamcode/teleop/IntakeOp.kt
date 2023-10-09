@@ -9,14 +9,21 @@ import org.firstinspires.ftc.teamcode.utils.input.GamepadEx
 class IntakeOp : LinearOpMode() {
     override fun runOpMode() {
         val robot = Robot(this)
-        val (gamepad1, gamepad2) = robot.getGamepads()
+        val (_, gamepad2) = robot.getGamepads()
         val intake = Intake(hardwareMap)
 
         gamepad2.getButton(GamepadEx.Buttons.A).onStart {
             intake.start()
         }
+
         gamepad2.getButton(GamepadEx.Buttons.B).onStart {
             intake.stop()
+        }
+
+        waitForStart()
+
+        while (opModeIsActive()) {
+            robot.update()
         }
     }
 }

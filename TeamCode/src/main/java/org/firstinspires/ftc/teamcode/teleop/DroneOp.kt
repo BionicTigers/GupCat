@@ -14,11 +14,18 @@ class DroneOp : LinearOpMode() {
         val (_, gamepad2) = robot.getGamepads()
         val drone = Drone(hardwareMap)
 
-        gamepad2.getButton(GamepadEx.Buttons.DPAD_UP).onStart{
+        gamepad2.getButton(GamepadEx.Buttons.DPAD_UP).onStart {
             drone.start()
         }
-        gamepad2.getButton(GamepadEx.Buttons.DPAD_UP).onStart{
+
+        gamepad2.getButton(GamepadEx.Buttons.DPAD_UP).onStart {
             drone.stop()
+        }
+
+        waitForStart()
+
+        while (opModeIsActive()) {
+            robot.update()
         }
     }
 }

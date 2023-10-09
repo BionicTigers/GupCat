@@ -8,8 +8,8 @@ import com.qualcomm.robotcore.hardware.HardwareMap
  *  brings pixels into the robot
  */
 class Intake(hardwareMap: HardwareMap) {
-    val colorSensor = hardwareMap.get(ColorSensor::class.java, "Sensor")
-    val motor = hardwareMap.get(DcMotorEx::class.java, "Intake")
+    private val colorSensor = hardwareMap.get(ColorSensor::class.java, "Sensor")
+    private val motor = hardwareMap.get(DcMotorEx::class.java, "Intake")
 
     fun start() {
         motor.power = 1.0

@@ -6,21 +6,25 @@ import org.firstinspires.ftc.teamcode.mechanisms.Cables
 import org.firstinspires.ftc.teamcode.utils.Robot
 import org.firstinspires.ftc.teamcode.utils.input.GamepadEx
 
-@TeleOp (name= "CablesOp")
+@TeleOp(name= "CablesOp")
 class CablesOp : LinearOpMode() {
     override fun runOpMode() {
         val robot = Robot(this)
-        val (gamepad1, gamepad2) = robot.getGamepads()
+        val (gamepad1, _) = robot.getGamepads()
         val cables = Cables(hardwareMap)
+
+        gamepad1.getButton(GamepadEx.Buttons.DPAD_UP).onStart {
+            cables.lift()
+        }
+
+        gamepad1.getButton(GamepadEx.Buttons.DPAD_UP).onEnd {
+            cables.stop()
+        }
+
         waitForStart()
-        while(opModeIsActive()) {
+
+        while (opModeIsActive()) {
             robot.update()
-            gamepad1.getButton(GamepadEx.Buttons.DPAD_UP).onHold {
-                cables.lift()
-            }
-            gamepad1.getButton(GamepadEx.Buttons.DPAD_UP).onEnd {
-                cables.stop()
-            }
         }
     }
 }
