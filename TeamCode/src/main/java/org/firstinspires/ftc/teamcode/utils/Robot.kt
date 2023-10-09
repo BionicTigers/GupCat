@@ -6,7 +6,7 @@ import org.firstinspires.ftc.teamcode.utils.command.Scheduler
 import org.firstinspires.ftc.teamcode.utils.input.GamepadEx
 import org.firstinspires.ftc.teamcode.utils.movement.Odometry
 
-class Robot(opMode: LinearOpMode) {
+class Robot(private val opMode: LinearOpMode) {
     val pose: Pose
         get() {
             return odometry.globalPose
@@ -36,5 +36,12 @@ class Robot(opMode: LinearOpMode) {
 
     fun update() {
         Scheduler.update()
+    }
+
+    fun onStart(loop: () -> Unit) {
+        opMode.waitForStart()
+        while (opMode.opModeIsActive()) {
+            loop()
+        }
     }
 }
