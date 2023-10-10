@@ -90,7 +90,7 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
         val yPid = PID(PIDTerms(), 0.0, 3657.6, -1.0, 1.0)
         val rPid = PID(PIDTerms(), -360.0, 360.0, -1.0, 1.0)
 
-        return ConditionalCommand({
+        return ConditionalCommand( {
             val current = robot.pose
             robotDMP(
                 Vector2(
@@ -99,7 +99,7 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
                 ).normalize(),
                 rPid.calculate(target.rotation, current.rotation)
             )
-        }, { (robot.pose - target).compare(5.0, 5.0, 5.0) })
+        }, { !(robot.pose - target).compare(5.0, 5.0, 5.0) } )
     }
 
     fun setup() {
