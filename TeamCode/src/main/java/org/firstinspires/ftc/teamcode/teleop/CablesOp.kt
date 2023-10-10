@@ -21,6 +21,14 @@ class CablesOp : LinearOpMode() {
             cables.stop()
         }
 
+        gamepad1.getButton(GamepadEx.Buttons.DPAD_DOWN).onStart {
+            cables.lower()
+        }
+
+        gamepad1.getButton(GamepadEx.Buttons.DPAD_DOWN).onEnd {
+            cables.stop()
+        }
+
         waitForStart()
 
         while (opModeIsActive()) {
