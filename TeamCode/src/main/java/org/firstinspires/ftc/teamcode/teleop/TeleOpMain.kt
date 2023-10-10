@@ -33,20 +33,23 @@ class TeleOpMain : LinearOpMode() {
         val leftJoystick = gamepad1.getJoystick(GamepadEx.Joysticks.LEFT_JOYSTICK)
         val rightJoystick = gamepad1.getJoystick(GamepadEx.Joysticks.RIGHT_JOYSTICK)
 
-        gamepad2.getButton(GamepadEx.Buttons.A).onStart {
+        //intake
+        gamepad1.getButton(GamepadEx.Buttons.A).onStart {
             intake.start()
         }
 
-        gamepad2.getButton(GamepadEx.Buttons.B).onStart {
+        gamepad1.getButton(GamepadEx.Buttons.B).onStart {
             intake.stop()
         }
 
+        //arm
         gamepad2.getJoystick(GamepadEx.Joysticks.RIGHT_JOYSTICK).onChange {
             arm.power = -it.y
         }
 
         Scheduler.add(ContinuousCommand { arm.update() })
 
+        //cables
         gamepad1.getButton(GamepadEx.Buttons.DPAD_UP).onStart {
             cables.lift()
         }
@@ -55,6 +58,7 @@ class TeleOpMain : LinearOpMode() {
             cables.stop()
         }
 
+        //drivetrain
         leftJoystick.onChange { pos ->
             rightJoystick.state?.let {
                 drivetrain.robotDMP(pos, -it.x)
@@ -67,6 +71,8 @@ class TeleOpMain : LinearOpMode() {
             }
         }
 
+
+        //drone
         gamepad2.getButton(GamepadEx.Buttons.DPAD_UP).onStart {
             drone.start()
         }
@@ -75,6 +81,8 @@ class TeleOpMain : LinearOpMode() {
             drone.stop()
         }
 
+
+        //lift
         gamepad2.getButton(GamepadEx.Buttons.DPAD_LEFT).onStart{
             lift.targetHeight = 800
             lift.killPower = false
@@ -94,6 +102,8 @@ class TeleOpMain : LinearOpMode() {
 
         Scheduler.add(ContinuousCommand { lift.update() })
 
+
+        //slide
         gamepad1.getButton(GamepadEx.Buttons.Y).onStart {
             slide.height += 500 * Scheduler.deltaTime
         }
@@ -101,23 +111,20 @@ class TeleOpMain : LinearOpMode() {
         gamepad1.getButton(GamepadEx.Buttons.X).onStart {
             slide.height -= 500 * Scheduler.deltaTime
         }
-//left off
-        gamepad2.getButton(GamepadEx.Buttons.T).onStart {
+
+        //output
+        gamepad1.getButton(GamepadEx.Buttons.DPAD_LEFT).onStart {
             output.openLeft()
         }
 
-        gamepad2.getButton(GamepadEx.Buttons.DPAD_DOWN).onStart {
+        gamepad1.getButton(GamepadEx.Buttons.DPAD_DOWN).onStart {
             output.openRight()
         }
 
-        gamepad2.getButton(GamepadEx.Buttons.DPAD_LEFT).onStart {
+        gamepad1.getButton(GamepadEx.Buttons.DPAD_UP).onStart {
             output.close()
         }
-        waitForStart()
-
-        while (opModeIsActive()) {
-            robot.update()
-        }
+        robot.onStart { }
     }
 
 
