@@ -6,6 +6,7 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName
 import org.firstinspires.ftc.vision.VisionPortal
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor
 import org.firstinspires.ftc.vision.tfod.TfodProcessor
+import org.opencv.core.Size
 
 @TeleOp(name = "AprilTagOp")
 class AprilTagOp : LinearOpMode() {
@@ -18,10 +19,16 @@ class AprilTagOp : LinearOpMode() {
         .build()
 
     val visionPortal = VisionPortal.Builder()
-        .setCamera(hardwareMap.get(WebcamName::class.java, "Webcam 1")
+        .setCamera(hardwareMap.get(WebcamName::class.java, "Webcam 1"))
+        .addProcessor(aprilTagProcessor)
+        .setCameraResolution(android.util.Size(640,400))
+        .setStreamFormat(VisionPortal.StreamFormat.YUY2)
+        .enableCameraMonitoring(true)
+        .setAutoStopLiveView(true)
+        .build()
 
 
-    override fun runOpMode() {
+     override fun runOpMode() {
 
     }
 
