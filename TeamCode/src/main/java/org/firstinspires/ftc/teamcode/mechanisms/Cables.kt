@@ -10,15 +10,15 @@ class Cables (hardwareMap: HardwareMap) {
 
     /** Runs the tape measure up at 60% power */
     fun lift() {
-        motor.power = 0.6
+        motor.power = -1.0
     }
 
     /** Runs the tape measure down at 60% power */
     fun lower() {
-        motor.power = -0.6
+        motor.power = 1.0
     }
 
-    /** Stops the servo */
+    /** Stops the motor */
     fun stop() {
         motor.power = 0.0
     }
