@@ -36,6 +36,7 @@ class AprilTagOp : LinearOpMode() {
             aprilTagTelemetry()
             telemetry.update()
 
+
         }
     }
 
