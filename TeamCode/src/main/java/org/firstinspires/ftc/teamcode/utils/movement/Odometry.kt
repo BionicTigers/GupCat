@@ -4,11 +4,12 @@ import com.qualcomm.hardware.lynx.LynxDcMotorController
 import com.qualcomm.robotcore.hardware.HardwareMap
 import org.firstinspires.ftc.teamcode.utils.ControlHub
 import org.firstinspires.ftc.teamcode.utils.Pose
+import org.firstinspires.ftc.teamcode.utils.Robot
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
 
-class Odometry(hardware: HardwareMap) {
+class Odometry(private val robot: Robot) {
     //Odometry Wheels
     private val odoDiameter: Double = 35.0 //MM
     private val gearRatio: Double = 2.5
@@ -19,10 +20,7 @@ class Odometry(hardware: HardwareMap) {
     private val rightOffset: Double = 162.0
     private val backOffset: Double = 80.0
 
-    private val hub = ControlHub(hardware, hardware.get("Control Hub") as LynxDcMotorController)
-
-    var globalPose: Pose = Pose()
-        private set
+    private val hub = ControlHub(robot.hardwareMap, robot.hardwareMap.get("Control Hub") as LynxDcMotorController)
 
     fun update() {
         //Make new variables for local values
@@ -71,11 +69,11 @@ class Odometry(hardware: HardwareMap) {
         val deltaYFinal = deltaLocalY - deltaStrafeY
 
         //Translate local position into global position
-        val globalX = globalPose.x + (deltaXFinal * cos(globalPose.rotation)) + (deltaYFinal * sin(globalPose.rotation))
-        val globalY = globalPose.y + (deltaYFinal * cos(globalPose.rotation)) - (deltaXFinal * sin(globalPose.rotation))
+        val globalX = robot.pose.x + (deltaXFinal * cos(robot.pose.rotation)) + (deltaYFinal * sin(robot.pose.rotation))
+        val globalY = robot.pose.y + (deltaYFinal * cos(robot.pose.rotation)) - (deltaXFinal * sin(robot.pose.rotation))
 
         //Update the current pose
-        globalPose = Pose(globalX, globalY, globalPose.rotation + localRotation)
+        robot.pose = Pose(globalX, globalY, robot.pose.rotation + localRotation)
 
         //Reset junk ticks for next cycle
         hub.setJunkTicks()
@@ -83,6 +81,6 @@ class Odometry(hardware: HardwareMap) {
 
     fun reset() {
         hub.setJunkTicks()
-        globalPose = Pose()
+        robot.pose = Pose()
     }
 }

@@ -1,18 +1,17 @@
 package org.firstinspires.ftc.teamcode.utils
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
+import com.qualcomm.robotcore.hardware.HardwareMap
 import org.firstinspires.ftc.teamcode.utils.command.ContinuousCommand
 import org.firstinspires.ftc.teamcode.utils.command.Scheduler
 import org.firstinspires.ftc.teamcode.utils.input.GamepadEx
 import org.firstinspires.ftc.teamcode.utils.movement.Odometry
 
 class Robot(private val opMode: LinearOpMode) {
-    val pose: Pose
-        get() {
-            return odometry.globalPose
-        }
+    var pose: Pose = Pose()
+    val hardwareMap: HardwareMap = opMode.hardwareMap
 
-    private val odometry: Odometry = Odometry(opMode.hardwareMap)
+    private val odometry: Odometry = Odometry(this)
 
     private val gamepad1: GamepadEx = GamepadEx(opMode.gamepad1)
     private val gamepad2: GamepadEx = GamepadEx(opMode.gamepad2)
