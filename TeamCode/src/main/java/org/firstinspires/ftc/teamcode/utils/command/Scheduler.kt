@@ -1,11 +1,13 @@
 package org.firstinspires.ftc.teamcode.utils.command
 
+import com.qualcomm.robotcore.eventloop.opmode.OpMode
+import com.qualcomm.robotcore.eventloop.opmode.OpModeManagerNotifier
 import com.qualcomm.robotcore.util.ElapsedTime
 
 /**
  * Task Scheduler used to maintain the order of code execution
  */
-object Scheduler {
+object Scheduler : OpModeManagerNotifier.Notifications {
     private val schedule: ArrayList<Command?> = ArrayList()
     private val elapsedTime = ElapsedTime(ElapsedTime.Resolution.MILLISECONDS)
     var deltaTime = 0.0
@@ -76,5 +78,13 @@ object Scheduler {
 
     fun clear() {
         schedule.clear()
+    }
+
+    override fun onOpModePreInit(opMode: OpMode?) {}
+
+    override fun onOpModePreStart(opMode: OpMode?) {}
+
+    override fun onOpModePostStop(opMode: OpMode?) {
+        this.clear()
     }
 }
