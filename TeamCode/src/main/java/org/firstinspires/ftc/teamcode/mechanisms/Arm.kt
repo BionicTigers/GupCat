@@ -12,8 +12,8 @@ private object ArmPIDTerms {
 }
 
 class Arm(hardwareMap: HardwareMap) {
-    private val right = hardwareMap.get(CRServo::class.java, "right")
-    private val left = hardwareMap.get(CRServo::class.java, "leftservo")
+    private val right = hardwareMap.get(CRServo::class.java, "rightServo")
+    private val left = hardwareMap.get(CRServo::class.java, "leftServo")
 //    private val hub = ControlHub(hardwareMap, hardwareMap.get("Expansion Hub 2") as LynxDcMotorController)
 //    private val pid = PID(ArmPIDTerms.PID_TERMS, 0.0, 270.0, -1.0, 1.0)
 

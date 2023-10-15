@@ -5,11 +5,12 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import org.firstinspires.ftc.teamcode.utils.Pose
 import org.firstinspires.ftc.teamcode.utils.Robot
 
-@Autonomous(name = "BlueParkLeft")
-class BlueParkLeft : LinearOpMode() {
+@Autonomous(name = "RedParkLeft")
+class RedParkLeft : LinearOpMode() {
     override fun runOpMode() {
         val robot = Robot(this)
-        robot.pose = Pose(310.0, 1499.0, 0.0)
-        BluePark(robot, hardwareMap)
+        robot.pose = Pose(3340.0, 2773.0, 0.0)
+        RedPark(robot, hardwareMap)
     }
+
 }
