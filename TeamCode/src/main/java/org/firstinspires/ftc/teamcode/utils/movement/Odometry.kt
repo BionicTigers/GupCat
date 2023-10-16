@@ -35,8 +35,8 @@ class Odometry(private val robot: Robot) {
 
         //Calculate how far the odo pods have moved since the last update in MM
         val deltaLeftMM = circumference * hub.getEncoderTicks(0) / 8192
-        val deltaRightMM = -circumference * hub.getEncoderTicks(0) / 8192
-        val deltaBackMM = -circumference * hub.getEncoderTicks(0) / 8192
+        val deltaRightMM = -circumference * hub.getEncoderTicks(1) / 8192
+        val deltaBackMM = -circumference * hub.getEncoderTicks(2) / 8192
 
         //Find the amount the robot has rotated
         val localRotation = deltaLeftMM - deltaRightMM
