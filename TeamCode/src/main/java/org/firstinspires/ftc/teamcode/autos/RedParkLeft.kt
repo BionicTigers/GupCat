@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.utils.Robot
 class RedParkLeft : LinearOpMode() {
     override fun runOpMode() {
         val robot = Robot(this)
-        robot.pose = Pose(3340.0, 2773.0, 0.0)
+        robot.pose = Pose(2773.0, 3340.0, 0.0)
         RedPark(robot, hardwareMap)
     }
 

@@ -31,8 +31,8 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
             motor.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
         }
 
-        motors["frontRight"]?.direction = DcMotorSimple.Direction.REVERSE
-        motors["backRight"]?.direction = DcMotorSimple.Direction.REVERSE
+        motors["frontLeft"]?.direction = DcMotorSimple.Direction.REVERSE
+        motors["backLeft"]?.direction = DcMotorSimple.Direction.REVERSE
     }
 
     //Robot Centric - Determine Motor Powers
@@ -43,10 +43,10 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
         //Finds the ratio to scale the motor powers to
         val ratio: Double = max(abs(pos.x) + abs(pos.y) + abs(turn), 1.0)
 
-        setPowers["frontLeft"] = mod * (pos.y + -pos.x + turn)
-        setPowers["frontRight"] = mod * (pos.y - -pos.x - turn)
-        setPowers["backLeft"] = mod * (pos.y - -pos.x + turn)
-        setPowers["backRight"] = mod * (pos.y + -pos.x - turn)
+        setPowers["frontLeft"] = mod * (pos.y + pos.x + turn)
+        setPowers["frontRight"] = mod * (pos.y - pos.x - turn)
+        setPowers["backLeft"] = mod * (pos.y - pos.x + turn)
+        setPowers["backRight"] = mod * (pos.y + pos.x - turn)
 
         println(setPowers)
 
@@ -110,6 +110,27 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
         Scheduler.add(ContinuousCommand {
             robotDMP(left.state!!, right.state!!.x)
         })
+    }
+    fun driveFrontLeft(){
+        motors["frontLeft"]?.power = 1.0
+    }
+
+    fun driveFrontRight(){
+        motors["frontRight"]?.power = 1.0
+    }
+
+    fun driveBackLeft(){
+        motors["backLeft"]?.power = 1.0
+    }
+
+    fun driveBackRight(){
+        motors["backRight"]?.power = 1.0
+    }
+
+    fun stop() {
+        for(motor in motors.values) {
+            motor.power = 0.0
+        }
     }
 
     override fun toString(): String {
