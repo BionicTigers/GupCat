@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.utils.movement
 
 import com.qualcomm.hardware.lynx.LynxDcMotorController
-import com.qualcomm.robotcore.hardware.HardwareMap
 import org.firstinspires.ftc.teamcode.utils.ControlHub
 import org.firstinspires.ftc.teamcode.utils.Pose
 import org.firstinspires.ftc.teamcode.utils.Robot
@@ -11,16 +10,20 @@ import kotlin.math.sin
 
 class Odometry(private val robot: Robot) {
     //Odometry Wheels
-    private val odoDiameter: Double = 35.0 //MM
-    private val gearRatio: Double = 2.5
+    private val odoDiameter: Double = 48.0 //MM
+    private val gearRatio: Double = 7.25
     private val circumference: Double = odoDiameter * gearRatio * PI
 
     //All measurements are in MM
-    private val leftOffset: Double = 162.0
-    private val rightOffset: Double = 162.0
-    private val backOffset: Double = 80.0
+    private val leftOffset: Double = 203.2
+    private val rightOffset: Double = 203.2
+    private val backOffset: Double = 177.8
 
     private val hub = ControlHub(robot.hardwareMap, robot.hardwareMap.get("Control Hub") as LynxDcMotorController)
+
+    init {
+        hub.setJunkTicks()
+    }
 
     fun update() {
         //Make new variables for local values
@@ -34,13 +37,14 @@ class Odometry(private val robot: Robot) {
         hub.refreshBulkData()
 
         //Calculate how far the odo pods have moved since the last update in MM
-        val deltaLeftMM = circumference * hub.getEncoderTicks(0) / 8192
-        val deltaRightMM = -circumference * hub.getEncoderTicks(1) / 8192
-        val deltaBackMM = -circumference * hub.getEncoderTicks(2) / 8192
+        val deltaLeftMM = -circumference * hub.getEncoderTicks(0) / 8192
+        val deltaRightMM = circumference * hub.getEncoderTicks(1) / 8192
+        val deltaBackMM = circumference * hub.getEncoderTicks(2) / 8192
+//        println("Left: $deltaLeftMM, Right: $deltaRightMM, Back: $deltaBackMM")
 
         //Find the amount the robot has rotated
-        val localRotation = deltaLeftMM - deltaRightMM
-
+        val localRotation = (deltaLeftMM - deltaRightMM) / (leftOffset + rightOffset)
+3
         //Calculates the radius of the arc of the robot's travel for forward/backward arcs
         if (deltaRightMM != deltaLeftMM && localRotation != 0.0) {
             val rT = (deltaLeftMM * rightOffset + deltaRightMM * leftOffset) / (deltaLeftMM - deltaRightMM)
@@ -68,12 +72,14 @@ class Odometry(private val robot: Robot) {
         val deltaXFinal = deltaLocalX + deltaStrafeX
         val deltaYFinal = deltaLocalY - deltaStrafeY
 
+        val globalRotation = Math.toRadians(robot.pose.rotation)
+
         //Translate local position into global position
-        val globalX = robot.pose.x + (deltaXFinal * cos(robot.pose.rotation)) + (deltaYFinal * sin(robot.pose.rotation))
-        val globalY = robot.pose.y + (deltaYFinal * cos(robot.pose.rotation)) - (deltaXFinal * sin(robot.pose.rotation))
+        val globalX = robot.pose.x + (deltaXFinal * cos(globalRotation)) + (deltaYFinal * sin(globalRotation))
+        val globalY = robot.pose.y + (deltaYFinal * cos(globalRotation)) - (deltaXFinal * sin(globalRotation))
 
         //Update the current pose
-        robot.pose = Pose(globalX, globalY, robot.pose.rotation + localRotation)
+        robot.pose = Pose(globalX, globalY, Math.toDegrees(globalRotation + localRotation))
 
         //Reset junk ticks for next cycle
         hub.setJunkTicks()

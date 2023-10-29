@@ -17,10 +17,11 @@ class Robot(private val opMode: LinearOpMode) {
     private val gamepad2: GamepadEx = GamepadEx(opMode.gamepad2)
 
     init {
-//        Scheduler.add(ContinuousCommand
-//        {
-//            odometry.update()
-//        }, 0)
+        Scheduler.add(ContinuousCommand
+        {
+            odometry.update()
+//            println(pose)
+        })
 
         Scheduler.add(ContinuousCommand
         {

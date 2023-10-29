@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.utils
 
+import kotlin.math.abs
+
 /**
  * Combines a Vector2 and a Rotation variable
  * Used for robot position and rotation
@@ -16,8 +18,9 @@ data class Pose(val x: Double, val y: Double, val rotation: Double) {
         return Vector2(x, y)
     }
 
+    //TODO: Change this to a operator override
     fun compare(x: Double, y: Double, rotation: Double): Boolean {
-        return this.x <= x && this.y <= y && this.rotation <= rotation
+        return abs(this.x) <= x && abs(this.y) <= y && abs(this.rotation) <= rotation
     }
 
     operator fun minus(other: Pose): Pose {

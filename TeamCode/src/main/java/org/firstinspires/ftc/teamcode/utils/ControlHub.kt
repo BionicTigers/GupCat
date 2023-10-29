@@ -23,8 +23,7 @@ class ControlHub(hardware: HardwareMap, private val hub: LynxDcMotorController) 
         }
     }
 
-    fun setJunkTicks(motor: Int) {
-        refreshBulkData()
+    private fun setJunkTicks(motor: Int) {
         junkTicks[motor] = bulkDataCache[motor]
     }
 
@@ -35,7 +34,7 @@ class ControlHub(hardware: HardwareMap, private val hub: LynxDcMotorController) 
     private fun internalRefreshBulkData(): IntArray {
         val bulkData = IntArray(4)
         for (i in 0..3) {
-            bulkData[i] = hub.getMotorCurrentPosition(i) - junkTicks[i]
+            bulkData[i] = hub.getMotorCurrentPosition(i)
         }
 
         return bulkData
@@ -46,7 +45,7 @@ class ControlHub(hardware: HardwareMap, private val hub: LynxDcMotorController) 
     }
 
     fun getEncoderTicks(motor: Int): Int {
-        return bulkDataCache[motor]
+        return bulkDataCache[motor] - junkTicks[motor]
     }
 
     //TODO (Erin): toString
