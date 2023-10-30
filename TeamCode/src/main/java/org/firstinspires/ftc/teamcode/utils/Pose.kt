@@ -18,12 +18,36 @@ data class Pose(val x: Double, val y: Double, val rotation: Double) {
         return Vector2(x, y)
     }
 
-    //TODO: Change this to a operator override
-    fun compare(x: Double, y: Double, rotation: Double): Boolean {
-        return abs(this.x) <= x && abs(this.y) <= y && abs(this.rotation) <= rotation
+    operator fun compareTo(other: Pose): Int {
+        var i = 0
+
+        if (abs(this.x) < other.x && abs(this.y) < other.y && abs(this.rotation) < other.rotation) {
+            i = -1
+        } else if (abs(this.x) == other.x && abs(this.y) == other.y && abs(this.rotation) == other.rotation) {
+            i = 0
+        } else if (abs(this.x) > other.x && abs(this.y) > other.y && abs(this.rotation) > other.rotation) {
+            i = 1
+        }
+        return i
+    }
+
+    operator fun plus(other: Pose): Pose {
+        return Pose(this.x + other.x, this.y + other.y, this.rotation + other.rotation)
     }
 
     operator fun minus(other: Pose): Pose {
         return Pose(this.x - other.x, this.y - other.y, this.rotation - other.rotation)
+    }
+
+    operator fun div(other: Pose): Pose {
+        return Pose(this.x / other.x, this.y / other.y, this.rotation / other.rotation)
+    }
+
+    operator fun div(other: Double): Pose {
+        return Pose(this.x / other, this.y / other, this.rotation / other)
+    }
+
+    operator fun times(other: Pose): Pose {
+        return Pose(this.x * other.x, this.y * other.y, this.rotation * other.rotation)
     }
 }

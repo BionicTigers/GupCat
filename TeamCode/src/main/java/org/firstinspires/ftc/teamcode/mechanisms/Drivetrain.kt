@@ -108,7 +108,7 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
                 ),
                 rPid.calculate(target.rotation, current.rotation)
             )
-        }, { if ((robot.pose - target).compare(5.0, 5.0, 5.0))  false else this.stop(); true } )
+        }, { if ( (robot.pose - target) <= (Pose(5.0, 5.0, 5.0)) )   false else this.stop(); true } )
     }
 
     fun setup() {
