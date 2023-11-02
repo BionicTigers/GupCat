@@ -9,7 +9,6 @@ import org.firstinspires.ftc.teamcode.utils.input.GamepadEx
 @TeleOp(name="ClawOp")
 class ClawOp : LinearOpMode() {
     override fun runOpMode() {
-
         val robot = Robot(this)
         val (_, gamepad2) = robot.getGamepads()
         val claw = Claw(hardwareMap)

@@ -1,4 +1,4 @@
-//package org.firstinspires.ftc.teamcode.teleop
+package org.firstinspires.ftc.teamcode.teleop
 //
 //import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 //import com.qualcomm.robotcore.eventloop.opmode.TeleOp
@@ -10,19 +10,11 @@
 //    val aprilTags = AprilTags(hardwareMap)
 //
 //    override fun runOpMode() {
-//
-//
 //        waitForStart()
 //
 //        while (opModeIsActive()) {
-//            aprilTags.aprilTagTelemetry(telemetry)
+//            aprilTags.aprilTagLog(telemetry, aprilTags.calculateRobotPos(), aprilTags.calcFinalPose(aprilTags.calculateRobotPos()))
 //            telemetry.update()
-//            aprilTags.calculateRobotPos(telemetry)
 //        }
 //    }
-//
-//    }
 //}
-//
-////// Enable or disable the AprilTag processor.
-////myVisionPortal.setProcessorEnabled(myAprilTagProcessor, true);
