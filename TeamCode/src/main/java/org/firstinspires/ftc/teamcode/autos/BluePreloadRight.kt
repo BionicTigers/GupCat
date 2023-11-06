@@ -22,19 +22,54 @@ import org.opencv.core.Scalar
 @TeleOp(name = "BluePreloadRight")
 class BluePreloadScore : LinearOpMode() {
     override fun runOpMode() {
+        /** Object declarations */
         val robot = Robot(this)
         val drivetrain = Drivetrain(hardwareMap, robot)
         val output = Output(hardwareMap)
         val slides = Slide(hardwareMap)
         val openCv = OpenCv(hardwareMap.get(WebcamName::class.java, "webcam"),
-            hashMapOf("blue" to Color(Scalar(6.0, 150.0, 130.0), Scalar(6.0, 150.0, 130.0), 50)))
+            hashMapOf("blue" to Color(Scalar(239.0, 74.0, 66.0), Scalar(239.0, 74.0, 66.0), 50)))
+        /** Sets the robot's starting position */
+        robot.pose = Pose(2761.0, 310.0, 0.0)
+        /** Creates potential scoring positions for the yellow pixel on the spike marks */
+        val leftSpikeScore = Pose(Offsets.map[0], 0.0)
+        val middleSpikeScore = Pose(Offsets.map[2], 0.0)
+        val rightSpikeScore = Pose(Offsets.map[1], 0.0)
+        /** Creates potential scoring positions for the purple pixel on the backdrop */
+        val leftBackdropScore = Pose(835.0, 1072.0, -90.0)
+        val middleBackdropScore = Pose(835.0, 1261.0, -90.0)
+        val rightBackdropScore = Pose(835.0, 1450.0, -90.0)
+        /** Positions between backdrop scoring and parking */
+        val prePark = Pose(835.0, 310.0, -90.0)
+        val Park = Pose(329.0, 310.0, -90.0)
+        /** Creates variables used to represent detections */
         var case1 = false
         var case2 = false
         var case3 = false
         val autoTime = ElapsedTime()
         var detection: String? = null
         val group1 = CommandGroup()
+            /** Gets camera detection */
             .add(ConditionalCommand({openCv.getDetection()}) {return@ConditionalCommand detection != null || autoTime.seconds() >= 5})
+            /** Set case variables according to which detection is read */
+            .add(ConditionalCommand({case1 = true; case2 = false; case3 = false}) {openCv.getDetection()?.position?.x!! <= 500})
+            .add(ConditionalCommand({case1 = false; case2 = true; case3 = false}) {openCv.getDetection()?.position?.x!! > 500 && openCv.getDetection()?.position?.x!! < 1000})
+            .add(ConditionalCommand({case1 = false; case2 = false; case3 = true}) {openCv.getDetection()?.position?.x!! >= 1000})
+            /** Uses case variables to decide which scoring position to move to */
+            .add(ConditionalCommand({drivetrain.moveToPosition(leftSpikeScore)}) {case1})
+            .add(ConditionalCommand({drivetrain.moveToPosition(middleSpikeScore)}) {case2})
+            .add(ConditionalCommand({drivetrain.moveToPosition(rightSpikeScore)}) {case3})
+            .add(OnceCommand { output.openLeft() })
+            .add(OnceCommand { output.close() })
+            /** Uses case variables to move from the first scoring position to the second */
+            .add(ConditionalCommand({drivetrain.moveToPosition(leftBackdropScore)}) {case1})
+            .add(ConditionalCommand({drivetrain.moveToPosition(middleBackdropScore)}) {case2})
+            .add(ConditionalCommand({drivetrain.moveToPosition(rightBackdropScore)}) {case3})
+            .add(OnceCommand { slides.height = 400.0 })
+            .add(OnceCommand { slides.update() }) //Note to self: Do slides initialize automatically or do I need to run init method manually? Ask Alex Mon
+            .add(OnceCommand { output.openRight() })
+            .add(OnceCommand { drivetrain.moveToPosition(prePark) })
+            .add(OnceCommand { drivetrain.moveToPosition(Park) })
             .build()
         Scheduler.add(group1)
         waitForStart()
