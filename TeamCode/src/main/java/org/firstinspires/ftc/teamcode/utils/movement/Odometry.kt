@@ -11,15 +11,16 @@ import kotlin.math.sin
 class Odometry(private val robot: Robot) {
     //Odometry Wheels
     private val odoDiameter: Double = 48.0 //MM
-    private val gearRatio: Double = 7.25
+    private val gearRatio: Double = 1.0
     private val circumference: Double = odoDiameter * gearRatio * PI
 
     //All measurements are in MM
-    private val leftOffset: Double = 203.2
-    private val rightOffset: Double = 203.2
-    private val backOffset: Double = 177.8
+    private val leftOffset: Double = 193.7
+    private val rightOffset: Double = 193.7
+    private val backOffset: Double = 162.0
 
     private val hub = ControlHub(robot.hardwareMap, robot.hardwareMap.get("Control Hub") as LynxDcMotorController)
+    var ticks = 0
 
     init {
         hub.setJunkTicks()
@@ -37,9 +38,10 @@ class Odometry(private val robot: Robot) {
         hub.refreshBulkData()
 
         //Calculate how far the odo pods have moved since the last update in MM
-        val deltaLeftMM = -circumference * hub.getEncoderTicks(0) / 8192
-        val deltaRightMM = circumference * hub.getEncoderTicks(1) / 8192
-        val deltaBackMM = circumference * hub.getEncoderTicks(2) / 8192
+        val deltaLeftMM =
+            circumference * hub.getEncoderTicks(0) / 2000
+        val deltaRightMM = -circumference * hub.getEncoderTicks(1) / 2000
+        val deltaBackMM = circumference * hub.getEncoderTicks(2) / 2000
 //        println("Left: $deltaLeftMM, Right: $deltaRightMM, Back: $deltaBackMM")
 
         //Find the amount the robot has rotated
@@ -80,9 +82,11 @@ class Odometry(private val robot: Robot) {
 
         //Update the current pose
         robot.pose = Pose(globalX, globalY, Math.toDegrees(globalRotation + localRotation))
+        ticks += hub.getEncoderTicks(0)
 
         //Reset junk ticks for next cycle
         hub.setJunkTicks()
+        println(ticks)
     }
 
     fun reset() {
