@@ -102,9 +102,9 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
 
         return ConditionalCommand( {
             val current = robot.pose
-            opMode.telemetry.addData("x", xPid.calculate(target.x, current.x))
-            opMode.telemetry.addData("y", yPid.calculate(target.y, current.y))
-            opMode.telemetry.addData( "r", rPid.calculate(target.rotation, current.rotation))
+            robot.telemetry.addData("x", xPid.calculate(target.x, current.x))
+            robot.telemetry.addData("y", yPid.calculate(target.y, current.y))
+            robot.telemetry.addData( "r", rPid.calculate(target.rotation, current.rotation))
             robotDMP(
                 Vector2(
                     xPid.calculate(target.x, current.x),

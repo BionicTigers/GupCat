@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.utils
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.hardware.HardwareMap
+import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.teamcode.utils.command.ContinuousCommand
 import org.firstinspires.ftc.teamcode.utils.command.Scheduler
 import org.firstinspires.ftc.teamcode.utils.input.GamepadEx
@@ -10,6 +11,8 @@ import org.firstinspires.ftc.teamcode.utils.movement.Odometry
 class Robot(private val opMode: LinearOpMode) {
     var pose: Pose = Pose()
     val hardwareMap: HardwareMap = opMode.hardwareMap
+
+    val telemetry: Telemetry = opMode.telemetry
 
     private val odometry: Odometry = Odometry(this)
 
