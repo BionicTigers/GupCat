@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.HardwareMap
+import org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.opMode
 import org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry
 import org.firstinspires.ftc.teamcode.utils.PID
 import org.firstinspires.ftc.teamcode.utils.PIDTerms
@@ -101,7 +102,9 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
 
         return ConditionalCommand( {
             val current = robot.pose
-            println("x: ${xPid.calculate(target.x, current.x)}, y: ${yPid.calculate(target.y, current.y)}, r: ${rPid.calculate(target.rotation, current.rotation)}")
+            opMode.telemetry.addData("x", xPid.calculate(target.x, current.x))
+            opMode.telemetry.addData("y", yPid.calculate(target.y, current.y))
+            opMode.telemetry.addData( "r", rPid.calculate(target.rotation, current.rotation))
             robotDMP(
                 Vector2(
                     xPid.calculate(target.x, current.x),

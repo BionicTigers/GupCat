@@ -13,7 +13,7 @@ class MTP : LinearOpMode() {
         val robot = Robot(this)
         val drivetrain = Drivetrain(hardwareMap, robot)
 
-        val cmd = drivetrain.moveToPosition(Pose(-300.0, 1800.0, 0.0))
+        val cmd = drivetrain.moveToPosition(Pose(0.0, -100.0, 0.0))
         Scheduler.add(cmd)
 
         waitForStart()

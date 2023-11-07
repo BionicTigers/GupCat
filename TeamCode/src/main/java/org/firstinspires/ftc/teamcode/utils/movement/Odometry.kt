@@ -21,7 +21,7 @@ class Odometry(private val robot: Robot) {
 
     //hubs
     private val hub = ControlHub(robot.hardwareMap, robot.hardwareMap.get("Control Hub") as LynxDcMotorController)
-    private val exHub = ControlHub(robot.hardwareMap, robot.hardwareMap.get("Expansion Hub") as LynxDcMotorController)
+    private val exHub = ControlHub(robot.hardwareMap, robot.hardwareMap.get("Expansion Hub 2") as LynxDcMotorController)
 
     init {
         hub.setJunkTicks()
@@ -87,6 +87,7 @@ class Odometry(private val robot: Robot) {
 
         //Reset junk ticks for next cycle
         hub.setJunkTicks()
+        exHub.setJunkTicks()
     }
 
     fun reset() {
