@@ -7,7 +7,7 @@ import org.firstinspires.ftc.teamcode.mechanisms.Intake
 import org.firstinspires.ftc.teamcode.utils.Robot
 import org.firstinspires.ftc.teamcode.utils.input.GamepadEx
 
-@TeleOp
+@TeleOp()
 class IntakeOp : LinearOpMode() {
     override fun runOpMode() {
         val robot = Robot(this)

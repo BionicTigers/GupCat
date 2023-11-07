@@ -19,8 +19,9 @@ class Odometry(private val robot: Robot) {
     private val rightOffset: Double = 193.7
     private val backOffset: Double = 162.0
 
+    //hubs
     private val hub = ControlHub(robot.hardwareMap, robot.hardwareMap.get("Control Hub") as LynxDcMotorController)
-    var ticks = 0
+    private val exHub = ControlHub(robot.hardwareMap, robot.hardwareMap.get("Expansion Hub") as LynxDcMotorController)
 
     init {
         hub.setJunkTicks()
@@ -38,10 +39,9 @@ class Odometry(private val robot: Robot) {
         hub.refreshBulkData()
 
         //Calculate how far the odo pods have moved since the last update in MM
-        val deltaLeftMM =
-            circumference * hub.getEncoderTicks(0) / 2000
-        val deltaRightMM = -circumference * hub.getEncoderTicks(1) / 2000
-        val deltaBackMM = circumference * hub.getEncoderTicks(2) / 2000
+        val deltaLeftMM = circumference * hub.getEncoderTicks(0) / 2000
+        val deltaRightMM = -circumference * hub.getEncoderTicks(3) / 2000
+        val deltaBackMM = circumference * exHub.getEncoderTicks(0) / 2000
 //        println("Left: $deltaLeftMM, Right: $deltaRightMM, Back: $deltaBackMM")
 
         //Find the amount the robot has rotated
@@ -82,11 +82,9 @@ class Odometry(private val robot: Robot) {
 
         //Update the current pose
         robot.pose = Pose(globalX, globalY, Math.toDegrees(globalRotation + localRotation))
-        ticks += hub.getEncoderTicks(0)
 
         //Reset junk ticks for next cycle
         hub.setJunkTicks()
-        println(ticks)
     }
 
     fun reset() {
