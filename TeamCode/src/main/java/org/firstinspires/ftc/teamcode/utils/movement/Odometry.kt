@@ -25,6 +25,7 @@ class Odometry(private val robot: Robot) {
 
     init {
         hub.setJunkTicks()
+        exHub.setJunkTicks()
     }
 
     fun update() {
@@ -37,6 +38,7 @@ class Odometry(private val robot: Robot) {
 
         //Find Local Updates
         hub.refreshBulkData()
+        exHub.refreshBulkData()
 
         //Calculate how far the odo pods have moved since the last update in MM
         val deltaLeftMM = circumference * hub.getEncoderTicks(0) / 2000
