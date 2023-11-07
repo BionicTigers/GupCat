@@ -19,8 +19,8 @@ import org.firstinspires.ftc.teamcode.utils.command.OnceCommand
 import org.firstinspires.ftc.teamcode.utils.command.Scheduler
 import org.opencv.core.Scalar
 
-@TeleOp(name = "BluePreloadRight")
-class BluePreloadRight : LinearOpMode() {
+@TeleOp(name = "BluePreloadLeft")
+class BluePreloadLeft : LinearOpMode() {
     override fun runOpMode() {
         /** Object declarations */
         val robot = Robot(this)
@@ -30,11 +30,11 @@ class BluePreloadRight : LinearOpMode() {
         val openCv = OpenCv(hardwareMap.get(WebcamName::class.java, "webcam"),
             hashMapOf("blue" to Color(Scalar(239.0, 74.0, 66.0), Scalar(239.0, 74.0, 66.0), 50)))
         /** Sets the robot's starting position */
-        robot.pose = Pose(2761.0, 310.0, 0.0)
+        robot.pose = Pose(2773.0, 3340.0, 0.0)
         /** Creates potential scoring positions for the yellow pixel on the spike marks */
-        val leftSpikeScore = Pose(Offsets.map[0], 0.0)
-        val middleSpikeScore = Pose(Offsets.map[2], 0.0)
-        val rightSpikeScore = Pose(Offsets.map[1], 0.0)
+        val leftSpikeScore = Pose(1213.0, 780.0, 0.0)
+        val middleSpikeScore = Pose(1499.0, 902.0, 0.0)
+        val rightSpikeScore = Pose(1810.0, 780.0, 0.0)
         /** Creates potential scoring positions for the purple pixel on the backdrop */
         val leftBackdropScore = Pose(750.0, 1072.0, -90.0)
         val middleBackdropScore = Pose(750.0, 1261.0, -90.0)
