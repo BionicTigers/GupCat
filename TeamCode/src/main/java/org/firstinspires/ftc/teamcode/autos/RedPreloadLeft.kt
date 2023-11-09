@@ -19,8 +19,8 @@ import org.firstinspires.ftc.teamcode.utils.command.OnceCommand
 import org.firstinspires.ftc.teamcode.utils.command.Scheduler
 import org.opencv.core.Scalar
 
-@TeleOp(name = "BluePreloadRight")
-class BluePreloadRight : LinearOpMode() {
+@TeleOp(name = "RedPreloadLeft")
+class RedPreloadLeft : LinearOpMode() {
     override fun runOpMode() {
         /** Object declarations */
         val robot = Robot(this)
@@ -28,20 +28,20 @@ class BluePreloadRight : LinearOpMode() {
         val output = Output(hardwareMap)
         val slides = Slide(hardwareMap)
         val openCv = OpenCv(hardwareMap.get(WebcamName::class.java, "webcam"),
-            hashMapOf("blue" to Color(Scalar(239.0, 74.0, 66.0), Scalar(239.0, 74.0, 66.0), 50)))
+            hashMapOf("red" to Color(Scalar(0.0, 255.0, 255.0), Scalar(0.0, 255.0, 255.0), 50)))
         /** Sets the robot's starting position */
-        robot.pose = Pose(2761.0, 310.0, 0.0)
+        robot.pose = Pose(1505.0, 3352.0, 0.0)
         /** Creates potential scoring positions for the yellow pixel on the spike marks */
-        val leftSpikeScore = Pose(Offsets.map[0], 0.0)
-        val middleSpikeScore = Pose(Offsets.map[2], 0.0)
-        val rightSpikeScore = Pose(Offsets.map[1], 0.0)
+        val leftSpikeScore = Pose(3054.0, 2816.0, 0.0)
+        val middleSpikeScore = Pose(2737.0, 2706.0, 0.0)
+        val rightSpikeScore = Pose(2450.0, 2816.0, 0.0)
         /** Creates potential scoring positions for the purple pixel on the backdrop */
-        val leftBackdropScore = Pose(750.0, 1072.0, -90.0)
-        val middleBackdropScore = Pose(750.0, 1261.0, -90.0)
-        val rightBackdropScore = Pose(750.0, 1450.0, -90.0)
+        val leftBackdropScore = Pose(750.0, 2456.0, 90.0)
+        val middleBackdropScore = Pose(750.0, 2718.0, 90.0)
+        val rightBackdropScore = Pose(750.0, 3023.0, 90.0)
         /** Positions between backdrop scoring and parking */
-        val prePark = Pose(750.0, 310.0, -90.0)
-        val Park = Pose(329.0, 310.0, -90.0)
+        val prePark = Pose(750.0, 3328.0, 90.0)
+        val Park = Pose(304.0, 3328.0, 90.0)
         /** Creates variables used to represent detections */
         var case1 = false
         var case2 = false
