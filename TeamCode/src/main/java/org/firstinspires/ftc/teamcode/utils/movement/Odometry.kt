@@ -11,7 +11,7 @@ import kotlin.math.sin
 class Odometry(private val robot: Robot) {
     //Odometry Wheels
     private val odoDiameter: Double = 48.0 //MM
-    private val gearRatio: Double = 1.0
+    private val gearRatio: Double = 1.229
     private val circumference: Double = odoDiameter * gearRatio * PI
 
     //All measurements are in MM

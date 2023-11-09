@@ -115,10 +115,6 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
         }, { if ( (robot.pose - target) <= (Pose(5.0, 5.0, 5.0)) )   false else this.stop(); true } )
     }
 
-    fun moveToPosLog() {
-        telemetry.addLine("x: " + robot.pose.x + " y: " + robot.pose.y + " rot: " + robot.pose.rotation)
-    }
-
     fun setup() {
         val (gamepad1, _) = robot.getGamepads()
         val left = gamepad1.getJoystick(GamepadEx.Joysticks.LEFT_JOYSTICK)
