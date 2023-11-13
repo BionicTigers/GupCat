@@ -48,7 +48,7 @@ class Odometry(private val robot: Robot) {
 
         //Find the amount the robot has rotated
         val localRotation = (deltaLeftMM - deltaRightMM) / (leftOffset + rightOffset)
-3
+
         //Calculates the radius of the arc of the robot's travel for forward/backward arcs
         if (deltaRightMM != deltaLeftMM && localRotation != 0.0) {
             val rT = (deltaLeftMM * rightOffset + deltaRightMM * leftOffset) / (deltaLeftMM - deltaRightMM)
