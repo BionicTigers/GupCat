@@ -4,7 +4,6 @@ import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.HardwareMap
-import org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.opMode
 import org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry
 import org.firstinspires.ftc.teamcode.utils.PID
 import org.firstinspires.ftc.teamcode.utils.PIDTerms
@@ -15,11 +14,12 @@ import org.firstinspires.ftc.teamcode.utils.command.ConditionalCommand
 import org.firstinspires.ftc.teamcode.utils.command.ContinuousCommand
 import org.firstinspires.ftc.teamcode.utils.command.Scheduler
 import org.firstinspires.ftc.teamcode.utils.input.GamepadEx
+import kotlin.math.PI
 import kotlin.math.abs
+import kotlin.math.atan2
 import kotlin.math.cos
+import kotlin.math.hypot
 import kotlin.math.max
-import kotlin.math.min
-import kotlin.math.sign
 import kotlin.math.sin
 
 private fun lerp(start: Double, end: Double, t: Double): Double {
@@ -73,7 +73,7 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
         //Create Motor Powers HashMap
         val setPowers: HashMap<String, Double> = HashMap(4)
 
-        val heading: Double = -robot.pose.rotation
+        val heading: Double = robot.pose.rotation * PI / 180
 
         //Defines the movement direction
         val angleX: Double = pos.x * cos(heading) - pos.y * sin(heading)
@@ -98,21 +98,42 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
     fun moveToPosition(target: Pose): ConditionalCommand {
         val xPid = PID(PIDTerms(), 0.0, 3657.6, -1.0, 1.0)
         val yPid = PID(PIDTerms(), 0.0, 3657.6, -1.0, 1.0)
-        val rPid = PID(PIDTerms(), -360.0, 360.0, -1.0, 1.0)
+        val rPid = PID(PIDTerms(), -3600.0, 3600.0, -1.0, 1.0)
 
         return ConditionalCommand( {
-            val current = robot.pose
-            robot.telemetry.addData("x", xPid.calculate(target.x, current.x))
-            robot.telemetry.addData("y", yPid.calculate(target.y, current.y))
-            robot.telemetry.addData( "r", rPid.calculate(target.rotation, current.rotation))
-            robotDMP(
-                Vector2(
-                    xPid.calculate(target.x, current.x),
-                    yPid.calculate(target.y, current.y)
-                ),
-                rPid.calculate(target.rotation, current.rotation)
+            val error = Pose(
+                xPid.calculate(target.x, robot.pose.x),
+                yPid.calculate(target.y, robot.pose.y),
+                rPid.calculate(target.rotation, robot.pose.rotation),
             )
-        }, { if ( (robot.pose - target) <= (Pose(5.0, 5.0, 5.0)) )   false else this.stop(); true } )
+
+            val magnitude = error.extractPosition().magnitude()
+            val heading = atan2(error.x, error.y)
+
+            val x = cos(heading - robot.pose.radians) * magnitude
+            val y = sin(heading - robot.pose.radians) * magnitude
+
+            val power = hypot(-x, y)
+            val angle = atan2(y, -x)
+
+            val angleSin = power * sin(angle)
+            val angleCos = power * cos(angle)
+
+            val setPowers: HashMap<String, Double> = HashMap(4)
+
+            setPowers["frontLeft"] = angleSin - angleCos + error.rotation
+            setPowers["frontRight"] = angleSin + angleCos - error.rotation
+            setPowers["backLeft"] = angleSin + angleCos + error.rotation
+            setPowers["backRight"] = angleSin - angleCos - error.rotation
+
+            var highest = 0.0
+            setPowers.forEach { (_, value) -> highest = if (highest < value) value else highest }
+            setPowers.forEach { (name, value) -> motors[name]!!.power = (value / highest) }
+        }, {
+            val diff = robot.pose - target
+            val compare = Pose(5.0, 5.0, 5.0)
+            if (diff <= compare && diff >= -compare) false else this.stop(); true
+        })
     }
 
     fun setup() {

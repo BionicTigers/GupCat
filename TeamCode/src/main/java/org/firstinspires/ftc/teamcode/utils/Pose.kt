@@ -11,6 +11,11 @@ data class Pose(val x: Double, val y: Double, val rotation: Double) {
     constructor(): this(0.0, 0.0, 0.0)
     constructor(v2: Vector2, rotation: Double): this(v2.x, v2.y, rotation)
 
+    val radians: Double
+        get() {
+            return Math.toRadians(rotation)
+        }
+
     /**
      * Convert the pose x and y into a Vector2
      */
@@ -49,5 +54,9 @@ data class Pose(val x: Double, val y: Double, val rotation: Double) {
 
     operator fun times(other: Pose): Pose {
         return Pose(this.x * other.x, this.y * other.y, this.rotation * other.rotation)
+    }
+
+    operator fun unaryMinus(): Pose {
+        return Pose(-this.x, -this.y, -this.rotation)
     }
 }
