@@ -13,6 +13,7 @@ import org.firstinspires.ftc.teamcode.utils.vision.OpenCv
 import org.firstinspires.ftc.teamcode.utils.Pose
 import org.firstinspires.ftc.teamcode.utils.command.CommandGroup
 import org.firstinspires.ftc.teamcode.utils.command.ConditionalCommand
+import org.firstinspires.ftc.teamcode.utils.command.ContinuousCommand
 import org.firstinspires.ftc.teamcode.utils.command.OnceCommand
 import org.firstinspires.ftc.teamcode.utils.command.Scheduler
 import org.opencv.core.Scalar
@@ -20,55 +21,83 @@ import org.opencv.core.Scalar
 @TeleOp(name = "BluePreloadLeft")
 class BluePreloadLeft : LinearOpMode() {
     override fun runOpMode() {
-        /** Object declarations */
+        //Object declarations
         val robot = Robot(this)
         val drivetrain = Drivetrain(hardwareMap, robot)
         val output = Output(hardwareMap)
         val slides = Slide(hardwareMap)
         val openCv = OpenCv(hardwareMap.get(WebcamName::class.java, "webcam"),
             hashMapOf("blue" to Color(Scalar(239.0, 74.0, 66.0), Scalar(239.0, 74.0, 66.0), 50)))
-        /** Sets the robot's starting position */
+
+        //Sets the robot's starting position
         robot.pose = Pose(2773.0, 3340.0, 0.0)
-        /** Creates potential scoring positions for the yellow pixel on the spike marks */
+
+        //Creates potential scoring positions for the yellow pixel on the spike marks
         val leftSpikeScore = Pose(1213.0, 780.0, 0.0)
         val middleSpikeScore = Pose(1499.0, 902.0, 0.0)
         val rightSpikeScore = Pose(1810.0, 780.0, 0.0)
-        /** Creates potential scoring positions for the purple pixel on the backdrop */
+
+        //Creates potential scoring positions for the purple pixel on the backdrop
         val leftBackdropScore = Pose(750.0, 1072.0, -90.0)
         val middleBackdropScore = Pose(750.0, 1261.0, -90.0)
         val rightBackdropScore = Pose(750.0, 1450.0, -90.0)
-        /** Positions between backdrop scoring and parking */
+
+        //Positions between backdrop scoring and parking
         val prePark = Pose(750.0, 310.0, -90.0)
-        val Park = Pose(329.0, 310.0, -90.0)
-        /** Creates variables used to represent detections */
-        var case1 = false
-        var case2 = false
-        var case3 = false
+        val park = Pose(329.0, 310.0, -90.0)
+
         val autoTime = ElapsedTime()
-        var detection: String? = null
+        var detection: Detection? = null
+
+        //Create Commands
+        val getDetection = ConditionalCommand({
+            val result = openCv.getDetection()
+            detection = when (result?.position?.x?.toInt()) {
+                in 0..(1280 / 3) -> Detection.Left
+                in (1280 / 3)..(1280 / 3 * 2) -> Detection.Center
+                in (1280 / 3 * 2)..1280 -> Detection.Right
+                else -> null
+            }
+        }) {return@ConditionalCommand detection == null || autoTime.seconds() >= 5}
+
+        fun moveToSpike(): ConditionalCommand? {
+            return when (detection) {
+                Detection.Left -> drivetrain.moveToPosition(leftSpikeScore)
+                Detection.Center -> drivetrain.moveToPosition(middleSpikeScore)
+                Detection.Right -> drivetrain.moveToPosition(rightSpikeScore)
+                else -> null
+            }
+        }
+
+        fun moveToBackdrop(): ConditionalCommand? {
+            return when (detection) {
+                Detection.Left -> drivetrain.moveToPosition(leftBackdropScore)
+                Detection.Center -> drivetrain.moveToPosition(middleBackdropScore)
+                Detection.Right -> drivetrain.moveToPosition(rightBackdropScore)
+                else -> null
+            }
+        }
+
+        val preParkCommand = drivetrain.moveToPosition(prePark)
+        val parkCommand = drivetrain.moveToPosition(park)
+
         val group1 = CommandGroup()
-            /** Gets camera detection */
-            .add(ConditionalCommand({openCv.getDetection()}) {return@ConditionalCommand detection != null || autoTime.seconds() >= 5})
-            /** Set case variables according to which detection is read */
-            .add(ConditionalCommand({case1 = true; case2 = false; case3 = false}) {openCv.getDetection()?.position?.x!! <= 500})
-            .add(ConditionalCommand({case1 = false; case2 = true; case3 = false}) {openCv.getDetection()?.position?.x!! > 500 && openCv.getDetection()?.position?.x!! < 1000})
-            .add(ConditionalCommand({case1 = false; case2 = false; case3 = true}) {openCv.getDetection()?.position?.x!! >= 1000})
-            /** Uses case variables to decide which scoring position to move to */
-            .add(ConditionalCommand({drivetrain.moveToPosition(leftSpikeScore)}) {case1})
-            .add(ConditionalCommand({drivetrain.moveToPosition(middleSpikeScore)}) {case2})
-            .add(ConditionalCommand({drivetrain.moveToPosition(rightSpikeScore)}) {case3})
-            .add(OnceCommand { output.openLeft() })
-            .add(OnceCommand { output.close() })
-            /** Uses case variables to move from the first scoring position to the second */
-            .add(ConditionalCommand({drivetrain.moveToPosition(leftBackdropScore)}) {case1})
-            .add(ConditionalCommand({drivetrain.moveToPosition(middleBackdropScore)}) {case2})
-            .add(ConditionalCommand({drivetrain.moveToPosition(rightBackdropScore)}) {case3})
-            .add(OnceCommand { slides.height = 400.0 })
-            .add(OnceCommand { slides.update() }) //Note to self: Do slides initialize automatically or do I need to run init method manually? Ask Alex Mon
-            .add(OnceCommand { output.openRight() })
-            .add(OnceCommand { drivetrain.moveToPosition(prePark) })
-            .add(OnceCommand { drivetrain.moveToPosition(Park) })
-            .build()
+            .add(getDetection) //Gets camera detection
+            .await(getDetection) //Waits for previous command to end
+            .add(moveToSpike()) //Moves to correct spike scoring position
+            .await(moveToSpike())
+            .add(moveToBackdrop()) //Moves to correct backdrop scoring position
+            .await(moveToBackdrop())
+            .add(OnceCommand { slides.height = 400.0 }) //Raises slides
+            .await(400) //Waits 400 ms
+            .add(OnceCommand { output.openRight() }) //Opens the right side of the output
+            .await(200) //Waits 200 ms
+            .add(preParkCommand) //Moves to the pre-parking position
+            .await(preParkCommand)
+            .add(parkCommand) //Moves to park position
+            .build() //Builds all commands
+
+        Scheduler.add(ContinuousCommand { slides.update() })
         Scheduler.add(group1)
         waitForStart()
         autoTime.reset()

@@ -7,7 +7,6 @@ import org.firstinspires.ftc.teamcode.mechanisms.Cables
 import org.firstinspires.ftc.teamcode.mechanisms.Drivetrain
 import org.firstinspires.ftc.teamcode.mechanisms.Drone
 import org.firstinspires.ftc.teamcode.mechanisms.Intake
-import org.firstinspires.ftc.teamcode.mechanisms.Lift
 import org.firstinspires.ftc.teamcode.mechanisms.Output
 import org.firstinspires.ftc.teamcode.mechanisms.Slide
 import org.firstinspires.ftc.teamcode.utils.Robot
@@ -26,7 +25,6 @@ class TeleOpMain : LinearOpMode() {
         val drivetrain = Drivetrain(hardwareMap, robot)
         val drone = Drone(hardwareMap)
         val intake = Intake(hardwareMap)
-        val lift = Lift(hardwareMap, robot)
         val output = Output(hardwareMap)
         val slide = Slide(hardwareMap)
 
@@ -80,28 +78,6 @@ class TeleOpMain : LinearOpMode() {
         gamepad2.getButton(GamepadEx.Buttons.DPAD_DOWN).onStart {
             drone.stop()
         }
-
-
-        //lift
-        gamepad2.getButton(GamepadEx.Buttons.DPAD_LEFT).onStart{
-            lift.targetHeight = 800
-            lift.killPower = false
-        }
-        gamepad2.getButton(GamepadEx.Buttons.DPAD_RIGHT).onStart{
-            lift.targetHeight = 400
-            lift.killPower = false
-        }
-        gamepad2.getButton(GamepadEx.Buttons.X).onStart{
-            lift.targetHeight = 0
-            lift.killPower = false
-        }
-        gamepad2.getButton(GamepadEx.Buttons.Y).onStart{
-            lift.targetHeight = 50
-            lift.killPower = true
-        }
-
-        Scheduler.add(ContinuousCommand { lift.update() })
-
 
         //slide
         gamepad1.getButton(GamepadEx.Buttons.Y).onStart {
