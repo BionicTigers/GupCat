@@ -32,12 +32,12 @@ class BluePreloadLeft : LinearOpMode() {
         //Sets the robot's starting position
         robot.pose = Pose(2773.0, 3340.0, 0.0)
 
-        //Creates potential scoring positions for the yellow pixel on the spike marks
+        //Creates potential scoring positions for the purple pixel on the spike marks
         val leftSpikeScore = Pose(1213.0, 780.0, 0.0)
         val middleSpikeScore = Pose(1499.0, 902.0, 0.0)
         val rightSpikeScore = Pose(1810.0, 780.0, 0.0)
 
-        //Creates potential scoring positions for the purple pixel on the backdrop
+        //Creates potential scoring positions for the yellow pixel on the backdrop
         val leftBackdropScore = Pose(750.0, 1072.0, -90.0)
         val middleBackdropScore = Pose(750.0, 1261.0, -90.0)
         val rightBackdropScore = Pose(750.0, 1450.0, -90.0)

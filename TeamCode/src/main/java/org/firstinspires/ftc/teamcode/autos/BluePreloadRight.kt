@@ -32,12 +32,12 @@ class BluePreloadRight : LinearOpMode() {
         // Sets the robot's starting position 
         robot.pose = Pose(2761.0, 310.0, 0.0)
 
-        // Creates potential scoring positions for the yellow pixel on the spike marks 
+        // Creates potential scoring positions for the purple pixel on the spike marks
         val leftSpikeScore = Offsets["left"]!!
         val middleSpikeScore = Offsets["center"]!!
         val rightSpikeScore = Offsets["right"]!!
 
-        // Creates potential scoring positions for the purple pixel on the backdrop 
+        // Creates potential scoring positions for the yellow pixel on the backdrop
         val leftBackdropScore = Pose(750.0, 1072.0, -90.0)
         val middleBackdropScore = Pose(750.0, 1261.0, -90.0)
         val rightBackdropScore = Pose(750.0, 1450.0, -90.0)
@@ -83,21 +83,20 @@ class BluePreloadRight : LinearOpMode() {
         val parkCommand = drivetrain.moveToPosition(park)
 
         val group1 = CommandGroup()
-            // Gets camera detection 
-            .add(getDetection)
-            .await(getDetection)
-            .add(moveToSpike())
+            .add(getDetection) //Gets camera detection
+            .await(getDetection) //Waits for previous command to end
+            .add(moveToSpike()) //Moves to correct spike scoring position
             .await(moveToSpike())
-            .add(moveToBackdrop())
+            .add(moveToBackdrop()) //Moves to correct backdrop scoring position
             .await(moveToBackdrop())
-            .add(OnceCommand { slides.height = 400.0 })
-            .await(400)
-            .add(OnceCommand { output.openRight() })
-            .await(200)
-            .add(preParkCommand)
+            .add(OnceCommand { slides.height = 400.0 }) //Raises slides
+            .await(400) //Waits 400 ms
+            .add(OnceCommand { output.openRight() }) //Opens the right side of the output
+            .await(200) //Waits 200 ms
+            .add(preParkCommand) //Moves to the pre-parking position
             .await(preParkCommand)
-            .add(parkCommand)
-            .build()
+            .add(parkCommand) //Moves to park position
+            .build() //Builds all commands
 
         Scheduler.add(ContinuousCommand { slides.update() })
         Scheduler.add(group1)
