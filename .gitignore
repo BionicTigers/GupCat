@@ -3,3 +3,4 @@
 /build
 /TeamCode/build
 /.gradle/
+/local.properties
