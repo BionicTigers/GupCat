@@ -79,6 +79,10 @@ class AprilTags(val robot: Robot, hardwareMap : HardwareMap) {
         // for each aptg the camera sees, find the global pose of the robot and put each pose in an array
         for (currentDetection in aprilTagProcessor.detections) {
             val globalPose = aprilTagData[currentDetection.id - 1].first // pose of the aptg from aprilTagData array
+            if (currentDetection.ftcPose == null) {
+                println("NULL")
+                continue
+            }
             val range = currentDetection.ftcPose.range * 2.54 // inches converted into mm, direct dist from the center of the aptg to the camera
             val bearing = currentDetection.ftcPose.bearing // deg, how much the robot would have to rotate to directly face the aptg
             val yaw = currentDetection.ftcPose.yaw // deg, rotation of the tag away or towards the camera

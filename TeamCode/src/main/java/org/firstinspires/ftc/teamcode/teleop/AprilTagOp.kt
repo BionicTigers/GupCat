@@ -23,10 +23,13 @@ class AprilTagOp : LinearOpMode() {
 
         gamepad2.getButton(GamepadEx.Buttons.Y).onStart{
             aprilTags.toggleLiveView()
+            telemetry.addLine("Toggled Live View")
         }
 
         gamepad2.getButton(GamepadEx.Buttons.X).onStart{
             aprilTags.toggleATProcessor()
+            telemetry.addLine("Toggled ATProcessor")
+
         }
 
 

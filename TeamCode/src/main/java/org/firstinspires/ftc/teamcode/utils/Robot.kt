@@ -14,7 +14,7 @@ class Robot(private val opMode: LinearOpMode) {
 
     val telemetry: Telemetry = opMode.telemetry
 
-    private val odometry: Odometry = Odometry(this)
+//    private val odometry: Odometry = Odometry(this)
 
     private val gamepad1: GamepadEx = GamepadEx(opMode.gamepad1)
     private val gamepad2: GamepadEx = GamepadEx(opMode.gamepad2)
@@ -22,7 +22,7 @@ class Robot(private val opMode: LinearOpMode) {
     init {
         Scheduler.add(ContinuousCommand
         {
-            odometry.update()
+//            odometry.update()
             opMode.telemetry.addData("x", pose.x)
             opMode.telemetry.addData("y", pose.y)
             opMode.telemetry.addData("rot", pose.rotation)
