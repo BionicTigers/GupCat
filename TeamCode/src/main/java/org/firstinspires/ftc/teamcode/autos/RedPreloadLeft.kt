@@ -10,11 +10,9 @@ import org.firstinspires.ftc.teamcode.mechanisms.Slide
 import org.firstinspires.ftc.teamcode.utils.Robot
 import org.firstinspires.ftc.teamcode.utils.vision.Color
 import org.firstinspires.ftc.teamcode.utils.vision.OpenCv
-import org.firstinspires.ftc.teamcode.autos.Offsets
 import org.firstinspires.ftc.teamcode.utils.Pose
 import org.firstinspires.ftc.teamcode.utils.command.CommandGroup
 import org.firstinspires.ftc.teamcode.utils.command.ConditionalCommand
-import org.firstinspires.ftc.teamcode.utils.command.ContinuousCommand
 import org.firstinspires.ftc.teamcode.utils.command.OnceCommand
 import org.firstinspires.ftc.teamcode.utils.command.Scheduler
 import org.opencv.core.Scalar

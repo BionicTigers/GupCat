@@ -20,12 +20,12 @@ data class AprilTag(val id: Int, val name: String)
 class AprilTags(val robot: Robot, hardwareMap : HardwareMap) {
 
     // get measurement from bot
-    val camPosX = 0.0 // in mm, camera position from the middle left/right
-    val camPosY = 0.0 // in mm, camera position from the middle forward/back
+    private val camPosX = 0.0 // in mm, camera position from the middle left/right
+    private val camPosY = 0.0 // in mm, camera position from the middle forward/back
 
     // rotation is counterclockwise 0 being facing 5040s side
     // x and y are from the bottom left corner while facing 5040's side
-    val aprilTagData = arrayOf(
+    private val aprilTagData = arrayOf(
         Pair(Pose(3437.6, 2914.6, 90.0), "Blue Left"), // poses in mm, mm, deg
         Pair(Pose(3437.6, 2861.1, 90.0), "Blue Mid"),
         Pair(Pose(3437.6, 2807.6, 90.0), "Blue Right"),
@@ -36,25 +36,23 @@ class AprilTags(val robot: Robot, hardwareMap : HardwareMap) {
         Pair(Pose(0.0, 2907.6, 270.0), "Blue Wall")
     )
 
-    // Set custom features of the Processor (Optional)
-    val aprilTagProcessor = AprilTagProcessor.Builder()
-        .setDrawTagID(true)          // Default is true
-        .setDrawTagOutline(true)     // Default is true
-        .setDrawAxes(true)           // Default is false
-        .setDrawCubeProjection(true) // Default is false
+    private val aprilTagProcessor = AprilTagProcessor.Builder()
+        .setDrawTagID(true)
+        .setDrawTagOutline(true)
+        .setDrawAxes(true)
+        .setDrawCubeProjection(true)
         .build()
-    var aTPon = true
+    private var aTPon = true //TODO: CHANGE THIS
 
-    // Set custom features of the Vision Portal (Optional)
-    val visionPortal = VisionPortal.Builder()
+    private val visionPortal = VisionPortal.Builder()
         .setCamera(hardwareMap.get(WebcamName::class.java, "Webcam 1"))
         .addProcessor(aprilTagProcessor)
         .enableCameraMonitoring(true)         // Enable LiveView (RC preview)
         .setAutoStopLiveView(true)            // Automatically stop LiveView (RC preview) when all vision processors are disabled.
         .build()
-    var lVon = true
+    private var lVon = true
 
-    val currentDetections : List<AprilTagDetection> = aprilTagProcessor.detections // an array of the aptgs the camera sees
+    private val currentDetections : List<AprilTagDetection> = aprilTagProcessor.detections // an array of the aptgs the camera sees
 
     // returns the list of aptgs the camera sees when called (id and name)
     fun getAprilTagDetections(): Array<AprilTag> {
@@ -80,7 +78,6 @@ class AprilTags(val robot: Robot, hardwareMap : HardwareMap) {
 
         // for each aptg the camera sees, find the global pose of the robot and put each pose in an array
         for (currentDetection in aprilTagProcessor.detections) {
-
             val globalPose = aprilTagData[currentDetection.id - 1].first // pose of the aptg from aprilTagData array
             val range = currentDetection.ftcPose.range * 2.54 // inches converted into mm, direct dist from the center of the aptg to the camera
             val bearing = currentDetection.ftcPose.bearing // deg, how much the robot would have to rotate to directly face the aptg

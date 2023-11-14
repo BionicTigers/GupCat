@@ -27,13 +27,11 @@ class Pipeline(private val injection: OpenCv) : OpenCvPipeline() {
 
         val hsvMat = if (injection.crop != null) hsvMatUncropped.submat(injection.crop) else hsvMatUncropped
 
-        var high : Double = 0.0
+        var high = 0.0
         var detectionToReturn: Pair<String, Vector2>? = null
 
         for ((iName, color) in injection.signals){
             val (area, position) = color.calculate(hsvMat)
-
-//            println("$name: $area")
 
             contours.addAll(color.contours)
 
