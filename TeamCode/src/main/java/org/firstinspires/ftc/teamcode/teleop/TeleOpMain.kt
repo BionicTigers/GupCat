@@ -6,6 +6,7 @@ import org.firstinspires.ftc.teamcode.mechanisms.Arm
 import org.firstinspires.ftc.teamcode.mechanisms.Cables
 import org.firstinspires.ftc.teamcode.mechanisms.Drivetrain
 import org.firstinspires.ftc.teamcode.mechanisms.Drone
+import org.firstinspires.ftc.teamcode.mechanisms.Height
 import org.firstinspires.ftc.teamcode.mechanisms.Intake
 import org.firstinspires.ftc.teamcode.mechanisms.Output
 import org.firstinspires.ftc.teamcode.mechanisms.Slide
@@ -87,6 +88,15 @@ class TeleOpMain : LinearOpMode() {
         gamepad1.getButton(GamepadEx.Buttons.X).onStart {
             slide.height -= 500 * Scheduler.deltaTime
         }
+
+//        gamepad1.getButton(GamepadEx.Buttons.LEFT_BUMPER).onStart {
+//            slide.height = Height.LAYER1.number
+//        }
+//          //Obsolete since we don't have slides currently
+//
+//        gamepad1.getButton(GamepadEx.Buttons.RIGHT_BUMPER).onStart {
+//            slide.height = Height.LAYER2.number
+//        }
 
         //output
         gamepad1.getButton(GamepadEx.Buttons.DPAD_LEFT).onStart {
