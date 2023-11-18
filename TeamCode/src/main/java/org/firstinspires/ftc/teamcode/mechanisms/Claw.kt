@@ -14,11 +14,11 @@ class Claw(hardwareMap: HardwareMap) {
     private var cycles = 0
     private var dist = 0.0
 
-    fun open() {
+    fun open() {  //Opens claw
         claw.position = 1.0
     }
 
-    fun close() {
+    fun close() {  //Closes claw
         claw.position = 0.0
     }
 

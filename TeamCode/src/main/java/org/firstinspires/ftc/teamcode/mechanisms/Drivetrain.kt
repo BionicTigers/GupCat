@@ -46,7 +46,6 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
 
     //Robot Centric - Determine Motor Powers
     fun robotDMP(pos: Vector2, mod: Double, turn: Double = 0.0) {
-        println(pos)
         //Create Motor Powers HashMap
         val setPowers: HashMap<String, Double> = HashMap(4)
         velocity = lerp(velocity, max(pos.magnitude(), abs(turn)), Scheduler.deltaTime * 2)
@@ -103,8 +102,9 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
             val error = Pose(
                 xPid.calculate(target.x, robot.pose.x),
                 yPid.calculate(target.y, robot.pose.y),
-                rPid.calculate(target.rotation, robot.pose.rotation),
+                rPid.calculate(target.rotation, robot.pose.rotation)
             )
+            println(rPid.calculate(target.rotation, robot.pose.rotation))
 
             val magnitude = error.extractPosition().magnitude()
             val heading = atan2(error.x, error.y)
@@ -120,10 +120,12 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
 
             val setPowers: HashMap<String, Double> = HashMap(4)
 
-            setPowers["frontLeft"] = angleSin - angleCos + error.rotation
-            setPowers["frontRight"] = angleSin + angleCos - error.rotation
-            setPowers["backLeft"] = angleSin + angleCos + error.rotation
-            setPowers["backRight"] = angleSin - angleCos - error.rotation
+            setPowers["frontLeft"] = angleSin - angleCos
+            setPowers["frontRight"] = angleSin + angleCos
+            setPowers["backLeft"] = angleSin + angleCos
+            setPowers["backRight"] = angleSin - angleCos
+
+            println(setPowers.toString())
 
             var highest = 0.0
             setPowers.forEach { (_, value) -> highest = if (highest < value) value else highest }

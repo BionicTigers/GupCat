@@ -8,10 +8,10 @@ import com.qualcomm.robotcore.hardware.HardwareMap
 class Drone(hardwareMap: HardwareMap) {
     private val drone = hardwareMap.get(DcMotorEx::class.java, "motor")
 
-    fun start() {
+    fun start() {  //Starts drone flywheel
         drone.power = 1.0
     }
-    fun stop() {
+    fun stop() {  //Stops drone flywheel
         drone.power = 0.0
     }
 }
