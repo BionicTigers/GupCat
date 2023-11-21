@@ -15,11 +15,11 @@ class IntakeOp : LinearOpMode() {
         val intake = Intake(hardwareMap)
 
         gamepad2.getButton(GamepadEx.Buttons.A).onStart {
-            intake.start()
+            intake.startBoth()
         }
 
         gamepad2.getButton(GamepadEx.Buttons.B).onStart {
-            intake.stop()
+            intake.stopIntake()
         }
 
         waitForStart()

@@ -16,8 +16,7 @@ import org.firstinspires.ftc.teamcode.utils.command.Scheduler
 
 fun BluePark(robot: Robot, hardwareMap: HardwareMap) {
     val drivetrain = Drivetrain(hardwareMap, robot)
-    val parkVector = Vector2(329.0, 310.0)
-    val parkPoint = Pose(parkVector, -90.0)
+    val parkPoint = Pose(329.0, 310.0, 0.0)
 
     robot.onStart {
         Scheduler.add(drivetrain.moveToPosition(parkPoint))

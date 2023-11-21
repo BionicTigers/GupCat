@@ -104,6 +104,7 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
                 yPid.calculate(target.y, robot.pose.y),
                 rPid.calculate(target.rotation, robot.pose.rotation)
             )
+
             println(rPid.calculate(target.rotation, robot.pose.rotation))
 
             val magnitude = error.extractPosition().magnitude()
@@ -115,15 +116,15 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
             val power = hypot(-x, y)
             val angle = atan2(y, -x)
 
-            val angleSin = power * sin(angle)
-            val angleCos = power * cos(angle)
+            val angleSin = sin(angle)
+            val angleCos = cos(angle)
 
             val setPowers: HashMap<String, Double> = HashMap(4)
 
-            setPowers["frontLeft"] = angleSin - angleCos
-            setPowers["frontRight"] = angleSin + angleCos
-            setPowers["backLeft"] = angleSin + angleCos
-            setPowers["backRight"] = angleSin - angleCos
+            setPowers["frontLeft"] = power * angleSin - power * angleCos
+            setPowers["frontRight"] = power * angleSin + power * angleCos
+            setPowers["backLeft"] = -power * angleSin + power * angleCos
+            setPowers["backRight"] = -power * angleSin - power * angleCos
 
             println(setPowers.toString())
 
