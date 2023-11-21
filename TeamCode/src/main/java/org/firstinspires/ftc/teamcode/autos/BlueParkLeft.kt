@@ -13,9 +13,11 @@ class BlueParkLeft : LinearOpMode() {
     override fun runOpMode() {
         val robot = Robot(this)
         val drivetrain = Drivetrain(hardwareMap, robot)
-        val wiggle = Pose(1504.0, 310.0, 0.0)
-        val parkPoint = Pose(329.0, 310.0, 0.0)
+        val wiggle = Pose(1499.0, 315.0, 0.0)
+        val parkPoint = Pose(329.0, 315.0, 0.0)
+
         robot.pose = Pose(1499.0, 310.0, 0.0)
+
         val group = CommandGroup()
             .add(drivetrain.moveToPosition(wiggle))
             .await(750)
