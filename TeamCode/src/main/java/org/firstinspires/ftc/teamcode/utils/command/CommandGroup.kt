@@ -32,6 +32,23 @@ class CommandGroup {
     }
 
     /**
+     * Func
+     */
+//    fun add(command: ConditionalCommand?): CommandGroup {
+//        if (command != null) {
+//            callbacks.add { command.callback.invoke(); return@add command.predicate.invoke() }
+//        }
+//        return this
+//    }
+
+    /**
+     * Removes a callback
+     */
+//    fun remove(command: Int) {
+//
+//    }
+
+    /**
      * Add a callback to the command group.
      *
      * The return boolean is if it should stay in the group.

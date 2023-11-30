@@ -46,6 +46,7 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
 
     //Robot Centric - Determine Motor Powers
     fun robotDMP(pos: Vector2, mod: Double, turn: Double = 0.0) {
+        println(pos)
         //Create Motor Powers HashMap
         val setPowers: HashMap<String, Double> = HashMap(4)
         velocity = lerp(velocity, max(pos.magnitude(), abs(turn)), Scheduler.deltaTime * 2)
@@ -96,39 +97,38 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
     fun moveToPosition(target: Pose): ConditionalCommand {
         val xPid = PID(PIDTerms(), 0.0, 3657.6, -1.0, 1.0)
         val yPid = PID(PIDTerms(), 0.0, 3657.6, -1.0, 1.0)
-        val rPid = PID(PIDTerms(), -3600.0, 3600.0, -1.0, 1.0)
+        val rPid = PID(PIDTerms(4.0), 0.0, 360.0, -1.0, 1.0)
 
         return ConditionalCommand( {
             val error = Pose(
                 xPid.calculate(target.x, robot.pose.x),
                 yPid.calculate(target.y, robot.pose.y),
-                rPid.calculate(target.rotation, robot.pose.rotation)
+                rPid.calculate(target.rotation, robot.pose.rotation),
             )
-            println(rPid.calculate(target.rotation, robot.pose.rotation))
 
             val magnitude = error.extractPosition().magnitude()
-            val heading = atan2(error.x, error.y)
+            val heading = atan2(-error.x, -error.y)
 
-            val x = cos(heading - robot.pose.radians) * magnitude
-            val y = sin(heading - robot.pose.radians) * magnitude
+            val x = cos(heading)
+            val y = sin(heading)
 
-            val power = hypot(-x, y)
-            val angle = atan2(y, -x)
+            val power = hypot(x, y)
+            val angle = atan2(x, y)
 
-            val angleSin = power * sin(angle)
-            val angleCos = power * cos(angle)
+//            println(Math.toDegrees(angle))
+
+            val angleSin = sin(angle)
+            val angleCos = cos(angle)
 
             val setPowers: HashMap<String, Double> = HashMap(4)
 
-            setPowers["frontLeft"] = angleSin - angleCos
-            setPowers["frontRight"] = angleSin + angleCos
-            setPowers["backLeft"] = angleSin + angleCos
-            setPowers["backRight"] = angleSin - angleCos
-
-            println(setPowers.toString())
+            setPowers["frontLeft"] = power * angleSin - power * angleCos - error.radians
+            setPowers["frontRight"] = power * angleSin + power * angleCos + error.radians
+            setPowers["backLeft"] = power * angleSin + power * angleCos - error.radians
+            setPowers["backRight"] = power * angleSin - power * angleCos + error.radians
 
             var highest = 0.0
-            setPowers.forEach { (_, value) -> highest = if (highest < value) value else highest }
+            setPowers.forEach { (_, value) -> highest = if (highest < abs(value)) abs(value) else highest }
             setPowers.forEach { (name, value) -> motors[name]!!.power = (value / highest) }
         }, {
             val diff = robot.pose - target

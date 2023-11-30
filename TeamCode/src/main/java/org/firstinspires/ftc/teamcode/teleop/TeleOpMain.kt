@@ -6,7 +6,6 @@ import org.firstinspires.ftc.teamcode.mechanisms.Arm
 import org.firstinspires.ftc.teamcode.mechanisms.Cables
 import org.firstinspires.ftc.teamcode.mechanisms.Drivetrain
 import org.firstinspires.ftc.teamcode.mechanisms.Drone
-import org.firstinspires.ftc.teamcode.mechanisms.Height
 import org.firstinspires.ftc.teamcode.mechanisms.Intake
 import org.firstinspires.ftc.teamcode.mechanisms.Output
 import org.firstinspires.ftc.teamcode.mechanisms.Slide

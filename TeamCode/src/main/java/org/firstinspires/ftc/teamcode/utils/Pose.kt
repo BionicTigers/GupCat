@@ -1,13 +1,13 @@
 package org.firstinspires.ftc.teamcode.utils
 
 import kotlin.math.abs
+import kotlin.math.sign
 
 /**
  * Combines a Vector2 and a Rotation variable
  * Used for robot position and rotation
  */
 data class Pose(val x: Double, val y: Double, val rotation: Double) {
-
     constructor(): this(0.0, 0.0, 0.0)
     constructor(v2: Vector2, rotation: Double): this(v2.x, v2.y, rotation)
 
@@ -22,6 +22,13 @@ data class Pose(val x: Double, val y: Double, val rotation: Double) {
     fun extractPosition(): Vector2 {
         return Vector2(x, y)
     }
+
+//    fun getRotationError(other: Double): Double {
+//        // (810 / 360) - floor(810 / 360) = .25
+//        // (90 / 360) - (810 / 360) = .25 - 1.25 = -1
+////        val normalizedRotation = (this.rotation / 360) - (this.rotation / 360).toInt()
+//        return ((other / 360) - (this.rotation / 360)) * 360
+//    }
 
     operator fun compareTo(other: Pose): Int {
         var i = 0
