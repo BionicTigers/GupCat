@@ -8,7 +8,7 @@ import org.firstinspires.ftc.teamcode.utils.command.Scheduler
 
 fun RedPark (robot: Robot, hardwareMap: HardwareMap) {
     val drivetrain = Drivetrain(hardwareMap, robot)
-    val parkPoint = Pose(304.0, 3328.0, 90.0)
+    val parkPoint = Pose(3435.0, 304.0, 0.0)
 
     robot.onStart {
         Scheduler.add(drivetrain.moveToPosition(parkPoint))

@@ -15,19 +15,19 @@ class WheelTest : LinearOpMode() {
         val drivetrain = Drivetrain(hardwareMap, robot)
 
         gamepad1.getButton(GamepadEx.Buttons.DPAD_UP).onStart {
-            drivetrain.driveFrontLeft()
+            drivetrain.driveFrontLeft() //FrontRight
         }
 
         gamepad1.getButton(GamepadEx.Buttons.DPAD_RIGHT).onStart {
-            drivetrain.driveFrontRight()
+            drivetrain.driveFrontRight() //BackRight
         }
 
         gamepad1.getButton(GamepadEx.Buttons.DPAD_DOWN).onStart {
-            drivetrain.driveBackRight()
+            drivetrain.driveBackRight() //BackLeft
         }
 
         gamepad1.getButton(GamepadEx.Buttons.DPAD_LEFT).onStart {
-            drivetrain.driveBackLeft()
+            drivetrain.driveBackLeft() //FrontLeft
         }
 
         gamepad1.getButton(GamepadEx.Buttons.A).onStart {

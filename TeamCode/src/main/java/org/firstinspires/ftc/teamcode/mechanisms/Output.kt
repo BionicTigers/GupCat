@@ -7,8 +7,8 @@ import com.qualcomm.robotcore.hardware.Servo
  * the backdrop*/
 class Output (hardwareMap: HardwareMap) {
     //Creates servos
-    val left = hardwareMap.get(Servo::class.java, "leftServo")
-    val right = hardwareMap.get(Servo::class.java, "rightServo")
+    val left = hardwareMap.get(Servo::class.java, "outputLeft")
+    val right = hardwareMap.get(Servo::class.java, "outputRight")
 
     /**
      * Opens the left side of the trapdoor
