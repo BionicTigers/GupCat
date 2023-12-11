@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.utils
 
 import kotlin.math.abs
+import kotlin.math.absoluteValue
 import kotlin.math.sign
 
 /**
@@ -29,6 +30,10 @@ data class Pose(val x: Double, val y: Double, val rotation: Double) {
 ////        val normalizedRotation = (this.rotation / 360) - (this.rotation / 360).toInt()
 //        return ((other / 360) - (this.rotation / 360)) * 360
 //    }
+
+    fun abs(): Pose {
+        return Pose(this.x.absoluteValue, this.y.absoluteValue, this.rotation.absoluteValue)
+    }
 
     operator fun compareTo(other: Pose): Int {
         var i = 0

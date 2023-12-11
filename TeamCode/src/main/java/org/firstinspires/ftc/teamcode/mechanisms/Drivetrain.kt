@@ -95,9 +95,9 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
     }
 
     fun moveToPosition(target: Pose): ConditionalCommand {
-        val xPid = PID(PIDTerms(), 0.0, 3657.6, -1.0, 1.0)
-        val yPid = PID(PIDTerms(), 0.0, 3657.6, -1.0, 1.0)
-        val rPid = PID(PIDTerms(4.0), 0.0, 360.0, -1.0, 1.0)
+        val xPid = PID(PIDTerms(1.0), 0.0, 3657.6, -1000.0, 1000.0)
+        val yPid = PID(PIDTerms(1.0), 0.0, 3657.6, -1000.0, 1000.0)
+        val rPid = PID(PIDTerms(1.0), -360.0, 360.0, -360.0, 360.0)
 
         return ConditionalCommand( {
             val error = Pose(
@@ -115,25 +115,35 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
             val power = hypot(x, y)
             val angle = atan2(x, y)
 
-//            println(Math.toDegrees(angle))
+            println(error.rotation)
+            println(error.radians)
 
             val angleSin = sin(angle)
             val angleCos = cos(angle)
 
             val setPowers: HashMap<String, Double> = HashMap(4)
 
-            setPowers["frontLeft"] = power * angleSin - power * angleCos - error.radians
-            setPowers["frontRight"] = power * angleSin + power * angleCos + error.radians
-            setPowers["backLeft"] = power * angleSin + power * angleCos - error.radians
-            setPowers["backRight"] = power * angleSin - power * angleCos + error.radians
+            val rot = -(target.radians - robot.pose.radians)
+            println(rot)
+
+            setPowers["frontLeft"] = power * angleSin - power * angleCos + rot
+            setPowers["frontRight"] = power * angleSin + power * angleCos - rot
+            setPowers["backLeft"] = power * angleSin + power * angleCos + rot
+            setPowers["backRight"] = power * angleSin - power * angleCos - rot
 
             var highest = 0.0
             setPowers.forEach { (_, value) -> highest = if (highest < abs(value)) abs(value) else highest }
+            highest *= 2
             setPowers.forEach { (name, value) -> motors[name]!!.power = (value / highest) }
         }, {
             val diff = robot.pose - target
-            val compare = Pose(5.0, 5.0, 5.0)
-            if (diff <= compare && diff >= -compare) false else this.stop(); true
+            val compare = Pose(20.0, 20.0, 20.0)
+            if (diff.abs() >= compare) {
+                return@ConditionalCommand true
+            } else {
+                this.stop()
+                return@ConditionalCommand false
+            }
         })
     }
 
