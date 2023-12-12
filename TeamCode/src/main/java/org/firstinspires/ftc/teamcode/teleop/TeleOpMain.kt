@@ -41,6 +41,14 @@ class TeleOpMain : LinearOpMode() {
             intake.stop()
         }
 
+        gamepad2.getTrigger(GamepadEx.Triggers.LEFT_TRIGGER).onStart {
+            intake.up()
+        }
+
+        gamepad2.getTrigger(GamepadEx.Triggers.RIGHT_TRIGGER).onStart {
+            intake.down()
+        }
+
         //hanging
         gamepad1.getButton(GamepadEx.Buttons.DPAD_UP).onStart {
             cables.lift()
@@ -83,6 +91,7 @@ class TeleOpMain : LinearOpMode() {
             output.close()
         }
 
+        //chainbar
         gamepad2.getButton(GamepadEx.Buttons.A).onStart {
             chainbar.up()
         }
@@ -91,6 +100,7 @@ class TeleOpMain : LinearOpMode() {
             chainbar.down()
         }
 
+        //arm
         gamepad2.getButton(GamepadEx.Buttons.LEFT_BUMPER).onStart {
             arm.up()
         }
