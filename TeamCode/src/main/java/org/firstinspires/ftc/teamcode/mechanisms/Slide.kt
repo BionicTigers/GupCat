@@ -29,6 +29,6 @@ class Slide(hardwareMap: HardwareMap) {
         val encoderTicks = hub.getEncoderTicks(0).toDouble()
         val power = pid.calculate(height, encoderTicks)
         left.power = power
-        right.power = power
+        right.power = -power
     }
 }

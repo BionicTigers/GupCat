@@ -7,28 +7,19 @@ import com.qualcomm.robotcore.hardware.Servo
  * the backdrop*/
 class Output (hardwareMap: HardwareMap) {
     //Creates servos
-    val left = hardwareMap.get(Servo::class.java, "outputLeft")
-    val right = hardwareMap.get(Servo::class.java, "outputRight")
+    val claw = hardwareMap.get(Servo::class.java, "claw")
 
     /**
      * Opens the left side of the trapdoor
      */
-    fun openLeft() {
-        left.position = 0.0
-    }
-
-    /**
-     * Opens the right side of the trapdoor
-     */
-    fun openRight() {
-        right.position = 0.7
+    fun open() {
+        claw.position = 0.0
     }
 
     /**
      * Closes both sides of the trapdoor
      */
     fun close() {
-        left.position = 0.3
-        right.position = 0.4
+        claw.position = 0.3
     }
 }
