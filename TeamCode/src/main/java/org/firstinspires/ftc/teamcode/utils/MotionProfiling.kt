@@ -3,14 +3,6 @@ package org.firstinspires.ftc.teamcode.utils
 import kotlin.math.pow
 import kotlin.math.sqrt
 
-private data class TimeSlices(val t1: Double,
-                              val t2: Double,
-                              val t3: Double,
-                              val t4: Double,
-                              val t5: Double,
-                              val t6: Double,
-                              val t7: Double)
-
 /**
  * Generate a motion profile based off certain parameters
  *
@@ -51,6 +43,7 @@ fun generateMotionProfile(start: Double,
         val t5 = t4 + t1
         val t6 = t5 + (t2-t1)
         val t7 = t6 + t1
-
     }
+
+    println()
 }

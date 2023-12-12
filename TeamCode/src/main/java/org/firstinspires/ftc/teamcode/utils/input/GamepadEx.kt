@@ -8,12 +8,16 @@ class GamepadEx(private val gamepad: Gamepad) {
     enum class Buttons {
         DPAD_UP, DPAD_DOWN, DPAD_RIGHT, DPAD_LEFT, A, B, X, Y, START,
         BACK, LEFT_BUMPER, RIGHT_BUMPER, LEFT_STICK_BUTTON,
-        RIGHT_STICK_BUTTON//, LEFT_TRIGGER, RIGHT_TRIGGER
+        RIGHT_STICK_BUTTON
     }
 
     //Gamepad Joysticks
     enum class Joysticks {
         LEFT_JOYSTICK, RIGHT_JOYSTICK
+    }
+
+    enum class Triggers {
+        LEFT_TRIGGER, RIGHT_TRIGGER
     }
 
     //Store Buttons
@@ -22,6 +26,10 @@ class GamepadEx(private val gamepad: Gamepad) {
     //Store Joysticks
     private val leftJoystick: Joystick = Joystick()
     private val rightJoystick: Joystick = Joystick()
+
+    //Store Trigger
+    private val leftTrigger: Trigger = Trigger()
+    private val rightTrigger: Trigger = Trigger()
 
     //Assign BoolButtons to array
     init {
@@ -44,6 +52,14 @@ class GamepadEx(private val gamepad: Gamepad) {
         }
     }
 
+    fun getTrigger(trigger: Triggers): Trigger {
+        return if (trigger == Triggers.LEFT_TRIGGER) {
+            leftTrigger
+        } else {
+            rightTrigger
+        }
+    }
+
     //Update every button and joystick
     fun update() {
         boolButtons.forEachIndexed { index, button ->
@@ -53,7 +69,20 @@ class GamepadEx(private val gamepad: Gamepad) {
             button.update(gamepad.javaClass.getDeclaredField(name).getBoolean(gamepad))
         }
 
-        leftJoystick.update(Vector2(gamepad.left_stick_x.toDouble(), gamepad.left_stick_y.toDouble()))
-        rightJoystick.update(Vector2(gamepad.right_stick_x.toDouble(), gamepad.right_stick_y.toDouble()))
+        leftJoystick.update(
+            Vector2(
+                gamepad.left_stick_x.toDouble(),
+                gamepad.left_stick_y.toDouble()
+            )
+        )
+        rightJoystick.update(
+            Vector2(
+                gamepad.right_stick_x.toDouble(),
+                gamepad.right_stick_y.toDouble()
+            )
+        )
+
+        leftTrigger.update(gamepad.left_trigger.toDouble())
+        rightTrigger.update(gamepad.right_trigger.toDouble())
     }
 }
