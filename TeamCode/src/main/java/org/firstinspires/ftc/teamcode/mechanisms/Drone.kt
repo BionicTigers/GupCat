@@ -9,7 +9,7 @@ class Drone(hardwareMap: HardwareMap) {
     private val drone = hardwareMap.get(DcMotorEx::class.java, "motor")
 
     fun start() {  //Starts drone flywheel
-        drone.power = 1.0
+        drone.power = 0.8
     }
     fun stop() {  //Stops drone flywheel
         drone.power = 0.0

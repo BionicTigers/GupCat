@@ -6,20 +6,20 @@ import com.qualcomm.robotcore.hardware.HardwareMap
 import com.qualcomm.robotcore.hardware.Servo
 /** Runs a tape measure up to the rigging in order to lift the robot */
 class Cables (hardwareMap: HardwareMap) {
-    private val motor = hardwareMap.get(DcMotorEx::class.java, "hangMotor")
+    private val servo = hardwareMap.get(CRServo::class.java, "hangServo")
 
     /** Runs the tape measure up at 60% power */
     fun lift() {
-        motor.power = -1.0
+        servo.power = -1.0
     }
 
     /** Runs the tape measure down at 60% power */
     fun lower() {
-        motor.power = 1.0
+        servo.power = 1.0
     }
 
     /** Stops the motor */
     fun stop() {
-        motor.power = 0.0
+        servo.power = 0.0
     }
 }
