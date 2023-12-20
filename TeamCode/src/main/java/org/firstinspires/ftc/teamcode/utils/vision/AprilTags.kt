@@ -7,10 +7,10 @@ import org.firstinspires.ftc.teamcode.utils.Pose
 import org.firstinspires.ftc.teamcode.utils.Robot
 import org.firstinspires.ftc.vision.VisionPortal
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection
+import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor
 import kotlin.math.abs
 import kotlin.math.acos
-import kotlin.math.asin
 import kotlin.math.cos
 import kotlin.math.pow
 import kotlin.math.sin
@@ -19,11 +19,11 @@ data class AprilTag(val id: Int, val name: String)
 
 class AprilTags(val robot: Robot, hardwareMap : HardwareMap) {
 
-    // get measurement from bot
+    // get measurement from bot  **make it negative if the distance is negative when placed on the field** (neg if camera is to the left or down, pos if camera is right or up)
     private val camPosX = 0.0 // in mm, camera position from the middle left/right
     private val camPosY = 0.0 // in mm, camera position from the middle forward/back
 
-    // rotation is counterclockwise 0 being facing 5040s side
+    // rotation is counterclockwise 0 being facing 5040s side (this is different from the robot's rotation, which is clockwise)
     // x and y are from the bottom left corner while facing 5040's side
     private val aprilTagData = arrayOf(
         Pair(Pose(3437.6, 2914.6, 90.0), "Blue Left"), // poses in mm, mm, deg
@@ -32,29 +32,33 @@ class AprilTags(val robot: Robot, hardwareMap : HardwareMap) {
         Pair(Pose(3437.6, 850.0, 90.0), "Red Left"),
         Pair(Pose(3437.6, 796.5, 90.0), "Red Mid"),
         Pair(Pose(3437.6, 743.0, 90.0), "Red Right"),
-        Pair(Pose(0.0, 750.0, 270.0), "Red Wall"),
-        Pair(Pose(0.0, 2907.6, 270.0), "Blue Wall")
+        Pair(Pose(0.0, 750.0, 270.0), "Red Wall Big"),
+        Pair(Pose(0.0, 895.35, 270.0), "Red Wall Small"),
+        Pair(Pose(0.0, 2767.9, 270.0), "Blue Wall Small"),
+        Pair(Pose(0.0, 2907.6, 270.0), "Blue Wall Big")
     )
 
     private val aprilTagProcessor = AprilTagProcessor.Builder()
+        .setTagLibrary(AprilTagGameDatabase.getCenterStageTagLibrary())
         .setDrawTagID(true)
         .setDrawTagOutline(true)
         .setDrawAxes(true)
         .setDrawCubeProjection(true)
+        .setLensIntrinsics(815.193, 815.193, 309.116, 289.874) // values from calibrating the camera
         .build()
-    private var aTPon = true //TODO: CHANGE THIS
+    private var processorOn = true
 
     private val visionPortal = VisionPortal.Builder()
         .setCamera(hardwareMap.get(WebcamName::class.java, "Webcam 1"))
         .addProcessor(aprilTagProcessor)
-        .enableCameraMonitoring(true)         // Enable LiveView (RC preview)
-        .setAutoStopLiveView(true)            // Automatically stop LiveView (RC preview) when all vision processors are disabled.
+        .enableLiveView(true)         // enable LiveView
+        .setAutoStopLiveView(true)    // automatically stop LiveView when all vision processors are disabled
         .build()
-    private var lVon = true
+    private var liveViewOn = true
 
-    private val currentDetections : List<AprilTagDetection> = aprilTagProcessor.detections // an array of the aptgs the camera sees
+    private val currentDetections : List<AprilTagDetection> = aprilTagProcessor.detections // an array of the apriltags the camera sees
 
-    // returns the list of aptgs the camera sees when called (id and name)
+    // returns the list of apriltags the camera sees when called (id and name)
     fun getAprilTagDetections(): Array<AprilTag> {
         val list = ArrayList<AprilTag>()
 
@@ -72,143 +76,163 @@ class AprilTags(val robot: Robot, hardwareMap : HardwareMap) {
         return list.toTypedArray()
     }
 
-    // returns the final global robot pose and sets the robot's pose to that pose (fgrp is the avg of the grps found from each aptg)
-    fun calculateRobotPos(): Pose { // none of this code works if the aptgs rotations are anything other than 90 or 270 :3
+    fun printEverything() {
+        for (currentDetection in aprilTagProcessor.detections) {
+            if (currentDetection.rawPose != null) {
+                println("id: ${currentDetection.id}")
+                println("tag pose: ${aprilTagData[currentDetection.id - 1].first}")
+                println("range: ${currentDetection.ftcPose.range}")
+                println("bearing: ${currentDetection.ftcPose.bearing}")
+                println("yaw: ${currentDetection.ftcPose.yaw}")
+                println("x: ${currentDetection.ftcPose.x}")
+                println("Final Pose: ${calculateRobotPos()}")
+            }
+        }
+    }
+
+    // returns the final global robot pose and sets the robot's pose to that pose
+    fun calculateRobotPos(): Pose { // none of this code works if the apriltags' rotations are anything other than 90 or 270 :3
         val poses : ArrayList<Pose> = arrayListOf()
 
-        // for each aptg the camera sees, find the global pose of the robot and put each pose in an array
+        // for each apriltags the camera sees, find the global pose of the robot and put each pose in an array
         for (currentDetection in aprilTagProcessor.detections) {
-            val globalPose = aprilTagData[currentDetection.id - 1].first // pose of the aptg from aprilTagData array
-            if (currentDetection.ftcPose == null) {
-                println("NULL")
-                continue
-            }
-            val range = currentDetection.ftcPose.range * 2.54 // inches converted into mm, direct dist from the center of the aptg to the camera
-            val bearing = currentDetection.ftcPose.bearing // deg, how much the robot would have to rotate to directly face the aptg
-            val yaw = currentDetection.ftcPose.yaw // deg, rotation of the tag away or towards the camera
-            val rawX = currentDetection.ftcPose.x // x val from the camera
+            if (currentDetection.rawPose != null) {
+                val globalPose = aprilTagData[currentDetection.id - 1].first // pose of the apriltags from aprilTagData array
 
-            // finding the x and y that line up with the x and y lines on the field
-            val dirX = globalPose.x + (range * sin((90 - bearing) + yaw))
-            val dirY = globalPose.y + (range * cos((90 - bearing) + yaw))
+                val range = currentDetection.ftcPose.range * 25.4 // inches converted into mm, direct dist from the center of the aptg to the camera
+                val bearing = currentDetection.ftcPose.bearing // deg, how much the robot would have to rotate to directly face the aptg
+                val yaw = currentDetection.ftcPose.yaw // deg, rotation of the tag away or towards the camera
+                val rawX = currentDetection.ftcPose.x // x val from the camera
+                // there is a diagram of these values here: https://ftc-docs.firstinspires.org/en/latest/apriltag/understanding_apriltag_detection_values/understanding-apriltag-detection-values.html
 
-            // finding global robot rotation (yaw might not be neg idk yet)
-            val robotRot = globalPose.rotation + (-yaw)
+                // finding the x and y from the apriltag to the camera that line up with the global x and y lines on the field (parallel to the walls)
+                val dirX = (range * sin(yaw))
+                val dirY = (range * cos(yaw))
 
-            // finding center of robot from cameras pos
-            val radius = ( 2.0.pow(camPosX) + 2.0.pow(camPosY) ).pow(.5)
-
-            val angle = if (robotRot >= 270)
-                (robotRot - 270) + asin(camPosX/radius)
-            else
-                robotRot + 90 + asin(camPosX/radius)
-
-            val camToMidX = if (robotRot < 180)
-                -(cos(angle) * radius)
-            else
-                cos(angle) * radius
-
-            val camToMidY = if (robotRot < 90 || robotRot > 270)
-                -(sin(angle) * radius)
-            else
-                sin(angle) * radius
-
-            // finding global y pos of the robot :(
-            val angRadX = acos(rawX/range)
-
-            val robotY = if (robotRot < 90 || robotRot > 180 && robotRot < 270) { // 1
-                if (90 - abs(yaw) > angRadX)
-                    globalPose.y - dirX + camToMidY
-                else
-                    globalPose.y + dirX + camToMidY
-
-            } else if ((robotRot > 90 && robotRot < 180) || robotRot > 270) {
-                if (90 - abs(yaw) < angRadX)
-                    globalPose.y - dirX + camToMidY
-                else
-                    globalPose.y + dirX + camToMidY
-
-            } else {
-                if (robotRot == 90.0) {
-                    if (rawX < 0)
-                        globalPose.y - dirX + camToMidY
-                    else
-                        globalPose.y + dirX + camToMidY
+                // finding global robot rotation
+                var robotRot = if (globalPose.rotation == 90.0) {
+                    if (yaw < 0) {
+                        270 + (bearing + -yaw)
+                    } else {
+                        270 + (-bearing + -yaw)
+                    }
                 } else {
-                    if (rawX > 0)
+                    if (yaw<0) {
+                        90 + (bearing + -yaw)
+                    } else {
+                        90 + (-bearing + -yaw)
+                    }
+                }
+
+                // finding pos of center of robot from the camera pos
+                val h = (2.0.pow(camPosX) + 2.0.pow(camPosY)).pow(.5)
+
+                val camToMidX = sin(robotRot)*camPosY+cos(robotRot)*camPosX
+
+                val camToMidY = (2.0.pow(h) + 2.0.pow(camToMidX)).pow(.5)
+
+                // finding global y pos of the robot
+                val angRadX = acos(rawX / range)
+
+                val robotY = if (robotRot < 90 || robotRot > 180 && robotRot < 270) { // 1
+                    if (90 - abs(yaw) > angRadX)
                         globalPose.y - dirX + camToMidY
                     else
                         globalPose.y + dirX + camToMidY
+
+                } else if ((robotRot > 90 && robotRot < 180) || robotRot > 270) {
+                    if (90 - abs(yaw) < angRadX)
+                        globalPose.y - dirX + camToMidY
+                    else
+                        globalPose.y + dirX + camToMidY
+
+                } else {
+                    if (robotRot == 90.0) {
+                        if (rawX < 0)
+                            globalPose.y - dirX + camToMidY
+                        else
+                            globalPose.y + dirX + camToMidY
+                    } else {
+                        if (rawX > 0)
+                            globalPose.y - dirX + camToMidY
+                        else
+                            globalPose.y + dirX + camToMidY
+                    }
                 }
+
+                // finding global x pos of the robot
+                val robotX = if (globalPose.rotation == 90.0)
+                    globalPose.x - dirY + camToMidX
+                else
+                    globalPose.x + dirY + camToMidX
+
+                // flipping the rotation (im not redoing all that math)
+                robotRot = -robotRot + 360
+
+                // makes pose
+                val botPose = Pose(robotX, robotY, robotRot)
+                poses.add(botPose)
             }
-
-            // finding global x pos of the robot
-            val robotX = if (globalPose.rotation == 90.0)
-                globalPose.x - dirY + camToMidX
-            else
-                globalPose.x + dirY + camToMidX
-
-            // makes pose
-            val botPose = Pose(robotX, robotY, robotRot)
-            poses.add(botPose)
         }
-
 
         var newPose = Pose()
 
+        // finds average of all the poses
         poses.forEach { pose ->
             newPose += pose
         }
         newPose /= poses.size.toDouble()
 
+        // sets the robots pose to the final pose
         robot.pose = newPose
 
         return newPose
     }
 
     fun toggleLiveView() { // saves CPU resources while off
-        if (lVon)
+        if (liveViewOn)
             visionPortal.stopLiveView()
         else
             visionPortal.resumeLiveView()
 
-        lVon = !lVon
+        liveViewOn = !liveViewOn
     }
 
     fun toggleATProcessor() { // saves more CPU resources while off
-        if (aTPon)
+        if (processorOn)
             visionPortal.setProcessorEnabled(aprilTagProcessor, false)
          else
             visionPortal.setProcessorEnabled(aprilTagProcessor, true)
 
 
-        aTPon = !aTPon
+        processorOn = !processorOn
     }
 
-    fun aprilTagLog(finalPose: Pose, telemetry: Telemetry) { // outputs id, name, xy coords, and range, bearing, yaw, calculated pose for each aptg and the final pose
+    fun aprilTagLog(finalPose: Pose, telemetry: Telemetry) { // outputs id, name, xy coords, and range, bearing, yaw, calculated pose for each apriltag and the final pose
         telemetry.addData(currentDetections.size.toString(), " apriltags detected")
 
         for (currentDetection in aprilTagProcessor.detections) {
             if (currentDetection.metadata != null) {
 
-                val cdid = currentDetection.id
-                aprilTagData[(cdid - 1)].second
+                val currentId = currentDetection.id
+                if (currentId == 4) {
 
-                telemetry.addLine("ID: $cdid Name: ${aprilTagData[(cdid - 1)].first}")
-                telemetry.addLine("Global Field Pos: ${aprilTagData[(cdid - 1)].second}")
+                    telemetry.addLine("ID: $currentId Name: ${aprilTagData[(currentId - 1)].first}")
+                    telemetry.addLine("Global Field Pos: ${aprilTagData[(currentId - 1)].second}")
 
-                telemetry.addLine("  X: ${currentDetection.ftcPose.x} Y: ${currentDetection.ftcPose.y}")
-                telemetry.addLine("  Yaw ${currentDetection.ftcPose.yaw} (deg)") // rotation of the tag away or towards the camera
-                telemetry.addLine("  Range: ${currentDetection.ftcPose.range} Bearing: ${currentDetection.ftcPose.bearing} (inch, deg)/n")
-                /* Range, direct (point-to-point) distance to the tag center
-                Bearing, the angle the camera must turn (left/right) to point directly at the tag center
-                */
+                    telemetry.addLine("  X: ${currentDetection.ftcPose.x} Y: ${currentDetection.ftcPose.y}")
+                    telemetry.addLine("  Yaw ${currentDetection.ftcPose.yaw} (deg)") // rotation of the tag away or towards the camera
+                    telemetry.addLine("  Range: ${currentDetection.ftcPose.range} Bearing: ${currentDetection.ftcPose.bearing} (inch, deg)/n")
+                    /* Range: direct distance to the tag center
+                    Bearing: the angle the camera must turn (left/right) to point directly at the tag center */
+                }
             } else {
                 telemetry.addLine("no metadata for apriltags")
             }
         }
 
         telemetry.addLine("Final Pose: $finalPose") // prints final pose from calculateRobotPos
+        telemetry.update()
     }
 
 }

@@ -5,39 +5,45 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import org.firstinspires.ftc.teamcode.utils.Robot
 import org.firstinspires.ftc.teamcode.utils.input.GamepadEx
 import org.firstinspires.ftc.teamcode.utils.vision.AprilTags
+import java.util.Arrays
 
 @TeleOp(name = "AprilTagOp")
 class AprilTagOp : LinearOpMode() {
     override fun runOpMode() {
         val robot = Robot(this)
-        val (_, gamepad2) = robot.getGamepads()
+        val (gamepad1, _) = robot.getGamepads()
         val aprilTags = AprilTags(robot, hardwareMap)
 
-        gamepad2.getButton(GamepadEx.Buttons.A).onStart{
+        gamepad1.getButton(GamepadEx.Buttons.A).onStart{
             aprilTags.aprilTagLog(aprilTags.calculateRobotPos(), telemetry)
+            println(aprilTags.aprilTagLog(aprilTags.calculateRobotPos(), telemetry))
         }
 
-        gamepad2.getButton(GamepadEx.Buttons.B).onStart{
-            telemetry.addLine("Apriltags in view: ${aprilTags.getAprilTagDetections()}")
+        gamepad1.getButton(GamepadEx.Buttons.B).onStart {
+            telemetry.addLine("Apriltags in view: ${Arrays.toString(aprilTags.getAprilTagDetections())}")
+            println("Apriltags in view: ${Arrays.toString(aprilTags.getAprilTagDetections())}")
         }
 
-        gamepad2.getButton(GamepadEx.Buttons.Y).onStart{
+        gamepad1.getButton(GamepadEx.Buttons.Y).onStart {
             aprilTags.toggleLiveView()
             telemetry.addLine("Toggled Live View")
+            println("Toggled Live View")
         }
 
-        gamepad2.getButton(GamepadEx.Buttons.X).onStart{
+        gamepad1.getButton(GamepadEx.Buttons.X).onStart {
             aprilTags.toggleATProcessor()
             telemetry.addLine("Toggled ATProcessor")
-
+            println("Toggled ATProcessor")
         }
 
 
         waitForStart()
 
         while (opModeIsActive()) {
+            robot.update()
             aprilTags.calculateRobotPos()
-            telemetry.update()
+            aprilTags.printEverything()
+
         }
     }
 }
