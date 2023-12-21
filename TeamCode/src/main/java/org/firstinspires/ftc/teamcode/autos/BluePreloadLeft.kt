@@ -90,7 +90,7 @@ class BluePreloadLeft : LinearOpMode() {
             .await(moveToBackdrop())
             .add(OnceCommand { slides.height = 400.0 }) //Raises slides
             .await(400) //Waits 400 ms
-            .add(OnceCommand { output.openRight() }) //Opens the right side of the output
+            .add(OnceCommand { output.open() }) //Opens the right side of the output
             .await(200) //Waits 200 ms
             .add(preParkCommand) //Moves to the pre-parking position
             .await(preParkCommand)
