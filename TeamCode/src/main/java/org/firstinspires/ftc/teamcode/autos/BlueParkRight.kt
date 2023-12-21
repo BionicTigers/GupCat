@@ -14,7 +14,7 @@ class BlueParkRight : LinearOpMode() {
         val robot = Robot(this)
         val drivetrain = Drivetrain(hardwareMap, robot)
         val wiggle = Pose(2761.0, 315.0, 0.0)
-        val parkPoint = Pose(329.0, 315.0, 0.0)
+        val parkPoint = Pose(5193.0, 315.0, 0.0)
 
         robot.pose = Pose(2761.0, 310.0, 0.0)
 
