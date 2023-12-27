@@ -8,12 +8,12 @@ import com.qualcomm.robotcore.hardware.Servo
 class Cables (hardwareMap: HardwareMap) {
     private val motor = hardwareMap.get(DcMotorEx::class.java, "hangMotor")
 
-    /** Runs the tape measure up at 60% power */
+    /** Runs the tape measure up at 100% power */
     fun lift() {
         motor.power = -1.0
     }
 
-    /** Runs the tape measure down at 60% power */
+    /** Runs the tape measure down at 100% power */
     fun lower() {
         motor.power = 1.0
     }

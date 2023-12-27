@@ -13,46 +13,34 @@ class Intake(hardwareMap: HardwareMap) {
     private val intakeMotor = hardwareMap.get(DcMotorEx::class.java, "intake")
     val leftServo = hardwareMap.get(Servo::class.java, "intakeLeft")
     val rightServo = hardwareMap.get(Servo::class.java, "intakeRight")
-    var leftPosition = leftServo.position
-    var rightPosition = leftServo.position
 
+    /**
+     * Runs the intake
+     */
     fun start() {
         intakeMotor.power = 0.8
     }
 
+    /**
+     * Stops the intake
+     */
     fun stop() {
         intakeMotor.power = 0.0
     }
 
+    /**
+     * Raises the intake to its storage position
+     */
     fun up() {
         leftServo.position = 1.0
         rightServo.position = 0.0
     }
 
+    /**
+     * Lowers the intake into intaking position
+     */
     fun down() {
         leftServo.position = 0.0
         rightServo.position = 1.0
     }
-
-    fun trimLeftUp() {
-        leftPosition += 0.1
-        leftServo.position = leftPosition
-    }
-
-    fun trimLeftDown() {
-        leftPosition -= 0.1
-        leftServo.position = leftPosition
-    }
-
-    fun trimRightUp() {
-        rightPosition += 0.1
-        rightServo.position = rightPosition
-    }
-
-    fun trimRightDown() {
-        rightPosition -= 0.1
-        rightServo.position = rightPosition
-    }
-
-
 }
