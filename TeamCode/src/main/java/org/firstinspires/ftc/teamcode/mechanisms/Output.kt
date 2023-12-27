@@ -13,13 +13,13 @@ class Output (hardwareMap: HardwareMap) {
      * Opens the left side of the trapdoor
      */
     fun open() {
-        claw.position = 0.0
+        claw.position = 0.8
     }
 
     /**
      * Closes both sides of the trapdoor
      */
     fun close() {
-        claw.position = 0.3
+        claw.position = 0.1
     }
 }

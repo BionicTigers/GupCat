@@ -9,8 +9,8 @@ import org.firstinspires.ftc.teamcode.utils.PID
 import org.firstinspires.ftc.teamcode.utils.PIDTerms
 
 class Slide(hardwareMap: HardwareMap) {
-    private val left = hardwareMap.get(DcMotorEx::class.java, "slideLeft")
-    private val right = hardwareMap.get(DcMotorEx::class.java, "slideRight")
+    private val left = hardwareMap.get(DcMotorEx::class.java, "slideBack")
+    private val right = hardwareMap.get(DcMotorEx::class.java, "slideFront")
     private val pid = PID(PIDTerms(), 0.0, 1000.0, -1.0, 1.0)
     private val hub = ControlHub(hardwareMap, hardwareMap.get("Control Hub") as LynxDcMotorController)
 

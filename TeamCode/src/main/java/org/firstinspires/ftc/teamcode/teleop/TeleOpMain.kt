@@ -20,9 +20,9 @@ class TeleOpMain : LinearOpMode() {
     override fun runOpMode() {
         val robot = Robot(this)
         val (gamepad1, gamepad2) = robot.getGamepads()
-        val cables = Cables(hardwareMap)
+//        val cables = Cables(hardwareMap)
         val drivetrain = Drivetrain(hardwareMap, robot)
-        val drone = Drone(hardwareMap)
+//        val drone = Drone(hardwareMap)
         val intake = Intake(hardwareMap)
         val output = Output(hardwareMap)
         val slide = Slide(hardwareMap)
@@ -50,13 +50,13 @@ class TeleOpMain : LinearOpMode() {
         }
 
         //hanging
-        gamepad1.getButton(GamepadEx.Buttons.DPAD_UP).onStart {
-            cables.lift()
-        }
-
-        gamepad1.getButton(GamepadEx.Buttons.DPAD_DOWN).onEnd {
-            cables.stop()
-        }
+//        gamepad1.getButton(GamepadEx.Buttons.DPAD_UP).onStart {
+//            cables.lift()
+//        }
+//
+//        gamepad1.getButton(GamepadEx.Buttons.DPAD_DOWN).onEnd {
+//            cables.stop()
+//        }
 
         //drivetrain
         Scheduler.add(ContinuousCommand {
@@ -65,13 +65,13 @@ class TeleOpMain : LinearOpMode() {
 
 
         //drone
-        gamepad2.getButton(GamepadEx.Buttons.DPAD_RIGHT).onStart {
-            drone.start()
-        }
-
-        gamepad2.getButton(GamepadEx.Buttons.DPAD_LEFT).onStart {
-            drone.stop()
-        }
+//        gamepad2.getButton(GamepadEx.Buttons.DPAD_RIGHT).onStart {
+//            drone.start()
+//        }
+//
+//        gamepad2.getButton(GamepadEx.Buttons.DPAD_LEFT).onStart {
+//            drone.stop()
+//        }
 
         //slide
         gamepad2.getButton(GamepadEx.Buttons.Y).onStart {
@@ -111,6 +111,7 @@ class TeleOpMain : LinearOpMode() {
 
         robot.onStart{
             robot.update()
+            slide.update()
         }
 
         Scheduler.clear()
