@@ -8,22 +8,34 @@ import org.firstinspires.ftc.teamcode.utils.ControlHub
 import org.firstinspires.ftc.teamcode.utils.PID
 import org.firstinspires.ftc.teamcode.utils.PIDTerms
 
+/**
+ * Raises and lowers arm and chainbar for more versatile scoring positions
+ */
 class Slide(hardwareMap: HardwareMap) {
-    private val left = hardwareMap.get(DcMotorEx::class.java, "slideLeft")
-    private val right = hardwareMap.get(DcMotorEx::class.java, "slideRight")
+    private val left = hardwareMap.get(DcMotorEx::class.java, "slideBack")
+    private val right = hardwareMap.get(DcMotorEx::class.java, "slideFront")
     private val pid = PID(PIDTerms(), 0.0, 1000.0, -1.0, 1.0)
     private val hub = ControlHub(hardwareMap, hardwareMap.get("Control Hub") as LynxDcMotorController)
 
+    /**
+     * Sets initial height of the slides to 0
+     */
     var height = 0.0
         set(value) {
             field = value.coerceIn(0.0, 1000.0)
         }
 
+    /**
+     * Initializes slides to make sure default settings are what is needed for proper function
+     */
     init {
-        hub.setJunkTicks()
-        right.direction = DcMotorSimple.Direction.REVERSE
+        hub.setJunkTicks() //Allows hub to ignore old encoder ticks
+        right.direction = DcMotorSimple.Direction.REVERSE //Reverses one motor to prevent conflicts
     }
 
+    /**
+     * Calculates and sets power using position and PID algorithm
+     */
     fun update() {
         hub.refreshBulkData()
         val encoderTicks = hub.getEncoderTicks(0).toDouble()

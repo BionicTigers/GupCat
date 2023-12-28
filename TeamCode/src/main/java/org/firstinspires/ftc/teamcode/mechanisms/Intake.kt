@@ -11,23 +11,35 @@ import com.qualcomm.robotcore.hardware.Servo
 class Intake(hardwareMap: HardwareMap) {
 //    private val colorSensor = hardwareMap.get(ColorSensor::class.java, "sensor")
     private val intakeMotor = hardwareMap.get(DcMotorEx::class.java, "intake")
-    private val leftServo = hardwareMap.get(Servo::class.java, "intakeLeft")
-    private val rightServo = hardwareMap.get(Servo::class.java, "intakeRight")
+    val leftServo = hardwareMap.get(Servo::class.java, "intakeLeft")
+    val rightServo = hardwareMap.get(Servo::class.java, "intakeRight")
 
+    /**
+     * Runs the intake
+     */
     fun start() {
         intakeMotor.power = 0.8
     }
 
+    /**
+     * Stops the intake
+     */
     fun stop() {
         intakeMotor.power = 0.0
     }
 
-    fun up(){
+    /**
+     * Raises the intake to its storage position
+     */
+    fun up() {
         leftServo.position = 1.0
         rightServo.position = 0.0
     }
 
-    fun down(){
+    /**
+     * Lowers the intake into intaking position
+     */
+    fun down() {
         leftServo.position = 0.0
         rightServo.position = 1.0
     }

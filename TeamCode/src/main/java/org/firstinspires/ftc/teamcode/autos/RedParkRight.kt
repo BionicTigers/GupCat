@@ -13,13 +13,13 @@ class RedParkRight : LinearOpMode() {
     override fun runOpMode() {
         val robot = Robot(this)
         val drivetrain = Drivetrain(hardwareMap, robot)
-        val wiggle = Pose(1517.0, 3435.0, 0.0)
+//        val wiggle = Pose(1517.0, 3435.0, 0.0)
         val parkPoint = Pose(304.0, 3435.0, 0.0)
-        robot.pose = Pose(1517.0, 3440.0, 0.0)
+        robot.pose = Pose(1417.0, 3440.0, 0.0)
 
         val group = CommandGroup()
-            .add(drivetrain.moveToPosition(wiggle))
-            .await(750)
+//            .add(drivetrain.moveToPosition(wiggle))
+//            .await(750)
             .add(drivetrain.moveToPosition(parkPoint))
             .build()
         Scheduler.add(group)
