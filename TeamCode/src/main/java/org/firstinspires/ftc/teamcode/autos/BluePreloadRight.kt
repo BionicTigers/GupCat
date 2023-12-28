@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.util.ElapsedTime
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName
+import org.firstinspires.ftc.teamcode.mechanisms.Chainbar
 import org.firstinspires.ftc.teamcode.mechanisms.Drivetrain
 import org.firstinspires.ftc.teamcode.mechanisms.Output
 import org.firstinspires.ftc.teamcode.mechanisms.Slide
@@ -26,6 +27,7 @@ class BluePreloadRight : LinearOpMode() {
         val drivetrain = Drivetrain(hardwareMap, robot)
         val output = Output(hardwareMap)
         val slides = Slide(hardwareMap)
+        val chainbar = Chainbar(hardwareMap)
         val openCv = OpenCv(hardwareMap.get(WebcamName::class.java, "webcam"),
             hashMapOf("blue" to Color(Scalar(239.0, 74.0, 66.0), Scalar(239.0, 74.0, 66.0), 50)))
 
@@ -89,7 +91,7 @@ class BluePreloadRight : LinearOpMode() {
             .await(moveToSpike())
             .add(moveToBackdrop()) //Moves to correct backdrop scoring position
             .await(moveToBackdrop())
-            .add(OnceCommand { slides.height = 400.0 }) //Raises slides
+            .add(OnceCommand { chainbar.up() }) //Raises slides
             .await(400) //Waits 400 ms
             .add(OnceCommand { output.open() }) //Opens the right side of the output
             .await(200) //Waits 200 ms

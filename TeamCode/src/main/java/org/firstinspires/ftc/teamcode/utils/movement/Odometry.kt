@@ -15,9 +15,9 @@ class Odometry(private val robot: Robot) {
     private val circumference: Double = odoDiameter * gearRatio * PI
 
     //All measurements are in MM
-    private val leftOffset: Double = 193.7
-    private val rightOffset: Double = 193.7
-    private val backOffset: Double = 162.0
+    private val leftOffset: Double = 170.7
+    private val rightOffset: Double = 170.7
+    private val backOffset: Double = 165.1
 
     //hubs
     private val hub = ControlHub(robot.hardwareMap, robot.hardwareMap.get("Control Hub") as LynxDcMotorController)
