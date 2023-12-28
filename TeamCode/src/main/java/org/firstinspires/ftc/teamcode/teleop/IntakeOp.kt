@@ -28,11 +28,6 @@ class IntakeOp : LinearOpMode() {
         gamepad2.getTrigger(GamepadEx.Triggers.LEFT_TRIGGER).onStart { intake.up() }
         gamepad2.getTrigger(GamepadEx.Triggers.RIGHT_TRIGGER).onStart { intake.down() }
 
-        gamepad2.getButton(GamepadEx.Buttons.DPAD_DOWN).onStart { intake.trimLeftDown() }
-        gamepad2.getButton(GamepadEx.Buttons.DPAD_UP).onStart { intake.trimLeftUp() }
-        gamepad2.getButton(GamepadEx.Buttons.DPAD_LEFT).onStart { intake.trimRightDown() }
-        gamepad2.getButton(GamepadEx.Buttons.DPAD_RIGHT).onStart { intake.trimRightUp() }
-
         telemetry.addData("Right Position: ", intake.rightServo.position)
         telemetry.addData("Left Position: ", intake.leftServo.position)
 

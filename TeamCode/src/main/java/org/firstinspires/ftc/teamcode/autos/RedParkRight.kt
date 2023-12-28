@@ -14,7 +14,7 @@ class RedParkRight : LinearOpMode() {
         val robot = Robot(this)
         val drivetrain = Drivetrain(hardwareMap, robot)
 //        val wiggle = Pose(1517.0, 3435.0, 0.0)
-        val parkPoint = Pose(400.0, 3435.0, 0.0)
+        val parkPoint = Pose(304.0, 3440.0, 0.0)
         robot.pose = Pose(1417.0, 3440.0, 0.0)
 
         val group = CommandGroup()
@@ -25,7 +25,6 @@ class RedParkRight : LinearOpMode() {
         Scheduler.add(group)
 
         robot.onStart {
-            Scheduler.update()
             robot.update()
         }
 
