@@ -166,7 +166,7 @@ class AprilTags(val robot: Robot, hardwareMap : HardwareMap) {
                 else
                     globalPose.x + dirY + camToMidX
 
-                // flipping the rotation (im not redoing all that math)
+                // flipping the rotation (im not redoing all that math <3)
                 robotRot = -robotRot + 360
 
                 // makes pose
