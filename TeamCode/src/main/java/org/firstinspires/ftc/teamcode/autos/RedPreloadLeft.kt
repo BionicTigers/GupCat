@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.autos
 
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.util.ElapsedTime
@@ -19,7 +20,7 @@ import org.firstinspires.ftc.teamcode.utils.command.OnceCommand
 import org.firstinspires.ftc.teamcode.utils.command.Scheduler
 import org.opencv.core.Scalar
 
-@TeleOp(name = "RedPreloadLeft")
+@Autonomous(name = "RedPreloadLeft")
 class RedPreloadLeft : LinearOpMode() {
     override fun runOpMode() {
         //Object declarations
@@ -28,7 +29,7 @@ class RedPreloadLeft : LinearOpMode() {
         val output = Output(hardwareMap)
         val slides = Slide(hardwareMap)
         val chainbar = Chainbar(hardwareMap)
-        val openCv = OpenCv(hardwareMap.get(WebcamName::class.java, "webcam"),
+        val openCv = OpenCv(hardwareMap.get(WebcamName::class.java, "Webcam 1"),
             hashMapOf("red" to Color(Scalar(0.0, 255.0, 255.0), Scalar(0.0, 255.0, 255.0), 50)))
 
         //Sets the robot's starting position
