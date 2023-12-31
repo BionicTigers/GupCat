@@ -23,7 +23,7 @@ class TeleOpMain : LinearOpMode() {
     override fun runOpMode() {
         val robot = Robot(this)
         val (gamepad1, gamepad2) = robot.getGamepads()
-//        val cables = Cables(hardwareMap)
+        val cables = Cables(hardwareMap)
         val drivetrain = Drivetrain(hardwareMap, robot)
 //        val drone = Drone(hardwareMap)
         val intake = Intake(hardwareMap)
@@ -57,14 +57,20 @@ class TeleOpMain : LinearOpMode() {
         }
 
         //hanging
-        //When the up button on GP1 is pressed, the hanging mechanism runs
-//        gamepad1.getButton(GamepadEx.Buttons.DPAD_UP).onStart {
-//            cables.lift()
-//        }
-//        //When the down button on GP1 is pressed, the hanging mechanism stops moving
-//        gamepad1.getButton(GamepadEx.Buttons.DPAD_DOWN).onStart {
-//            cables.stop()
-//        }
+        //When the down button on GP1 is pressed, the hanging pulls down on the bar
+        gamepad1.getButton(GamepadEx.Buttons.DPAD_DOWN).onStart {
+            cables.pull()
+        }
+
+        //When the up button on GP1 is pressed, the hanging mechanism raises up
+        gamepad1.getButton(GamepadEx.Buttons.DPAD_UP).onStart {
+            cables.raise()
+        }
+
+        //When the A (X) button on GP1 is pressed, the hanging mechanism stops
+        gamepad1.getButton(GamepadEx.Buttons.A).onStart {
+            cables.stop()
+        }
 
         //drivetrain
         //Uses current joystick positions to determine the correct motor powers

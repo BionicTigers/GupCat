@@ -38,7 +38,7 @@ class Slide(hardwareMap: HardwareMap) {
      */
     fun update() {
         hub.refreshBulkData()
-        val encoderTicks = hub.getEncoderTicks(0).toDouble()
+        val encoderTicks = hub.getEncoderTicks(2).toDouble()
         val power = pid.calculate(height, encoderTicks)
         left.power = power
         right.power = -power
