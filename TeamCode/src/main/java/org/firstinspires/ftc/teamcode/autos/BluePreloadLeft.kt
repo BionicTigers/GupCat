@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.autos
 
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.util.ElapsedTime
@@ -19,7 +20,7 @@ import org.firstinspires.ftc.teamcode.utils.command.OnceCommand
 import org.firstinspires.ftc.teamcode.utils.command.Scheduler
 import org.opencv.core.Scalar
 
-@TeleOp(name = "BluePreloadLeft")
+@Autonomous(name = "BluePreloadLeft")
 class BluePreloadLeft : LinearOpMode() {
     override fun runOpMode() {
         //Object declarations

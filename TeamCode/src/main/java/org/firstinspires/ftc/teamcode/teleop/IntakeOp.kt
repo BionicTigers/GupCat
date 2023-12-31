@@ -25,6 +25,14 @@ class IntakeOp : LinearOpMode() {
             intake.stop()
         }
 
+        gamepad2.getButton(GamepadEx.Buttons.Y).onStart {
+            intake.startSlow()
+        }
+
+        gamepad2.getButton(GamepadEx.Buttons.X).onStart {
+            intake.preloadPos()
+        }
+
         gamepad2.getTrigger(GamepadEx.Triggers.LEFT_TRIGGER).onStart { intake.up() }
         gamepad2.getTrigger(GamepadEx.Triggers.RIGHT_TRIGGER).onStart { intake.down() }
 

@@ -72,13 +72,12 @@ class TeleOpMain : LinearOpMode() {
             drivetrain.robotDMP(leftJoystick.state!!, -rightJoystick.state!!.x)
         })
 
-
         //drone
         //When the right button on GP2 is pressed, the drone flywheel runs
 //        gamepad2.getButton(GamepadEx.Buttons.DPAD_RIGHT).onStart {
 //            drone.start()
 //        }
-        //When the left button on GP2 is pressed, the flywheel stops
+//        When the left button on GP2 is pressed, the flywheel stops
 //        gamepad2.getButton(GamepadEx.Buttons.DPAD_LEFT).onStart {
 //            drone.stop()
 //        }
@@ -93,6 +92,8 @@ class TeleOpMain : LinearOpMode() {
         gamepad2.getButton(GamepadEx.Buttons.X).onStart {
             slide.height -= 500 * Scheduler.deltaTime
         }
+
+        Scheduler.add(ContinuousCommand({ slide.update() }))
 
         //output
         //When the up button on GP1 is pressed, the claw opens
@@ -129,7 +130,7 @@ class TeleOpMain : LinearOpMode() {
 
         robot.onStart{
             robot.update() //Updates position telemetry and gamepads
-            slide.update() //Runs slides to current target position
+//            slide.update() //Runs slides to current target position
         }
 
         Scheduler.clear() //Clears all commands from the scheduler to allow a new OpMode to run

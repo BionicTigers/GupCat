@@ -14,8 +14,8 @@ class RedParkRight : LinearOpMode() {
         val robot = Robot(this)
         val drivetrain = Drivetrain(hardwareMap, robot)
 //        val wiggle = Pose(1517.0, 3435.0, 0.0)
-        val parkPoint = Pose(304.0, 3440.0, 0.0)
-        robot.pose = Pose(1417.0, 3440.0, 0.0)
+        val parkPoint = Pose(2890.0, 315.0, 0.0)
+        robot.pose = Pose(2082.0, 310.0, 0.0)
 
         val group = CommandGroup()
 //            .add(drivetrain.moveToPosition(wiggle))

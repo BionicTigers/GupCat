@@ -107,7 +107,7 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
             )
 
             val magnitude = error.extractPosition().magnitude()
-            val heading = atan2(-error.x, -error.y)
+            val heading = atan2(error.x, -error.y) //val heading = atan2(-error.x, -error.y)
 
             val x = cos(heading)
             val y = sin(heading)

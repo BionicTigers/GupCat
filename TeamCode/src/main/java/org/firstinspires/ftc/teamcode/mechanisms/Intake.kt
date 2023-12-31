@@ -43,4 +43,19 @@ class Intake(hardwareMap: HardwareMap) {
         leftServo.position = 0.0
         rightServo.position = 1.0
     }
+
+    /**
+     * Runs the intake very slowly for placing the preload in auto
+     */
+    fun startSlow() {
+        intakeMotor.power = -0.6
+    }
+
+    /**
+     * Lowers the intake so you can place a preload
+     */
+    fun preloadPos() {
+        leftServo.position = 0.5
+        rightServo.position = 0.5
+    }
 }
