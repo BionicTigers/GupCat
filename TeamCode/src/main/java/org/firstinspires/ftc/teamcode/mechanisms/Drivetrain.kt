@@ -99,37 +99,28 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
         val yPid = PID(PIDTerms(1.0), 0.0, 3657.6, -1000.0, 1000.0)
         val rPid = PID(PIDTerms(1.0), -360.0, 360.0, -360.0, 360.0)
 
-        return ConditionalCommand( {
+        return ConditionalCommand({
+            val setPowers: HashMap<String, Double> = HashMap(4)
+
             val error = Pose(
                 xPid.calculate(target.x, robot.pose.x),
                 yPid.calculate(target.y, robot.pose.y),
                 rPid.calculate(target.rotation, robot.pose.rotation),
             )
 
-            val magnitude = error.extractPosition().magnitude()
-            val heading = atan2(error.x, -error.y) //val heading = atan2(-error.x, -error.y)
+            val heading = atan2(error.x, -error.y)
+            val angleError = error.radians
+            val y = cos(heading)
+            val x = sin(heading)
 
-            val x = cos(heading)
-            val y = sin(heading)
-
+            val angle = atan2(y, x)
             val power = hypot(x, y)
-            val angle = atan2(x, y)
+            val angleVector = Vector2(sin(angle), cos(angle))
 
-            println(error.rotation)
-            println(error.radians)
-
-            val angleSin = sin(angle)
-            val angleCos = cos(angle)
-
-            val setPowers: HashMap<String, Double> = HashMap(4)
-
-            val rot = -(target.radians - robot.pose.radians)
-            println(rot)
-
-            setPowers["frontLeft"] = power * angleSin - power * angleCos + rot
-            setPowers["frontRight"] = power * angleSin + power * angleCos - rot
-            setPowers["backLeft"] = power * angleSin + power * angleCos + rot
-            setPowers["backRight"] = power * angleSin - power * angleCos - rot
+            setPowers["frontLeft"] = power * (angleVector.x - angleVector.y) - angleError
+            setPowers["frontRight"] = power * (angleVector.x + angleVector.y) + angleError
+            setPowers["backLeft"] = power * (angleVector.x + angleVector.y) - angleError
+            setPowers["backRight"] = power * (angleVector.x - angleVector.y) + angleError
 
             var highest = 0.0
             setPowers.forEach { (_, value) -> highest = if (highest < abs(value)) abs(value) else highest }
