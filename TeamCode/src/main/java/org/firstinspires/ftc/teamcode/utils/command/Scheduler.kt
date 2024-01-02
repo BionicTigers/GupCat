@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.util.ElapsedTime
  */
 object Scheduler : OpModeManagerNotifier.Notifications {
     private val schedule: ArrayList<Command?> = ArrayList()
-    private val elapsedTime = ElapsedTime(ElapsedTime.Resolution.MILLISECONDS)
+    private val elapsedTime = ElapsedTime()
     var deltaTime = 0.0
         internal set
 

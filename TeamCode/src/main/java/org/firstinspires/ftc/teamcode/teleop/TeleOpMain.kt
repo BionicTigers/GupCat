@@ -90,13 +90,17 @@ class TeleOpMain : LinearOpMode() {
 
         //slide
         //When the Y button is pressed on GP2, the target height of the slides is raised by 500
-        gamepad2.getButton(GamepadEx.Buttons.Y).onStart {
-            slide.height += 500 * Scheduler.deltaTime
+        gamepad2.getButton(GamepadEx.Buttons.Y).onHold {
+            println(slide.height)
+            println(Scheduler.deltaTime)
+            slide.height += 250 * Scheduler.deltaTime
+            arm.up()
         }
 
         //When the X button is pressed on GP2, the target height of the slides is lowered by 500
-        gamepad2.getButton(GamepadEx.Buttons.X).onStart {
-            slide.height -= 500 * Scheduler.deltaTime
+        gamepad2.getButton(GamepadEx.Buttons.X).onHold {
+            arm.down()
+            slide.height -= 250 * Scheduler.deltaTime
         }
 
         Scheduler.add(ContinuousCommand({ slide.update() }))
@@ -140,6 +144,4 @@ class TeleOpMain : LinearOpMode() {
         }
 
         Scheduler.clear() //Clears all commands from the scheduler to allow a new OpMode to run
-
-
 }}
