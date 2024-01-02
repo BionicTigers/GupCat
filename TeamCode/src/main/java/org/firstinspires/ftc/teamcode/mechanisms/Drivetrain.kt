@@ -108,19 +108,19 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
                 rPid.calculate(target.rotation, robot.pose.rotation),
             )
 
+            val unit = Vector2(cos(robot.pose.radians), sin(robot.pose.radians))
             val heading = atan2(error.x, -error.y)
-            val angleError = error.radians
+            val angleError = Math.toRadians(robot.pose.rotation - target.rotation)
             val y = cos(heading)
             val x = sin(heading)
 
-            val angle = atan2(y, x)
             val power = hypot(x, y)
-            val angleVector = Vector2(sin(angle), cos(angle))
+            val angleVector = Vector2(x * sin(robot.pose.radians) + y * cos(robot.pose.radians), x * cos(robot.pose.radians) - y * sin(robot.pose.radians))
 
-            setPowers["frontLeft"] = power * (angleVector.x - angleVector.y) - angleError
-            setPowers["frontRight"] = power * (angleVector.x + angleVector.y) + angleError
-            setPowers["backLeft"] = power * (angleVector.x + angleVector.y) - angleError
-            setPowers["backRight"] = power * (angleVector.x - angleVector.y) + angleError
+            setPowers["frontLeft"] = power * (angleVector.x - angleVector.y) + angleError
+            setPowers["frontRight"] = power * (angleVector.x + angleVector.y) - angleError
+            setPowers["backLeft"] = power * (angleVector.x + angleVector.y) + angleError
+            setPowers["backRight"] = power * (angleVector.x - angleVector.y) - angleError
 
             var highest = 0.0
             setPowers.forEach { (_, value) -> highest = if (highest < abs(value)) abs(value) else highest }

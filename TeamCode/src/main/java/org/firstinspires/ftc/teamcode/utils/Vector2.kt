@@ -20,4 +20,8 @@ data class Vector2(val x: Double, val y: Double) {
     operator fun minus(other: Vector2): Vector2 {
         return Vector2(this.x - other.x, this.y - other.y)
     }
+
+    operator fun times(other: Vector2): Vector2 {
+        return Vector2(this.x * other.x, this.y * other.y)
+    }
 }
