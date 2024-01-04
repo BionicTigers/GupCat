@@ -37,22 +37,22 @@ class TeleOpMain : LinearOpMode() {
 
         //intake
         //When the up button on GP2 is pressed, the intake starts
-        gamepad2.getButton(GamepadEx.Buttons.DPAD_UP).onStart {
+        gamepad2.getButton(GamepadEx.Buttons.DPAD_RIGHT).onStart {
             intake.start()
         }
 
         //When the down button on GP2 is pressed, the intake stops
-        gamepad2.getButton(GamepadEx.Buttons.DPAD_DOWN).onStart {
+        gamepad2.getButton(GamepadEx.Buttons.DPAD_LEFT).onStart {
             intake.stop()
         }
 
         //When the left trigger on GP2 is pressed, the intake is raised
-        gamepad2.getTrigger(GamepadEx.Triggers.LEFT_TRIGGER).onStart {
+        gamepad2.getButton(GamepadEx.Buttons.DPAD_UP).onStart {
             intake.up()
         }
 
         //When the right trigger on GP2 is pressed, the intake is lowered
-        gamepad2.getTrigger(GamepadEx.Triggers.RIGHT_TRIGGER).onStart {
+        gamepad2.getButton(GamepadEx.Buttons.DPAD_DOWN).onStart {
             intake.down()
         }
 
@@ -94,7 +94,7 @@ class TeleOpMain : LinearOpMode() {
             println(slide.height)
             println(Scheduler.deltaTime)
             slide.height += 250 * Scheduler.deltaTime
-            arm.up()
+//            arm.up()
         }
 
         //When the X button is pressed on GP2, the target height of the slides is lowered by 500
@@ -118,12 +118,12 @@ class TeleOpMain : LinearOpMode() {
 
         //chainbar
         //When the A button on GP2 is pressed, the chainbar raises
-        gamepad2.getButton(GamepadEx.Buttons.A).onStart {
+        gamepad2.getTrigger(GamepadEx.Triggers.LEFT_TRIGGER).onStart {
             chainbar.up()
         }
 
         //When the B button on GP2 is pressed, the chainbar lowers
-        gamepad2.getButton(GamepadEx.Buttons.B).onStart {
+        gamepad2.getTrigger(GamepadEx.Triggers.RIGHT_TRIGGER).onStart {
             chainbar.down()
         }
 

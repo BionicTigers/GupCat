@@ -14,7 +14,7 @@ class CablesOp : LinearOpMode() {
         val cables = Cables(hardwareMap)
 
         gamepad1.getButton(GamepadEx.Buttons.DPAD_UP).onStart {
-            cables.lift()
+            cables.raise()
         }
 
         gamepad1.getButton(GamepadEx.Buttons.DPAD_UP).onEnd {
@@ -22,7 +22,7 @@ class CablesOp : LinearOpMode() {
         }
 
         gamepad1.getButton(GamepadEx.Buttons.DPAD_DOWN).onStart {
-            cables.lower()
+            cables.pull()
         }
 
         gamepad1.getButton(GamepadEx.Buttons.DPAD_DOWN).onEnd {

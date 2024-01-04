@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.teleop
 
+import com.acmerobotics.dashboard.FtcDashboard
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import org.firstinspires.ftc.robotcore.external.Telemetry
@@ -14,6 +15,7 @@ import org.firstinspires.ftc.teamcode.utils.input.GamepadEx
 
 class SlideOp : LinearOpMode() {
     override fun runOpMode() {
+        val dashboard = FtcDashboard.getInstance()
         val robot = Robot(this)
         val (gamepad1, _) = robot.getGamepads()
         val slide = Slide(hardwareMap)
@@ -29,14 +31,11 @@ class SlideOp : LinearOpMode() {
 
         Scheduler.add(ContinuousCommand { slide.update() })
 
-        telemetry.clearAll()
-
         waitForStart()
 
         while (opModeIsActive()) {
-            telemetry.addData("Position: ", slide.right.currentPosition)
             robot.update()
-            telemetry.update()
+
         }
 
         Scheduler.clear()

@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.mechanisms
 
+import com.acmerobotics.dashboard.FtcDashboard
 import com.qualcomm.hardware.lynx.LynxDcMotorController
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
@@ -17,6 +18,8 @@ class Slide(hardwareMap: HardwareMap) {
     val right = hardwareMap.get(DcMotorEx::class.java, "slideFront")
     private val pid = PID(PIDTerms(), 0.0, 1000.0, -1.0, 1.0)
     private val hub = ControlHub(hardwareMap, hardwareMap.get("Control Hub") as LynxDcMotorController)
+    private val dashboard = FtcDashboard.getInstance()
+    private val dashTelemetry = dashboard.telemetry
 
     /**
      * Sets initial height of the slides to 0
@@ -43,7 +46,12 @@ class Slide(hardwareMap: HardwareMap) {
         hub.refreshBulkData()
         val encoderTicks = hub.getEncoderTicks(2).toDouble()
         val power = pid.calculate(height, encoderTicks)
+
+
         left.power = power
         right.power = power
+        dashTelemetry.addData("pv", encoderTicks)
+        dashTelemetry.addData("sp", height)
+        dashTelemetry.update()
     }
 }
