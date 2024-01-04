@@ -13,9 +13,10 @@ class BlueParkLeft : LinearOpMode() {
     override fun runOpMode() {
         val robot = Robot(this)
         val drivetrain = Drivetrain(hardwareMap, robot)
-        val parkPoint = Pose(2890.0, 3347.0, 180.0)
-
         robot.pose = Pose(2082.0, 3347.0, 180.0)
+
+
+        val parkPoint = Pose(3000.0, 3347.0, 180.0)
 
         val group = CommandGroup()
             .add(drivetrain.moveToPosition(parkPoint))
