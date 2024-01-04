@@ -94,7 +94,7 @@ class TeleOpMain : LinearOpMode() {
             println(slide.height)
             println(Scheduler.deltaTime)
             slide.height += 250 * Scheduler.deltaTime
-            arm.up()
+//            arm.up()
         }
 
         //When the X button is pressed on GP2, the target height of the slides is lowered by 500

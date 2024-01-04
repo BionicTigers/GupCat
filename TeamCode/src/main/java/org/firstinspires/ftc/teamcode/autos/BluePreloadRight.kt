@@ -23,7 +23,7 @@ import org.opencv.core.Scalar
 @Autonomous(name = "BluePreloadRight")
 class BluePreloadRight : LinearOpMode() {
     override fun runOpMode() {
-        // Object declarations 
+        // Object declarations
         val robot = Robot(this)
         val drivetrain = Drivetrain(hardwareMap, robot)
         val output = Output(hardwareMap)
@@ -32,7 +32,7 @@ class BluePreloadRight : LinearOpMode() {
         val openCv = OpenCv(hardwareMap.get(WebcamName::class.java, "webcam"),
             hashMapOf("blue" to Color(Scalar(239.0, 74.0, 66.0), Scalar(239.0, 74.0, 66.0), 50)))
 
-        // Sets the robot's starting position 
+        // Sets the robot's starting position
         robot.pose = Pose(2761.0, 310.0, 0.0)
 
         // Creates potential scoring positions for the purple pixel on the spike marks
@@ -45,7 +45,7 @@ class BluePreloadRight : LinearOpMode() {
         val middleBackdropScore = Pose(750.0, 1261.0, -90.0)
         val rightBackdropScore = Pose(750.0, 1450.0, -90.0)
 
-        // Positions between backdrop scoring and parking 
+        // Positions between backdrop scoring and parking
         val prePark = Pose(750.0, 310.0, -90.0)
         val park = Pose(329.0, 310.0, -90.0)
 

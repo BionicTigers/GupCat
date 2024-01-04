@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.mechanisms
 
 import com.qualcomm.robotcore.hardware.ColorSensor
 import com.qualcomm.robotcore.hardware.DcMotorEx
+import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.HardwareMap
 import com.qualcomm.robotcore.hardware.Servo
 
@@ -14,11 +15,12 @@ class Intake(hardwareMap: HardwareMap) {
     val leftServo = hardwareMap.get(Servo::class.java, "intakeLeft")
     val rightServo = hardwareMap.get(Servo::class.java, "intakeRight")
 
+
     /**
      * Runs the intake
      */
     fun start() {
-        intakeMotor.power = 0.8
+        intakeMotor.power = -0.8
     }
 
     /**

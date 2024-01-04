@@ -33,6 +33,11 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
         "backRight" to hardwareMap.get(DcMotorEx::class.java, "backRight")
     )
 
+    private val fl = .87
+    private val fr = 1.0
+    private val bl = .87
+    private val br = .82
+
     private var velocity = 0.0
 
     init {
@@ -54,10 +59,10 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
         //Finds the ratio to scale the motor powers to
         val ratio: Double = max(abs(pos.x) + abs(pos.y) + abs(turn), 1.0)
 
-        setPowers["frontLeft"] = velocity * (pos.y - pos.x + turn)
-        setPowers["frontRight"] = velocity * (pos.y + pos.x - turn)
-        setPowers["backLeft"] = velocity * (pos.y + pos.x + turn)
-        setPowers["backRight"] = velocity * (pos.y - pos.x - turn)
+        setPowers["frontLeft"] = (velocity * (pos.y - pos.x + turn)) * fl
+        setPowers["frontRight"] = (velocity * (pos.y + pos.x - turn)) * fr
+        setPowers["backLeft"] = (velocity * (pos.y + pos.x + turn)) * bl
+        setPowers["backRight"] = (velocity * (pos.y - pos.x - turn)) * br
 
         //Set motor powers scaled to the ratio
         setPowers.forEach { (name, value) -> motors[name]!!.power = (value / ratio) }
@@ -81,10 +86,10 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
         //Finds the ratio to scale the motor powers to
         val ratio: Double = max(abs(angleX) + abs(angleY) + abs(turn), 1.0)
 
-        setPowers["frontLeft"] = mod * (angleY - angleX + turn)
-        setPowers["frontRight"] = mod * (angleY + angleX - turn)
-        setPowers["backLeft"] = mod * (angleY + angleX + turn)
-        setPowers["backRight"] = mod * (angleY - angleX - turn)
+        setPowers["frontLeft"] = (mod * (angleY - angleX + turn) ) * fl
+        setPowers["frontRight"] = (mod * (angleY + angleX - turn) ) * fr
+        setPowers["backLeft"] = (mod * (angleY + angleX + turn) ) * bl
+        setPowers["backRight"] = (mod * (angleY - angleX - turn) ) * br
 
         //Set motor powers scaled to the ratio
         setPowers.forEach { (name, value) -> motors[name]!!.power = (value / ratio) }
@@ -117,10 +122,10 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
             val power = hypot(x, y)
             val angleVector = Vector2(x * sin(robot.pose.radians) + y * cos(robot.pose.radians), x * cos(robot.pose.radians) - y * sin(robot.pose.radians))
 
-            setPowers["frontLeft"] = power * (angleVector.x - angleVector.y) + angleError
-            setPowers["frontRight"] = power * (angleVector.x + angleVector.y) - angleError
-            setPowers["backLeft"] = power * (angleVector.x + angleVector.y) + angleError
-            setPowers["backRight"] = power * (angleVector.x - angleVector.y) - angleError
+            setPowers["frontLeft"] = (power * (angleVector.x - angleVector.y) + angleError) * fl
+            setPowers["frontRight"] = (power * (angleVector.x + angleVector.y) - angleError) * fr
+            setPowers["backLeft"] = (power * (angleVector.x + angleVector.y) + angleError) * bl
+            setPowers["backRight"] = (power * (angleVector.x - angleVector.y) - angleError) * br
 
             var highest = 0.0
             setPowers.forEach { (_, value) -> highest = if (highest < abs(value)) abs(value) else highest }
@@ -148,19 +153,19 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
         })
     }
     fun driveFrontLeft(){
-        motors["frontLeft"]?.power = 1.0
+        motors["frontLeft"]?.power = 1.0 * fl
     }
 
     fun driveFrontRight(){
-        motors["frontRight"]?.power = 1.0
+        motors["frontRight"]?.power = 1.0 * fr
     }
 
     fun driveBackLeft(){
-        motors["backLeft"]?.power = 1.0
+        motors["backLeft"]?.power = 1.0 * bl
     }
 
     fun driveBackRight(){
-        motors["backRight"]?.power = 1.0
+        motors["backRight"]?.power = 1.0 * br
     }
 
     fun stop() {
