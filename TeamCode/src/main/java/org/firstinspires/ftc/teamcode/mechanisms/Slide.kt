@@ -6,9 +6,13 @@ import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.HardwareMap
+import com.qualcomm.robotcore.util.ElapsedTime
 import org.firstinspires.ftc.teamcode.utils.ControlHub
+import org.firstinspires.ftc.teamcode.utils.MotionResult
 import org.firstinspires.ftc.teamcode.utils.PID
 import org.firstinspires.ftc.teamcode.utils.PIDTerms
+import org.firstinspires.ftc.teamcode.utils.generateMotionProfile
+import kotlin.math.floor
 
 /**
  * Raises and lowers arm and chainbar for more versatile scoring positions
@@ -21,12 +25,17 @@ class Slide(hardwareMap: HardwareMap) {
     private val dashboard = FtcDashboard.getInstance()
     private val dashTelemetry = dashboard.telemetry
 
+//    private lateinit var profile: MotionResult
+    private lateinit var elapsedTime: ElapsedTime
+
     /**
      * Sets initial height of the slides to 0
      */
     var height = 0.0
         set(value) {
-            field = value.coerceIn(0.0, 1560.0)
+            field = value.coerceIn(0.0, 1450.0)
+//            profile = generateMotionProfile(field, 8.5, 8.5, 20.0)
+            elapsedTime = ElapsedTime()
         }
 
     /**
@@ -37,6 +46,7 @@ class Slide(hardwareMap: HardwareMap) {
         right.direction = DcMotorSimple.Direction.REVERSE //Reverses one motor to prevent conflicts
         right.mode = DcMotor.RunMode.RUN_USING_ENCODER
         left.mode = DcMotor.RunMode.RUN_USING_ENCODER
+        height = 0.0
     }
 
     /**
@@ -45,8 +55,10 @@ class Slide(hardwareMap: HardwareMap) {
     fun update() {
         hub.refreshBulkData()
         val encoderTicks = hub.getEncoderTicks(2).toDouble()
-        val power = pid.calculate(height, encoderTicks)
-
+//        val targetHeight = profile.position.getOrElse(floor(elapsedTime.seconds() / profile.deltaTime).toInt()) { height }
+        var power = pid.calculate(height, encoderTicks)
+        if (encoderTicks > 50)
+            power += .15
 
         left.power = power
         right.power = power

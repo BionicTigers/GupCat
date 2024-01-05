@@ -71,6 +71,7 @@ class TeleOpMain : LinearOpMode() {
         gamepad1.getButton(GamepadEx.Buttons.A).onStart {
             cables.stop()
         }
+        Scheduler.add(ContinuousCommand{ telemetry.addData("enc", (cables.hub.getEncoderTicks(0))); telemetry.update() })
 
         //drivetrain
         //Uses current joystick positions to determine the correct motor powers
@@ -103,7 +104,7 @@ class TeleOpMain : LinearOpMode() {
             slide.height -= 250 * Scheduler.deltaTime
         }
 
-        Scheduler.add(ContinuousCommand({ slide.update() }))
+        Scheduler.add(ContinuousCommand { slide.update() })
 
         //output
         //When the up button on GP1 is pressed, the claw opens
@@ -137,6 +138,11 @@ class TeleOpMain : LinearOpMode() {
         gamepad2.getButton(GamepadEx.Buttons.RIGHT_BUMPER).onStart {
             arm.down()
         }
+
+        waitForStart()
+
+        chainbar.up()
+        arm.down()
 
         robot.onStart{
             robot.update() //Updates position telemetry and gamepads

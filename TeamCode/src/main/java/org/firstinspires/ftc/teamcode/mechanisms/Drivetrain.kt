@@ -12,6 +12,7 @@ import org.firstinspires.ftc.teamcode.utils.Vector2
 import org.firstinspires.ftc.teamcode.utils.command.ConditionalCommand
 import org.firstinspires.ftc.teamcode.utils.command.ContinuousCommand
 import org.firstinspires.ftc.teamcode.utils.command.Scheduler
+import org.firstinspires.ftc.teamcode.utils.generateMotionProfile
 import org.firstinspires.ftc.teamcode.utils.input.GamepadEx
 import kotlin.math.PI
 import kotlin.math.abs
@@ -103,6 +104,8 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
         val xPid = PID(PIDTerms(1.0), 0.0, 3657.6, -1000.0, 1000.0)
         val yPid = PID(PIDTerms(1.0), 0.0, 3657.6, -1000.0, 1000.0)
         val rPid = PID(PIDTerms(1.0), -360.0, 360.0, -360.0, 360.0)
+
+//        val xProfile = generateMotionProfile(target.x, )
 
         return ConditionalCommand({
             val setPowers: HashMap<String, Double> = HashMap(4)

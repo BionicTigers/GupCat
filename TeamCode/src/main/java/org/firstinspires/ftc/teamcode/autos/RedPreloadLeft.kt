@@ -18,6 +18,7 @@ import org.firstinspires.ftc.teamcode.utils.command.ConditionalCommand
 import org.firstinspires.ftc.teamcode.utils.command.ContinuousCommand
 import org.firstinspires.ftc.teamcode.utils.command.OnceCommand
 import org.firstinspires.ftc.teamcode.utils.command.Scheduler
+import org.firstinspires.ftc.teamcode.utils.vision.VisionConstants
 import org.opencv.core.Scalar
 
 @Autonomous(name = "RedPreloadLeft")
@@ -30,14 +31,14 @@ class RedPreloadLeft : LinearOpMode() {
         val slides = Slide(hardwareMap)
         val chainbar = Chainbar(hardwareMap)
         val openCv = OpenCv(hardwareMap.get(WebcamName::class.java, "Webcam 1"),
-            hashMapOf("red" to Color(Scalar(0.0, 255.0, 255.0), Scalar(0.0, 255.0, 255.0), 50)))
+            hashMapOf("Red" to VisionConstants.RED))
 
         //Sets the robot's starting position
-        robot.pose = Pose(1505.0, 3352.0, 0.0)
+        robot.pose = Pose(920.0, 3371.0, 0.0)
 
         //Creates potential scoring positions for the purple pixel on the spike marks
         val leftSpikeScore = Pose(3054.0, 2816.0, 0.0)
-        val middleSpikeScore = Pose(2737.0, 2706.0, 0.0)
+        val middleSpikeScore = Pose(926.0, 2706.0, 0.0)
         val rightSpikeScore = Pose(2450.0, 2816.0, 0.0)
 
         //Creates potential scoring positions for the purple pixel on the backdrop
