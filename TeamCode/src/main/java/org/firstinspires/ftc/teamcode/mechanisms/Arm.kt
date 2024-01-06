@@ -20,6 +20,6 @@ class Arm(hardwareMap: HardwareMap) {
      * Lowers the arm into scoring position
      */
     fun down() {
-        arm.position = 0.5
+        arm.position = 1.0
     }
 }

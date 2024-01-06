@@ -15,7 +15,7 @@ class Cables (hardwareMap: HardwareMap) {
 
     init {
         motor.mode = DcMotor.RunMode.RUN_USING_ENCODER
-        motor.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.FLOAT
+//        motor.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.FLOAT
         hub.setJunkTicks()
     }
 
