@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.autos
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.util.ElapsedTime
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName
 import org.firstinspires.ftc.teamcode.mechanisms.Chainbar
@@ -10,7 +9,6 @@ import org.firstinspires.ftc.teamcode.mechanisms.Drivetrain
 import org.firstinspires.ftc.teamcode.mechanisms.Output
 import org.firstinspires.ftc.teamcode.mechanisms.Slide
 import org.firstinspires.ftc.teamcode.utils.Robot
-import org.firstinspires.ftc.teamcode.utils.vision.Color
 import org.firstinspires.ftc.teamcode.utils.vision.OpenCv
 import org.firstinspires.ftc.teamcode.utils.Pose
 import org.firstinspires.ftc.teamcode.utils.command.CommandGroup
@@ -18,7 +16,7 @@ import org.firstinspires.ftc.teamcode.utils.command.ConditionalCommand
 import org.firstinspires.ftc.teamcode.utils.command.ContinuousCommand
 import org.firstinspires.ftc.teamcode.utils.command.OnceCommand
 import org.firstinspires.ftc.teamcode.utils.command.Scheduler
-import org.opencv.core.Scalar
+import org.firstinspires.ftc.teamcode.utils.vision.VisionConstants
 
 @Autonomous(name = "BluePreloadLeft")
 class BluePreloadLeft : LinearOpMode() {
@@ -30,24 +28,24 @@ class BluePreloadLeft : LinearOpMode() {
         val slides = Slide(hardwareMap)
         val chainbar = Chainbar(hardwareMap)
         val openCv = OpenCv(hardwareMap.get(WebcamName::class.java, "webcam"),
-            hashMapOf("blue" to Color(Scalar(239.0, 74.0, 66.0), Scalar(239.0, 74.0, 66.0), 50)))
+            hashMapOf("Blue" to VisionConstants.BLUE))
 
         //Sets the robot's starting position
-        robot.pose = Pose(2773.0, 310.0, 0.0)
+        robot.pose = Pose(2773.0, 310.0, 180.0)
 
         //Creates potential scoring positions for the purple pixel on the spike marks
-        val leftSpikeScore = Pose(2986.0, 780.0, 0.0)
-        val middleSpikeScore = Pose(2773.0, 902.0, 0.0)
-        val rightSpikeScore = Pose(2560.0, 780.0, 0.0)
+        val leftSpikeScore = Pose(2986.0, 780.0, 180.0)
+        val middleSpikeScore = Pose(2773.0, 902.0, 180.0)
+        val rightSpikeScore = Pose(2560.0, 780.0, 180.0)
 
         //Creates potential scoring positions for the yellow pixel on the backdrop
-        val leftBackdropScore = Pose(4499.0, 731.0, -90.0)
-        val middleBackdropScore = Pose(4499.0, 908.0, -90.0)
-        val rightBackdropScore = Pose(4499.0, 1060.0, -90.0)
+        val leftBackdropScore = Pose(4499.0, 731.0, 90.0)
+        val middleBackdropScore = Pose(4499.0, 908.0, 90.0)
+        val rightBackdropScore = Pose(4499.0, 1060.0, 90.0)
 
         //Positions between backdrop scoring and parking
-        val prePark = Pose(4499.0, 310.0, -90.0)
-        val park = Pose(5193.0, 310.0, -90.0)
+        val prePark = Pose(4499.0, 310.0, 90.0)
+        val park = Pose(5193.0, 310.0, 90.0)
 
         val autoTime = ElapsedTime()
         var detection: Detection? = null

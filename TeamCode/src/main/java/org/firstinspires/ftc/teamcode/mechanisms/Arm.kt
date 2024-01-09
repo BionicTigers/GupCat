@@ -13,7 +13,7 @@ class Arm(hardwareMap: HardwareMap) {
      * Raises the arm into its storage position
      */
     fun up() {
-        arm.position = 0.2
+        arm.position = 1.0
     }
 
     /**

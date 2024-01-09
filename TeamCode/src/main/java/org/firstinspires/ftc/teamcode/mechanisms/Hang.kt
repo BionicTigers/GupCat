@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.hardware.Servo
 import org.firstinspires.ftc.teamcode.utils.ControlHub
 
 /** Runs a tape measure up to the rigging in order to lift the robot */
-class Cables (hardwareMap: HardwareMap) {
+class Hang (hardwareMap: HardwareMap) {
     private val motor = hardwareMap.get(DcMotorEx::class.java, "hangMotor")
     val hub = ControlHub(hardwareMap, hardwareMap.get("Control Hub") as LynxDcMotorController)
 

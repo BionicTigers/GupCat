@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.autos
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.util.ElapsedTime
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName
 import org.firstinspires.ftc.teamcode.mechanisms.Chainbar
@@ -10,7 +9,6 @@ import org.firstinspires.ftc.teamcode.mechanisms.Drivetrain
 import org.firstinspires.ftc.teamcode.mechanisms.Output
 import org.firstinspires.ftc.teamcode.mechanisms.Slide
 import org.firstinspires.ftc.teamcode.utils.Robot
-import org.firstinspires.ftc.teamcode.utils.vision.Color
 import org.firstinspires.ftc.teamcode.utils.vision.OpenCv
 import org.firstinspires.ftc.teamcode.utils.Pose
 import org.firstinspires.ftc.teamcode.utils.command.CommandGroup
@@ -19,7 +17,6 @@ import org.firstinspires.ftc.teamcode.utils.command.ContinuousCommand
 import org.firstinspires.ftc.teamcode.utils.command.OnceCommand
 import org.firstinspires.ftc.teamcode.utils.command.Scheduler
 import org.firstinspires.ftc.teamcode.utils.vision.VisionConstants
-import org.opencv.core.Scalar
 
 @Autonomous(name = "RedPreloadLeft")
 class RedPreloadLeft : LinearOpMode() {
@@ -37,18 +34,18 @@ class RedPreloadLeft : LinearOpMode() {
         robot.pose = Pose(920.0, 3371.0, 0.0)
 
         //Creates potential scoring positions for the purple pixel on the spike marks
-        val leftSpikeScore = Pose(3054.0, 2816.0, 0.0)
-        val middleSpikeScore = Pose(926.0, 2706.0, 0.0)
-        val rightSpikeScore = Pose(2450.0, 2816.0, 0.0)
+        val leftSpikeScore = Pose(670.0, 2816.0, 0.0)
+        val middleSpikeScore = Pose(920.0, 2706.0, 0.0)
+        val rightSpikeScore = Pose(1170.0, 2816.0, 0.0)
 
         //Creates potential scoring positions for the purple pixel on the backdrop
-        val leftBackdropScore = Pose(750.0, 2456.0, 90.0)
-        val middleBackdropScore = Pose(750.0, 2718.0, 90.0)
-        val rightBackdropScore = Pose(750.0, 3023.0, 90.0)
+        val leftBackdropScore = Pose(3070.0, 2580.0, 90.0)
+        val middleBackdropScore = Pose(3070.0, 2740.0, 90.0)
+        val rightBackdropScore = Pose(3070.0, 2900.0, 90.0)
 
         //Positions between backdrop scoring and parking
-        val prePark = Pose(750.0, 3328.0, 90.0)
-        val park = Pose(304.0, 3328.0, 90.0)
+        val prePark = Pose(3070.0, 3328.0, 90.0)
+        val park = Pose(3297.0, 3328.0, 90.0)
 
         val autoTime = ElapsedTime()
         var detection: Detection? = null

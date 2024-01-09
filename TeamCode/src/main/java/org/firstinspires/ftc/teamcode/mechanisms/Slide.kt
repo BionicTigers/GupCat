@@ -20,7 +20,7 @@ import kotlin.math.floor
 class Slide(hardwareMap: HardwareMap) {
     val left = hardwareMap.get(DcMotorEx::class.java, "slideBack")
     val right = hardwareMap.get(DcMotorEx::class.java, "slideFront")
-    private val pid = PID(PIDTerms(), 0.0, 1000.0, -1.0, 1.0)
+    private val pid = PID(PIDTerms(2.0), -50.0, 1000.0, -1.0, 1.0)
     private val hub = ControlHub(hardwareMap, hardwareMap.get("Control Hub") as LynxDcMotorController)
     private val dashboard = FtcDashboard.getInstance()
     private val dashTelemetry = dashboard.telemetry
@@ -33,7 +33,7 @@ class Slide(hardwareMap: HardwareMap) {
      */
     var height = 0.0
         set(value) {
-            field = value.coerceIn(0.0, 1450.0)
+            field = value.coerceIn(-50.0, 1450.0)
 //            profile = generateMotionProfile(field, 8.5, 8.5, 20.0)
             elapsedTime = ElapsedTime()
         }
@@ -57,7 +57,7 @@ class Slide(hardwareMap: HardwareMap) {
         val encoderTicks = hub.getEncoderTicks(2).toDouble()
 //        val targetHeight = profile.position.getOrElse(floor(elapsedTime.seconds() / profile.deltaTime).toInt()) { height }
         var power = pid.calculate(height, encoderTicks)
-        if (encoderTicks > 50)
+        if (height > 50)
             power += .15
 
         left.power = power
