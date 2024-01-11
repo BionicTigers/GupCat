@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.util.ElapsedTime
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName
+import org.firstinspires.ftc.teamcode.mechanisms.Arm
 import org.firstinspires.ftc.teamcode.mechanisms.Chainbar
 import org.firstinspires.ftc.teamcode.mechanisms.Drivetrain
 import org.firstinspires.ftc.teamcode.mechanisms.Output
@@ -27,25 +28,26 @@ class BluePreloadRight : LinearOpMode() {
         val output = Output(hardwareMap)
         val slides = Slide(hardwareMap)
         val chainbar = Chainbar(hardwareMap)
+        val arm = Arm(hardwareMap)
         val openCv = OpenCv(hardwareMap.get(WebcamName::class.java, "webcam"),
             hashMapOf("Blue" to VisionConstants.BLUE))
 
         // Sets the robot's starting position
-        robot.pose = Pose(2761.0, 310.0, 180.0)
+        robot.pose = Pose(902.0, 286.0, 180.0)
 
         // Creates potential scoring positions for the purple pixel on the spike marks
-        val leftSpikeScore = Offsets["left"]!!
-        val middleSpikeScore = Offsets["center"]!!
-        val rightSpikeScore = Offsets["right"]!!
+        val leftSpikeScore = Pose(1133.0, 829.0, 180.0)
+        val middleSpikeScore = Pose(902.0, 896.0, 180.0)
+        val rightSpikeScore = Pose(658.0, 829.0, 180.0)
 
         // Creates potential scoring positions for the yellow pixel on the backdrop
-        val leftBackdropScore = Pose(750.0, 1072.0, 90.0)
-        val middleBackdropScore = Pose(750.0, 1261.0, 90.0)
-        val rightBackdropScore = Pose(750.0, 1450.0, 90.0)
+        val leftBackdropScore = Pose(3060.0, 676.0, 90.0)
+        val middleBackdropScore = Pose(3060.0, 932.0, 90.0)
+        val rightBackdropScore = Pose(3060.0, 1109.0, 90.0)
 
         // Positions between backdrop scoring and parking
-        val prePark = Pose(750.0, 310.0, 90.0)
-        val park = Pose(329.0, 310.0, 90.0)
+        val prePark = Pose(3060.0, 249.0, 90.0)
+        val park = Pose(3352.0, 249.0, 90.0)
 
         // Creates variables used to represent detections
         val autoTime = ElapsedTime()
@@ -92,6 +94,8 @@ class BluePreloadRight : LinearOpMode() {
             .await(moveToBackdrop())
             .add(OnceCommand { chainbar.up() }) //Raises slides
             .await(400) //Waits 400 ms
+            .add(OnceCommand { arm.up() })
+            .await(100)
             .add(OnceCommand { output.open() }) //Opens the right side of the output
             .await(200) //Waits 200 ms
             .add(preParkCommand) //Moves to the pre-parking position

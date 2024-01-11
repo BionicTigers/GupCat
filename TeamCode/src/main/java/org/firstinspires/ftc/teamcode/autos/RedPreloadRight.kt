@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.util.ElapsedTime
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName
+import org.firstinspires.ftc.teamcode.mechanisms.Arm
 import org.firstinspires.ftc.teamcode.mechanisms.Chainbar
 import org.firstinspires.ftc.teamcode.mechanisms.Drivetrain
 import org.firstinspires.ftc.teamcode.mechanisms.Output
@@ -27,6 +28,7 @@ class RedPreloadRight : LinearOpMode() {
         val output = Output(hardwareMap)
         val slides = Slide(hardwareMap)
         val chainbar = Chainbar(hardwareMap)
+        val arm = Arm(hardwareMap)
         val openCv = OpenCv(hardwareMap.get(WebcamName::class.java, "webcam"),
             hashMapOf("Red" to VisionConstants.RED))
 
@@ -91,6 +93,8 @@ class RedPreloadRight : LinearOpMode() {
             .await(moveToBackdrop())
             .add(OnceCommand { chainbar.up() }) //Raises slides
             .await(400) //Waits 400 ms
+            .add(OnceCommand { arm.up() })
+            .await(100)
             .add(OnceCommand { output.open() }) //Opens the right side of the output
             .await(200) //Waits 200 ms
             .add(preParkCommand) //Moves to the pre-parking position
