@@ -177,6 +177,13 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
         }
     }
 
+    fun slow() {
+        for(motor in motors.values) {
+            motor.power = 0.75
+        }
+    }
+
+
     override fun toString(): String {
         return "Drivetrain { Front { ${motors["frontLeft"]}, ${motors["frontRight"]} }, Back { ${motors["backLeft"]}, ${motors["backRight"]} } }"
     }

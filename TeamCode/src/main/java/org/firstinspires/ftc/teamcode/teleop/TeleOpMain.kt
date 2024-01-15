@@ -111,7 +111,7 @@ class TeleOpMain : LinearOpMode() {
             output.open()
         }
 
-        //When the down button on GP1 is pressed, the claw closes
+        //When the down button on GP                                                                                                                          1 is pressed, the claw closes
         gamepad2.getButton(GamepadEx.Buttons.B).onStart {
             output.close()
         }
@@ -125,6 +125,11 @@ class TeleOpMain : LinearOpMode() {
         //When the B button on GP2 is pressed, the chainbar lowers
         gamepad2.getTrigger(GamepadEx.Triggers.RIGHT_TRIGGER).onStart {
             chainbar.down()
+        }
+
+        //When the triangle button on GP1 is pressed, the drivetrain enters slow mode.
+        gamepad1.getButton(GamepadEx.Buttons.Y).onStart {
+            drivetrain.slow()
         }
 
         //arm
