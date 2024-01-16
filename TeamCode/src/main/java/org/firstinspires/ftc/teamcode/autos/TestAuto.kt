@@ -15,28 +15,17 @@ import org.firstinspires.ftc.teamcode.utils.command.Scheduler
 class TestAuto : LinearOpMode() {
     override fun runOpMode() {
         val robot = Robot(this)
-        val drivetrain = Drivetrain(hardwareMap, robot)
-        val intake = Intake(hardwareMap)
-
-        val middleSpikeScore = Pose(863.6, 919.0, 0.0)
-
-        robot.pose = Pose(863.6, 310.0, 0.0)
 
         val group = CommandGroup()
 //            .add(drivetrain.moveToPosition(middleSpikeScore))
-            .add(OnceCommand { intake.down() })
-            .add(OnceCommand { intake.startSlow() })
-            .await(1)
-            .add(OnceCommand { intake.stop() })
-            .add(OnceCommand { intake.up() })
-            .await(OnceCommand { intake.up() })
-//            .add(drivetrain.moveToPosition())
+            .add(OnceCommand { println("hi") })
+            .await(5)
+            .add(OnceCommand { println("hi2") })
             .build()
         Scheduler.add(group)
 
         robot.onStart {
             Scheduler.update()
-            robot.update()
         }
 
         Scheduler.clear()    }

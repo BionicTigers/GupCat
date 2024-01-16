@@ -8,7 +8,7 @@ import org.firstinspires.ftc.teamcode.utils.input.GamepadEx
 import kotlin.math.max
 import kotlin.math.min
 
-@TeleOp(name="Port Test", group="Testing")
+@TeleOp(name = "Port Test", group = "Testing")
 class PortTest : LinearOpMode() {
     private lateinit var gamepad: GamepadEx
 

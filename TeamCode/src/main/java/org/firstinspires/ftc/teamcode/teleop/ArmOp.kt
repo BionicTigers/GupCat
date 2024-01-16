@@ -6,7 +6,7 @@ import org.firstinspires.ftc.teamcode.mechanisms.Arm
 import org.firstinspires.ftc.teamcode.utils.Robot
 import org.firstinspires.ftc.teamcode.utils.input.GamepadEx
 
-@TeleOp(name = "ArmOp")
+@TeleOp(name = "ArmOp", group = "mechanisms")
 class ArmOp : LinearOpMode() {
 
     override fun runOpMode() {

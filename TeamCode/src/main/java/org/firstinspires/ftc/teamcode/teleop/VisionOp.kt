@@ -8,7 +8,7 @@ import org.firstinspires.ftc.teamcode.utils.vision.OpenCv
 import org.firstinspires.ftc.teamcode.utils.vision.VisionConstants
 import org.opencv.core.Scalar
 
-@TeleOp(name = "VisionOp")
+@TeleOp(name = "VisionOp", group = "mechanisms")
 class VisionOp : LinearOpMode(){
     override fun runOpMode() {
         val signals = hashMapOf<String, Color>(

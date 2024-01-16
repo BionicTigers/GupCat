@@ -7,7 +7,7 @@ import org.firstinspires.ftc.teamcode.utils.input.GamepadEx
 import org.firstinspires.ftc.teamcode.utils.vision.AprilTags
 import java.util.Arrays
 
-@TeleOp(name = "AprilTagOp")
+@TeleOp(name = "AprilTagOp", group = "mechanisms")
 class AprilTagOp : LinearOpMode() {
     override fun runOpMode() {
         val robot = Robot(this)

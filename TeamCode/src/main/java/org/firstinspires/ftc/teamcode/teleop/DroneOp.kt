@@ -6,8 +6,7 @@ import org.firstinspires.ftc.teamcode.mechanisms.Drone
 import org.firstinspires.ftc.teamcode.utils.Robot
 import org.firstinspires.ftc.teamcode.utils.input.GamepadEx
 
-@TeleOp(name="LiftOp")
-
+@TeleOp(name="LiftOp", group = "mechanisms")
 class DroneOp : LinearOpMode() {
     override fun runOpMode() {
         val robot = Robot(this)

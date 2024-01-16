@@ -175,6 +175,15 @@ class AprilTags(val robot: Robot, hardwareMap : HardwareMap) {
             }
         }
 
+        fun tooCloseToBackdrop(): Boolean {
+            for (currentDetection in aprilTagProcessor.detections) {
+                if (currentDetection.rawPose != null && currentDetection.id <= 6 && currentDetection.ftcPose.range < 7.0) {
+                    return true
+                }
+            }
+            return false
+        }
+
         var newPose = Pose()
 
         // finds average of all the poses

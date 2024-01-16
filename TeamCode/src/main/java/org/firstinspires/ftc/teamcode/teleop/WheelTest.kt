@@ -7,7 +7,7 @@ import org.firstinspires.ftc.teamcode.mechanisms.Drivetrain
 import org.firstinspires.ftc.teamcode.utils.Robot
 import org.firstinspires.ftc.teamcode.utils.input.GamepadEx
 
-@TeleOp(name = "WheelTest")
+@TeleOp(name = "WheelTest", group = "Testing")
 class WheelTest : LinearOpMode() {
     override fun runOpMode() {
         val robot = Robot(this)

@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap
 import org.firstinspires.ftc.teamcode.utils.Robot
 import org.firstinspires.ftc.teamcode.utils.input.GamepadEx
 
-@TeleOp(name = "ServoTestOp")
+@TeleOp(name = "ServoTestOp", group = "Testing")
 class ServoTestOp : LinearOpMode() {
     override fun runOpMode() {
         val robot = Robot(this)

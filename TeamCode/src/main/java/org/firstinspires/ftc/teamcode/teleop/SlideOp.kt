@@ -11,7 +11,7 @@ import org.firstinspires.ftc.teamcode.utils.command.ContinuousCommand
 import org.firstinspires.ftc.teamcode.utils.command.Scheduler
 import org.firstinspires.ftc.teamcode.utils.input.GamepadEx
 
-@TeleOp(name="SlideOp")
+@TeleOp(name="SlideOp", group = "mechanisms")
 
 class SlideOp : LinearOpMode() {
     override fun runOpMode() {
