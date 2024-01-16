@@ -63,6 +63,8 @@ class Slide(hardwareMap: HardwareMap) {
             power += .15
         if (!limitSwitch.getState()) {
             power = 0.0
+            right.power = 0.0
+            left.power = 0.0
             height = 0.0
         }
         left.power = power
