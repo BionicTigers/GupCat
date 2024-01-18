@@ -56,17 +56,15 @@ class Slide(hardwareMap: HardwareMap) {
      */
     fun update() {
         hub.refreshBulkData()
+        if (!limitSwitch.getState()) {
+            hub.setJunkTicks()
+            height = 0.0
+        }
         val encoderTicks = hub.getEncoderTicks(2).toDouble()
 //        val targetHeight = profile.position.getOrElse(floor(elapsedTime.seconds() / profile.deltaTime).toInt()) { height }
         var power = pid.calculate(height, encoderTicks)
         if (height > 50)
             power += .15
-        if (!limitSwitch.getState()) {
-            power = 0.0
-            right.power = 0.0
-            left.power = 0.0
-            height = 0.0
-        }
         left.power = power
         right.power = power
         dashTelemetry.addData("pv", encoderTicks)
