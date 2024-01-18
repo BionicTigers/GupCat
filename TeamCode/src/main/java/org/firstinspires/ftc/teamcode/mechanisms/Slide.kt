@@ -5,6 +5,7 @@ import com.qualcomm.hardware.lynx.LynxDcMotorController
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.DcMotorSimple
+import com.qualcomm.robotcore.hardware.DigitalChannel
 import com.qualcomm.robotcore.hardware.HardwareMap
 import com.qualcomm.robotcore.util.ElapsedTime
 import org.firstinspires.ftc.teamcode.utils.ControlHub
@@ -20,6 +21,7 @@ import kotlin.math.floor
 class Slide(hardwareMap: HardwareMap) {
     val left = hardwareMap.get(DcMotorEx::class.java, "slideBack")
     val right = hardwareMap.get(DcMotorEx::class.java, "slideFront")
+    val limitSwitch = hardwareMap.get(DigitalChannel::class.java, "limitSwitch")
     private val pid = PID(PIDTerms(2.0), -50.0, 1000.0, -1.0, 1.0)
     private val hub = ControlHub(hardwareMap, hardwareMap.get("Control Hub") as LynxDcMotorController)
     private val dashboard = FtcDashboard.getInstance()
@@ -54,12 +56,15 @@ class Slide(hardwareMap: HardwareMap) {
      */
     fun update() {
         hub.refreshBulkData()
+        if (!limitSwitch.getState()) {
+            hub.setJunkTicks()
+            height = 0.0
+        }
         val encoderTicks = hub.getEncoderTicks(2).toDouble()
 //        val targetHeight = profile.position.getOrElse(floor(elapsedTime.seconds() / profile.deltaTime).toInt()) { height }
         var power = pid.calculate(height, encoderTicks)
         if (height > 50)
             power += .15
-
         left.power = power
         right.power = power
         dashTelemetry.addData("pv", encoderTicks)
