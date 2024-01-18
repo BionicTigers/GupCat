@@ -39,15 +39,15 @@ class Intake(hardwareMap: HardwareMap) {
      */
     fun up() {
         leftServo.position = 1.0
-        rightServo.position = 0.0
+        rightServo.position = 0.4
     }
 
     /**
      * Lowers the intake into intaking position
      */
     fun down() {
-        leftServo.position = 0.0
-        rightServo.position = 1.0
+        leftServo.position = 0.2
+        rightServo.position = 0.8
     }
 
     /**

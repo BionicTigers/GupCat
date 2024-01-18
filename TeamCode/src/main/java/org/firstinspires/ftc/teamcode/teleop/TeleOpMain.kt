@@ -47,12 +47,12 @@ class TeleOpMain : LinearOpMode() {
         }
 
         //When the left trigger on GP2 is pressed, the intake is raised
-        gamepad2.getButton(GamepadEx.Buttons.DPAD_UP).onStart {
+        gamepad2.getButton(GamepadEx.Buttons.DPAD_DOWN).onStart {
             intake.up()
         }
 
         //When the right trigger on GP2 is pressed, the intake is lowered
-        gamepad2.getButton(GamepadEx.Buttons.DPAD_DOWN).onStart {
+        gamepad2.getButton(GamepadEx.Buttons.DPAD_UP).onStart {
             intake.down()
         }
 
