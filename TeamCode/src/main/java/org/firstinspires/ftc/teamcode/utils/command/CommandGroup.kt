@@ -78,9 +78,8 @@ class CommandGroup {
      */
     fun await(time: Int): CommandGroup {
         //Check if the command has a priority, if it doesn't then it's not in the scheduler
-        val timer = ElapsedTime(ElapsedTime.Resolution.MILLISECONDS)
-        println(timer.seconds())
-        callbacks.add { println(timer.seconds()); println(timer.seconds() <= time); return@add timer.seconds() <= time }
+        val timer = ElapsedTime()
+        callbacks.add { return@add timer.seconds() >= time }
         return this
     }
 
@@ -95,7 +94,7 @@ class CommandGroup {
                     callbacks.removeAt(0)
                 }
             },
-            { return@ConditionalCommand callbacks.isNotEmpty() }
+            {return@ConditionalCommand callbacks.isNotEmpty() }
         )
     }
 }

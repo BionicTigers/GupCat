@@ -19,7 +19,7 @@ class DriveOp : LinearOpMode() {
         val rightJoystick = gamepad1.getJoystick(GamepadEx.Joysticks.RIGHT_JOYSTICK)
 
         Scheduler.add(ContinuousCommand {
-            drivetrain.robotDMP(leftJoystick.state!!, -rightJoystick.state!!.x)
+            drivetrain.fieldDMP(leftJoystick.state!!, -rightJoystick.state!!.x)
         })
 
         waitForStart()
