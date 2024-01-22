@@ -34,10 +34,15 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
         "backRight" to hardwareMap.get(DcMotorEx::class.java, "backRight")
     )
 
-    private val fl = .87
+//    private val fl = .87
+//    private val fr = 1.0
+//    private val bl = .87
+//    private val br = .82
+
+    private val fl = 1.0
     private val fr = 1.0
-    private val bl = .87
-    private val br = .82
+    private val bl = 1.0
+    private val br = 1.0
 
     private var velocity = 0.0
 
@@ -78,11 +83,11 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
         //Create Motor Powers HashMap
         val setPowers: HashMap<String, Double> = HashMap(4)
 
-        val heading: Double = robot.pose.rotation * PI / 180
+        val heading: Double = robot.pose.radians
 
         //Defines the movement direction
-        val angleX: Double = pos.x * cos(heading) - pos.y * sin(heading)
-        val angleY: Double = pos.x * sin(heading) + pos.y * cos(heading)
+        val angleX: Double = (pos.x * cos(-heading) - pos.y * sin(-heading))
+        val angleY: Double = pos.x * sin(-heading) + pos.y * cos(-heading)
 
         //Finds the ratio to scale the motor powers to
         val ratio: Double = max(abs(angleX) + abs(angleY) + abs(turn), 1.0)
@@ -105,7 +110,8 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
         val yPid = PID(PIDTerms(1.0), 0.0, 3657.6, -1000.0, 1000.0)
         val rPid = PID(PIDTerms(1.0), -360.0, 360.0, -360.0, 360.0)
 
-//        val xProfile = generateMotionProfile(target.x, )
+        val xProfile = generateMotionProfile(robot.pose.x, target.x, 30.0, 30.0, 30.0) //TODO get correct mv
+        val yProfile = generateMotionProfile(robot.pose.y, target.y, 30.0, 30.0, 30.0) //TODO get correct mv
 
         return ConditionalCommand({
             val setPowers: HashMap<String, Double> = HashMap(4)
@@ -116,7 +122,6 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
                 rPid.calculate(target.rotation, robot.pose.rotation),
             )
 
-            val unit = Vector2(cos(robot.pose.radians), sin(robot.pose.radians))
             val heading = atan2(error.x, -error.y)
             val angleError = Math.toRadians(robot.pose.rotation - target.rotation)
             val y = cos(heading)

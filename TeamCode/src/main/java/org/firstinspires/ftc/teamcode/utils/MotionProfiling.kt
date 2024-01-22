@@ -19,12 +19,16 @@ data class MotionResult(
  * @param maxVelocity mm/s
  */
 fun generateMotionProfile(
+    start: Double,
     target: Double,
     jerk: Double,
     maxAcceleration: Double,
     maxVelocity: Double,
     points: Int = 500
-): MotionResult {
+): MotionResult? {
+    if (target == start || target == 0.0)
+        return null
+
     val va = maxAcceleration.pow(2) / jerk
     val sa = 2.0 * maxAcceleration.pow(3) / jerk.pow(2)
     val sv =
@@ -171,7 +175,7 @@ fun generateMotionProfile(
         else acceleration[i] = acceleration[i - 1] + jerk * timeslice
 
         velocity[i] = velocity.getOrElse(i - 1) { 0.0 } + acceleration[i] * timeslice
-        position[i] = position.getOrElse(i - 1) { 0.0 } + velocity[i] * timeslice
+        position[i] = position.getOrElse(i - 1) { start } + velocity[i] * timeslice
         timeList[i] = time
     }
 

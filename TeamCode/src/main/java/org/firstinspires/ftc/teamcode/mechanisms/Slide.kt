@@ -22,12 +22,12 @@ class Slide(hardwareMap: HardwareMap) {
     val left = hardwareMap.get(DcMotorEx::class.java, "slideBack")
     val right = hardwareMap.get(DcMotorEx::class.java, "slideFront")
     val limitSwitch = hardwareMap.get(DigitalChannel::class.java, "limitSwitch")
-    private val pid = PID(PIDTerms(2.0), -50.0, 1000.0, -1.0, 1.0)
+    private val pid = PID(PIDTerms(), 0.0, 1000.0, -1.0, 1.0)
     private val hub = ControlHub(hardwareMap, hardwareMap.get("Control Hub") as LynxDcMotorController)
     private val dashboard = FtcDashboard.getInstance()
     private val dashTelemetry = dashboard.telemetry
 
-//    private lateinit var profile: MotionResult
+    private var profile: MotionResult? = null
     private lateinit var elapsedTime: ElapsedTime
 
     /**
@@ -35,8 +35,9 @@ class Slide(hardwareMap: HardwareMap) {
      */
     var height = 0.0
         set(value) {
+            hub.refreshBulkData()
             field = value.coerceIn(-50.0, 1450.0)
-//            profile = generateMotionProfile(field, 8.5, 8.5, 20.0)
+//            profile = generateMotionProfile(hub.getEncoderTicks(2).toDouble(), field, 7000.0, 7000.0, 20000.0)
             elapsedTime = ElapsedTime()
         }
 
@@ -56,13 +57,13 @@ class Slide(hardwareMap: HardwareMap) {
      */
     fun update() {
         hub.refreshBulkData()
-        if (!limitSwitch.getState()) {
+        if (!limitSwitch.state) {
             hub.setJunkTicks()
             height = 0.0
         }
         val encoderTicks = hub.getEncoderTicks(2).toDouble()
-//        val targetHeight = profile.position.getOrElse(floor(elapsedTime.seconds() / profile.deltaTime).toInt()) { height }
-        var power = pid.calculate(height, encoderTicks)
+        val targetHeight = if (profile != null) profile!!.position.getOrElse(floor(elapsedTime.seconds() / profile!!.deltaTime).toInt()) { height } else height
+        var power = pid.calculate(targetHeight, encoderTicks)
         if (height > 50)
             power += .15
         left.power = power

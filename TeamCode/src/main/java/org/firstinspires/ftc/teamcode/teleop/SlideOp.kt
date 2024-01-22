@@ -29,6 +29,14 @@ class SlideOp : LinearOpMode() {
             slide.height -= 500 * Scheduler.deltaTime
         }
 
+        gamepad1.getButton(GamepadEx.Buttons.DPAD_UP).onStart {
+            slide.height = 1500.0
+        }
+
+        gamepad1.getButton(GamepadEx.Buttons.DPAD_DOWN).onStart {
+            slide.height = 0.0
+        }
+
         Scheduler.add(ContinuousCommand { slide.update() })
 
         waitForStart()
