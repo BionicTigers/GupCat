@@ -11,9 +11,12 @@ import org.opencv.core.Scalar
 @TeleOp(name = "VisionOp")
 class VisionOp : LinearOpMode(){
     override fun runOpMode() {
+
         val signals = hashMapOf<String, Color>(
-            "Red" to Color(Scalar(0.0, 120.0, 70.0), Scalar(20.0, 200.0, 180.0), 1000),
-            "Blue" to Color(Scalar(80.0, 50.0, 20.0), Scalar(140.0, 250.0, 250.0), 1000),
+//            "Red" to Color(Scalar(0.0, 120.0, 70.0), Scalar(20.0, 200.0, 180.0), 1000),
+//            "Blue" to Color(Scalar(80.0, 50.0, 20.0), Scalar(140.0, 250.0, 250.0), 1000),
+            "Red" to VisionConstants.RED,
+            "Blue" to VisionConstants.BLUE,
         )
 
         val openCv = OpenCv(

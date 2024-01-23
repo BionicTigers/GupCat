@@ -24,7 +24,6 @@ class RedParkRight : LinearOpMode() {
 //            .add(drivetrain.moveToPosition(wiggle))
 //            .await(750)
             .add(drivetrain.moveToPosition(parkPoint))
-            .add(OnceCommand { intake.startSlow() })
             .build()
         Scheduler.add(group)
 

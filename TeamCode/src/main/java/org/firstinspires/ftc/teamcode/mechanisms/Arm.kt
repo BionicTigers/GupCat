@@ -9,11 +9,15 @@ import com.qualcomm.robotcore.hardware.Servo
 class Arm(hardwareMap: HardwareMap) {
     private val arm = hardwareMap.get(Servo::class.java, "arm")
 
+    init {
+        arm.direction = Servo.Direction.REVERSE
+    }
+
     /**
      * Raises the arm into its storage position
      */
     fun up() {
-        arm.position = 0.0
+        arm.position = 0.6
     }
 
     /**

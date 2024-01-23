@@ -21,15 +21,15 @@ class Chainbar(hardwareMap: HardwareMap) {
      * Raises the arm to its most forward position
      */
     fun up() {
-        leftServo.position = 1.0
-        rightServo.position = 1.0
+        leftServo.position = 0.0
+        rightServo.position = 0.0
     }
 
     /**
      * Lowers the arm to its furthest back position
      */
     fun down() {
-        leftServo.position = 0.0
-        rightServo.position = 0.0
+        leftServo.position = 0.9
+        rightServo.position = 0.9
     }
 }

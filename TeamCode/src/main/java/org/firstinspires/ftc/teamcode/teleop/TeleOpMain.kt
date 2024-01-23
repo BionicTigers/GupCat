@@ -75,7 +75,7 @@ class TeleOpMain : LinearOpMode() {
         //drivetrain
         //Uses current joystick positions to determine the correct motor powers
         Scheduler.add(ContinuousCommand {
-            drivetrain.robotDMP(leftJoystick.state!!, -rightJoystick.state!!.x)
+            drivetrain.fieldDMP(leftJoystick.state!!, -rightJoystick.state!!.x)
         })
 
         //drone

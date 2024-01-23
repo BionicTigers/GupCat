@@ -18,7 +18,7 @@ class RedParkLeft : LinearOpMode() {
         val intake = Intake(hardwareMap)
         robot.pose = Pose(863.6, 310.0, 0.0)
         val forward = Pose(863.6, 1400.0, 0.0)
-        val parkPoint = Pose(2895.6, 1300.0, 0.0)
+        val parkPoint = Pose(2895.6, 1400.0, 0.0)
 //        val spin = Pose(2895.0, 1370.0, 180.0)
 
         val group = CommandGroup()

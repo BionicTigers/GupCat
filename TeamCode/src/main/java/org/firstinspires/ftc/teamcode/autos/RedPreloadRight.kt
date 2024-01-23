@@ -29,7 +29,7 @@ class RedPreloadRight : LinearOpMode() {
         val slides = Slide(hardwareMap)
         val chainbar = Chainbar(hardwareMap)
         val arm = Arm(hardwareMap)
-        val openCv = OpenCv(hardwareMap.get(WebcamName::class.java, "webcam"),
+        val openCv = OpenCv(hardwareMap.get(WebcamName::class.java, "Webcam 1"),
             hashMapOf("Red" to VisionConstants.RED))
 
         //Sets the robot's starting position
@@ -91,12 +91,12 @@ class RedPreloadRight : LinearOpMode() {
             .await(moveToSpike())
             .add(moveToBackdrop()) //Moves to correct backdrop scoring position
             .await(moveToBackdrop())
-            .add(OnceCommand { chainbar.up() }) //Raises slides
-            .await(400) //Waits 400 ms
-            .add(OnceCommand { arm.up() })
-            .await(100)
-            .add(OnceCommand { output.open() }) //Opens the right side of the output
-            .await(200) //Waits 200 ms
+//            .add(OnceCommand { chainbar.up() }) //Raises slides
+//            .await(400) //Waits 400 ms
+//            .add(OnceCommand { arm.up() })
+//            .await(100)
+//            .add(OnceCommand { output.open() }) //Opens the right side of the output
+//            .await(200) //Waits 200 ms
             .add(preParkCommand) //Moves to the pre-parking position
             .await(preParkCommand)
             .add(parkCommand) //Moves to park position
