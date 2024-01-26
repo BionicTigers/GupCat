@@ -1,17 +1,41 @@
 package org.firstinspires.ftc.teamcode.utils.command
 
-abstract class Command(internal val callback: () -> Unit) {
-    val priority: Int?
-        get() {
-            return Scheduler.getPriority(this)
-        }
+import org.firstinspires.ftc.teamcode.utils.Time
+import java.util.UUID
 
-    abstract fun run()
+data class CommandContext internal constructor(
+    val id: UUID = UUID.randomUUID(),
+    var startTime: Time = Time(),
+    var deltaTime: Time = Time(),
+    var elapsedTime: Time = Time(),
+    var inScheduler: Boolean = false
+)
 
-    /**
-     * If the command is in the scheduler, remove it.
-     */
-    fun remove() {
-        priority?.let { Scheduler.remove(it) }
+open class Command(val callback: (CommandContext) -> Unit, val predicate: (CommandContext) -> Boolean) {
+    constructor(callback: (deltaTime: CommandContext) -> Unit) : this(callback, { false })
+
+    internal val context = CommandContext()
+
+    fun execute() {
+        callback(context)
+        if (!predicate(context))
+            remove()
     }
+
+    fun remove() {
+        assert(context.inScheduler) { "Command must be initialized before removing it" }
+        Scheduler.remove(context.id)
+    }
+
+    override fun toString(): String {
+        return "${context.id}, ${context.deltaTime}, ${context.elapsedTime}"
+    }
+}
+
+fun continuousCommand(callback: (CommandContext) -> Unit): Command {
+    return Command(callback) { false }
+}
+
+fun timedCommand(callback: (CommandContext) -> Unit, time: Time): Command {
+    return Command(callback) { it.elapsedTime >= time }
 }
