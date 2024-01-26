@@ -21,6 +21,7 @@ import org.firstinspires.ftc.teamcode.utils.vision.VisionConstants
 @Autonomous(name = "RedPreloadRight")
 class RedPreloadRight : LinearOpMode() {
     override fun runOpMode() {
+        Scheduler.clear() //Clears all commands from the scheduler to allow a new OpMode to run
         //Object declarations
         val robot = Robot(this)
         val drivetrain = Drivetrain(hardwareMap, robot)
@@ -35,13 +36,13 @@ class RedPreloadRight : LinearOpMode() {
         robot.pose = Pose(2110.0, 3352.0, 0.0)
 
         //Creates potential scoring positions for the purple pixel on the spike marks
-        val leftSpikeScore = Pose(1865.0, 2816.0, 0.0)
-        val middleSpikeScore = Pose(1505.0, 2706.0, 0.0)
-        val rightSpikeScore = Pose(1243.0, 2816.0, 0.0)
+        val leftSpikeScore = Pose(2410.0, 2816.0, 0.0)
+        val middleSpikeScore = Pose(2110.0, 2706.0, 0.0)
+        val rightSpikeScore = Pose(1810.0, 2816.0, 0.0)
 
         //Creates potential scoring positions for the yellow pixel on the backdrop
         val leftBackdropScore = Pose(3070.0, 2580.0, 90.0)
-        val middleBackdropScore = Pose(3070.0, 2740.0, 90.0)
+        val middleBackdropScore = Pose(3070.0, 2640.0, 90.0)
         val rightBackdropScore = Pose(3070.0, 2900.0, 90.0)
 
         //Positions between backdrop scoring and parking
@@ -54,29 +55,30 @@ class RedPreloadRight : LinearOpMode() {
         //Create Commands
         val getDetection = Command({
             val result = openCv.getDetection()
+            println(result)
             detection = when (result?.position?.x?.toInt()) {
                 in 0..(1280 / 3) -> Detection.Left
                 in (1280 / 3)..(1280 / 3 * 2) -> Detection.Center
                 in (1280 / 3 * 2)..1280 -> Detection.Right
                 else -> null
             }
-        }) {return@Command detection == null || autoTime.seconds() >= 5}
+        }) {detection == null}
 
-        fun moveToSpike(): Command? {
+        fun moveToSpike(): Command {
             return when (detection) {
                 Detection.Left -> drivetrain.moveToPosition(leftSpikeScore)
                 Detection.Center -> drivetrain.moveToPosition(middleSpikeScore)
                 Detection.Right -> drivetrain.moveToPosition(rightSpikeScore)
-                else -> null
+                else -> drivetrain.moveToPosition(middleSpikeScore)
             }
         }
 
-        fun moveToBackdrop(): Command? {
+        fun moveToBackdrop(): Command {
             return when (detection) {
                 Detection.Left -> drivetrain.moveToPosition(leftBackdropScore)
                 Detection.Center -> drivetrain.moveToPosition(middleBackdropScore)
                 Detection.Right -> drivetrain.moveToPosition(rightBackdropScore)
-                else -> null
+                else -> drivetrain.moveToPosition(middleBackdropScore)
             }
         }
 
@@ -87,17 +89,11 @@ class RedPreloadRight : LinearOpMode() {
             .add(getDetection) //Gets camera detection
             .add(Command { println(detection) })
             .add(moveToSpike()) //Moves to correct spike scoring position
-            .await(500)
             .add(moveToBackdrop()) //Moves to correct backdrop scoring position
-            .await(500)
             .add(Command { chainbar.up() }) //Raises slides
-            .await(400) //Waits 400 ms
             .add(Command { arm.up() })
-            .await(100)
             .add(Command { output.open() }) //Opens the right side of the output
-            .await(200) //Waits 200 ms
             .add(preParkCommand) //Moves to the pre-parking position
-            .await(500)
             .add(parkCommand) //Moves to park position
             .build() //Builds all commands
 

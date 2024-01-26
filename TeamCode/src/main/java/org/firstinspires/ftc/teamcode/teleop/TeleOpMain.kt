@@ -21,6 +21,7 @@ import org.firstinspires.ftc.teamcode.utils.input.GamepadEx
 @TeleOp
 class TeleOpMain : LinearOpMode() {
     override fun runOpMode() {
+        Scheduler.clear() //Clears all commands from the scheduler to allow a new OpMode to run
         val robot = Robot(this)
         val (gamepad1, gamepad2) = robot.getGamepads()
         val cables = Hang(hardwareMap)
@@ -87,6 +88,7 @@ class TeleOpMain : LinearOpMode() {
         //drivetrain
         //Uses current joystick positions to determine the correct motor powers
         Scheduler.add(continuousCommand {
+            println(leftJoystick.state)
             drivetrain.fieldDMP(leftJoystick.state!!, -rightJoystick.state!!.x)
         })
 
@@ -114,8 +116,9 @@ class TeleOpMain : LinearOpMode() {
 //        }
         val leftGP2Joystick = gamepad2.getJoystick(GamepadEx.Joysticks.LEFT_JOYSTICK)
         Scheduler.add(continuousCommand {
+            println(leftGP2Joystick.state)
             slide.height -= 1000 * Scheduler.deltaTime.seconds() * leftGP2Joystick.state!!.y
-            println(leftGP2Joystick.state!!.y)
+            println(leftGP2Joystick.state?.y)
             println(Scheduler.deltaTime)
         })
 
@@ -168,6 +171,4 @@ class TeleOpMain : LinearOpMode() {
             robot.update() //Updates position telemetry and gamepads
 //            slide.update() //Runs slides to current target position
         }
-
-        Scheduler.clear() //Clears all commands from the scheduler to allow a new OpMode to run
 }}

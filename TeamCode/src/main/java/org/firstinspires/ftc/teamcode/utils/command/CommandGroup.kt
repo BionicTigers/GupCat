@@ -18,7 +18,10 @@ class CommandGroup {
                 executed = true
             }
 
+            println(commandList[0].context.inScheduler)
+
             if (!commandList[0].context.inScheduler && executed) {
+                println(commandList.count())
                 commandList.removeAt(0)
                 if (commandList.isNotEmpty())
                     Scheduler.addToQueue(commandList[0])

@@ -11,6 +11,7 @@ import org.firstinspires.ftc.teamcode.utils.command.Scheduler
 @Autonomous(name = "BlueParkRight", group = "Autonomous")
 class BlueParkRight : LinearOpMode() {
     override fun runOpMode() {
+        Scheduler.clear() //Clears all commands from the scheduler to allow a new OpMode to run
         val robot = Robot(this)
         val drivetrain = Drivetrain(hardwareMap, robot)
         robot.pose = Pose(863.6, 3347.0, 180.0)

@@ -30,7 +30,7 @@ object Scheduler {
         commandList[command.context.id] = command
         unorderedList[totalAdded] = command.context.id
         setupInternals(command)
-        totalAdded = totalAdded++
+        totalAdded += 1
 
         return command.context
     }
@@ -39,14 +39,14 @@ object Scheduler {
         commandList[command.context.id] = command
         orderedList[totalAdded] = command.context.id
         setupInternals(command)
-        totalAdded = totalAdded++
+        totalAdded += 1
 
         return command.context
     }
 
     internal fun addToQueue(command: Command) {
         addQueue.add(command)
-        totalAdded = totalAdded++
+        totalAdded += 1
     }
 
     fun contains(id: UUID): Boolean {
@@ -106,7 +106,7 @@ object Scheduler {
         addQueue.forEach {
             setupInternals(it)
             commandList[it.context.id] = it
-            unorderedList[totalAdded++] = it.context.id
+            unorderedList[totalAdded] = it.context.id
         }
 
         addQueue.clear()
@@ -114,6 +114,8 @@ object Scheduler {
 
     fun clear() {
         commandList.clear()
+        unorderedList.clear()
+        orderedList.clear()
 
         update()
     }

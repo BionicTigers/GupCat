@@ -22,6 +22,7 @@ class Robot(private val opMode: LinearOpMode) {
     init {
         Scheduler.add(continuousCommand
         {
+
             odometry.update()
             opMode.telemetry.addData("x", pose.x)
             opMode.telemetry.addData("y", pose.y)

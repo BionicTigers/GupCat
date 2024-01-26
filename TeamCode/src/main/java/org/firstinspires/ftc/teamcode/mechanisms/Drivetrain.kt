@@ -129,8 +129,8 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
         val yPid = PID(PIDTerms(1.0), 0.0, 3657.6, -1000.0, 1000.0)
         val rPid = PID(PIDTerms(1.0), -360.0, 360.0, -360.0, 360.0)
 
-        val xProfile = generateMotionProfile(robot.pose.x, target.x, 1500.0, 4000.0, 3000.0) //TODO get correct mv
-        val yProfile = generateMotionProfile(robot.pose.y, target.y, 1500.0, 4000.0, 3000.0) //TODO get correct mv
+        val xProfile = generateMotionProfile(robot.pose.x, target.x, 30000.0, 4000.0, 3000.0) //TODO get correct mv
+        val yProfile = generateMotionProfile(robot.pose.y, target.y, 30000.0, 4000.0, 3000.0) //TODO get correct mv
         val elapsedTime = ElapsedTime()
 
         return Command({

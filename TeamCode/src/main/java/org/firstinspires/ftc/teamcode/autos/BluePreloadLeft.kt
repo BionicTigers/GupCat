@@ -21,6 +21,7 @@ import org.firstinspires.ftc.teamcode.utils.vision.VisionConstants
 @Autonomous(name = "BluePreloadLeft")
 class BluePreloadLeft : LinearOpMode() {
     override fun runOpMode() {
+        Scheduler.clear() //Clears all commands from the scheduler to allow a new OpMode to run
         //Object declarations
         val robot = Robot(this)
         val drivetrain = Drivetrain(hardwareMap, robot)
@@ -28,21 +29,23 @@ class BluePreloadLeft : LinearOpMode() {
         val slides = Slide(hardwareMap)
         val chainbar = Chainbar(hardwareMap)
         val arm = Arm(hardwareMap)
-        val openCv = OpenCv(hardwareMap.get(WebcamName::class.java, "webcam"),
+        val openCv = OpenCv(hardwareMap.get(WebcamName::class.java, "Webcam 1"),
             hashMapOf("Blue" to VisionConstants.BLUE))
 
         //Sets the robot's starting position
         robot.pose = Pose(2121.0, 286.0, 180.0)
 
         //Creates potential scoring positions for the purple pixel on the spike marks
-        val leftSpikeScore = Pose(2426.0, 853.0, 180.0)
+        val leftSpikeScore = Pose(1853.0, 853.0, 180.0)
         val middleSpikeScore = Pose(2121.0, 926.0, 180.0)
-        val rightSpikeScore = Pose(1853.0, 853.0, 180.0)
+        val rightSpikeScore = Pose(2426.0, 853.0, 180.0)
+
+        val intermediate = Pose(2000.0, 800.0, 180.0)
 
         //Creates potential scoring positions for the yellow pixel on the backdrop
-        val leftBackdropScore = Pose(3060.0, 676.0, 90.0)
-        val middleBackdropScore = Pose(3060.0, 932.0, 90.0)
-        val rightBackdropScore = Pose(3060.0, 1109.0, 90.0)
+        val leftBackdropScore = Pose(2700.0, 676.0, 90.0)
+        val middleBackdropScore = Pose(2000.0, 900.0, 90.0)
+        val rightBackdropScore = Pose(2700.0, 1109.0, 90.0)
 
         //Positions between backdrop scoring and parking
         val prePark = Pose(3060.0, 249.0, 90.0)
@@ -62,21 +65,21 @@ class BluePreloadLeft : LinearOpMode() {
             }
         }) {return@Command detection == null || autoTime.seconds() >= 5}
 
-        fun moveToSpike(): Command? {
+        fun moveToSpike(): Command {
             return when (detection) {
                 Detection.Left -> drivetrain.moveToPosition(leftSpikeScore)
                 Detection.Center -> drivetrain.moveToPosition(middleSpikeScore)
                 Detection.Right -> drivetrain.moveToPosition(rightSpikeScore)
-                else -> null
+                else -> drivetrain.moveToPosition(middleSpikeScore)
             }
         }
 
-        fun moveToBackdrop(): Command? {
+        fun moveToBackdrop(): Command {
             return when (detection) {
                 Detection.Left -> drivetrain.moveToPosition(leftBackdropScore)
                 Detection.Center -> drivetrain.moveToPosition(middleBackdropScore)
                 Detection.Right -> drivetrain.moveToPosition(rightBackdropScore)
-                else -> null
+                else -> drivetrain.moveToPosition(middleBackdropScore)
             }
         }
 
@@ -85,19 +88,13 @@ class BluePreloadLeft : LinearOpMode() {
 
         val group1 = CommandGroup()
             .add(getDetection) //Gets camera detection
-            .await(getDetection) //Waits for previous command to end
             .add(moveToSpike()) //Moves to correct spike scoring position
-            .await(moveToSpike())
+            .add(drivetrain.moveToPosition(intermediate))
             .add(moveToBackdrop()) //Moves to correct backdrop scoring position
-            .await(moveToBackdrop())
             .add(Command { chainbar.up()})
-            .await(400)
             .add(Command { arm.up() })
-            .await(100)
             .add(Command { output.open() }) //Opens the right side of the output
-            .await(200) //Waits 200 ms
             .add(preParkCommand) //Moves to the pre-parking position
-            .await(preParkCommand)
             .add(parkCommand) //Moves to park position
             .build() //Builds all commands
 

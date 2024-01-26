@@ -33,7 +33,7 @@ open class Command(val callback: (CommandContext) -> Unit, val predicate: (Comma
 }
 
 fun continuousCommand(callback: (CommandContext) -> Unit): Command {
-    return Command(callback) { false }
+    return Command(callback) { true }
 }
 
 fun timedCommand(callback: (CommandContext) -> Unit, time: Time): Command {

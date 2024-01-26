@@ -21,6 +21,7 @@ import org.firstinspires.ftc.teamcode.utils.vision.VisionConstants
 @Autonomous(name = "BluePreloadRight")
 class BluePreloadRight : LinearOpMode() {
     override fun runOpMode() {
+        Scheduler.clear() //Clears all commands from the scheduler to allow a new OpMode to run
         // Object declarations
         val robot = Robot(this)
         val drivetrain = Drivetrain(hardwareMap, robot)
@@ -63,21 +64,21 @@ class BluePreloadRight : LinearOpMode() {
             }
         }) {return@Command detection == null || autoTime.seconds() >= 5}
 
-        fun moveToSpike(): Command? {
+        fun moveToSpike(): Command {
             return when (detection) {
                 Detection.Left -> drivetrain.moveToPosition(leftSpikeScore)
                 Detection.Center -> drivetrain.moveToPosition(middleSpikeScore)
                 Detection.Right -> drivetrain.moveToPosition(rightSpikeScore)
-                else -> null
+                else -> drivetrain.moveToPosition(middleSpikeScore)
             }
         }
 
-        fun moveToBackdrop(): Command? {
+        fun moveToBackdrop(): Command {
             return when (detection) {
                 Detection.Left -> drivetrain.moveToPosition(leftBackdropScore)
                 Detection.Center -> drivetrain.moveToPosition(middleBackdropScore)
                 Detection.Right -> drivetrain.moveToPosition(rightBackdropScore)
-                else -> null
+                else -> drivetrain.moveToPosition(middleBackdropScore)
             }
         }
 
@@ -86,19 +87,12 @@ class BluePreloadRight : LinearOpMode() {
 
         val group1 = CommandGroup()
             .add(getDetection) //Gets camera detection
-            .await(getDetection) //Waits for previous command to end
             .add(moveToSpike()) //Moves to correct spike scoring position
-            .await(moveToSpike())
             .add(moveToBackdrop()) //Moves to correct backdrop scoring position
-            .await(moveToBackdrop())
             .add(Command { chainbar.up() }) //Raises slides
-            .await(400) //Waits 400 ms
             .add(Command { arm.up() })
-            .await(100)
             .add(Command { output.open() }) //Opens the right side of the output
-            .await(200) //Waits 200 ms
             .add(preParkCommand) //Moves to the pre-parking position
-            .await(preParkCommand)
             .add(parkCommand) //Moves to park position
             .build() //Builds all commands
 
