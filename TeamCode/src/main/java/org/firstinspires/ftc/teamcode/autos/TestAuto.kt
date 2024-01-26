@@ -6,8 +6,8 @@ import org.firstinspires.ftc.teamcode.mechanisms.Drivetrain
 import org.firstinspires.ftc.teamcode.mechanisms.Intake
 import org.firstinspires.ftc.teamcode.utils.Pose
 import org.firstinspires.ftc.teamcode.utils.Robot
+import org.firstinspires.ftc.teamcode.utils.command.Command
 import org.firstinspires.ftc.teamcode.utils.command.CommandGroup
-import org.firstinspires.ftc.teamcode.utils.command.OnceCommand
 import org.firstinspires.ftc.teamcode.utils.command.Scheduler
 
 @Autonomous(name = "Test", group = "Autonomous")
@@ -15,17 +15,26 @@ import org.firstinspires.ftc.teamcode.utils.command.Scheduler
 class TestAuto : LinearOpMode() {
     override fun runOpMode() {
         val robot = Robot(this)
+        val drivetrain = Drivetrain(hardwareMap, robot)
+        val intake = Intake(hardwareMap)
+
+        val middleSpikeScore = Pose(863.6, 919.0, 0.0)
+
+        robot.pose = Pose(863.6, 310.0, 0.0)
 
         val group = CommandGroup()
 //            .add(drivetrain.moveToPosition(middleSpikeScore))
-            .add(OnceCommand { println("hi") })
-            .await(5)
-            .add(OnceCommand { println("hi2") })
+            .add(Command { intake.up() })
+            .add(Command { intake.startSlow() })
+            .add(Command { intake.stop() })
+            .add(Command { intake.down() })
+//            .add(drivetrain.moveToPosition())
             .build()
         Scheduler.add(group)
 
         robot.onStart {
             Scheduler.update()
+            robot.update()
         }
 
         Scheduler.clear()    }

@@ -5,8 +5,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.teamcode.mechanisms.Intake
 import org.firstinspires.ftc.teamcode.utils.Robot
-import org.firstinspires.ftc.teamcode.utils.command.ContinuousCommand
-import org.firstinspires.ftc.teamcode.utils.command.Scheduler
 import org.firstinspires.ftc.teamcode.utils.input.GamepadEx
 
 @TeleOp(name = "IntakeOp", group = "mechanisms")
@@ -34,8 +32,8 @@ class IntakeOp : LinearOpMode() {
             intake.preloadPos()
         }
 
-        gamepad2.getTrigger(GamepadEx.Triggers.LEFT_TRIGGER).onStart { intake.up() }
-        gamepad2.getTrigger(GamepadEx.Triggers.RIGHT_TRIGGER).onStart { intake.down() }
+        gamepad2.getTrigger(GamepadEx.Triggers.LEFT_TRIGGER).onStart { intake.down() }
+        gamepad2.getTrigger(GamepadEx.Triggers.RIGHT_TRIGGER).onStart { intake.up() }
 
         telemetry.addData("Right Position: ", intake.rightServo.position)
         telemetry.addData("Left Position: ", intake.leftServo.position)

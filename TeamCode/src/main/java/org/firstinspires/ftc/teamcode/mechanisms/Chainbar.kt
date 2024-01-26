@@ -18,18 +18,18 @@ class Chainbar(hardwareMap: HardwareMap) {
     }
 
     /**
-     * Raises the arm to its most forward position
+     * Rotates the arm up (towards sky)
      */
     fun up() {
-        leftServo.position = 1.0
-        rightServo.position = 1.0
+        leftServo.position = 0.0
+        rightServo.position = 0.0
     }
 
     /**
-     * Lowers the arm to its furthest back position
+     * Rotates the arm down (towards transfer)
      */
     fun down() {
-        leftServo.position = 0.0
-        rightServo.position = 0.0
+        leftServo.position = 0.55
+        rightServo.position = 0.55
     }
 }

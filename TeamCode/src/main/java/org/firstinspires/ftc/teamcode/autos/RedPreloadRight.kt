@@ -12,16 +12,16 @@ import org.firstinspires.ftc.teamcode.mechanisms.Slide
 import org.firstinspires.ftc.teamcode.utils.Robot
 import org.firstinspires.ftc.teamcode.utils.vision.OpenCv
 import org.firstinspires.ftc.teamcode.utils.Pose
+import org.firstinspires.ftc.teamcode.utils.command.Command
 import org.firstinspires.ftc.teamcode.utils.command.CommandGroup
-import org.firstinspires.ftc.teamcode.utils.command.ConditionalCommand
-import org.firstinspires.ftc.teamcode.utils.command.ContinuousCommand
-import org.firstinspires.ftc.teamcode.utils.command.OnceCommand
 import org.firstinspires.ftc.teamcode.utils.command.Scheduler
+import org.firstinspires.ftc.teamcode.utils.command.continuousCommand
 import org.firstinspires.ftc.teamcode.utils.vision.VisionConstants
 
 @Autonomous(name = "RedPreloadRight")
 class RedPreloadRight : LinearOpMode() {
     override fun runOpMode() {
+        Scheduler.clear() //Clears all commands from the scheduler to allow a new OpMode to run
         //Object declarations
         val robot = Robot(this)
         val drivetrain = Drivetrain(hardwareMap, robot)
@@ -29,20 +29,20 @@ class RedPreloadRight : LinearOpMode() {
         val slides = Slide(hardwareMap)
         val chainbar = Chainbar(hardwareMap)
         val arm = Arm(hardwareMap)
-        val openCv = OpenCv(hardwareMap.get(WebcamName::class.java, "webcam"),
+        val openCv = OpenCv(hardwareMap.get(WebcamName::class.java, "Webcam 1"),
             hashMapOf("Red" to VisionConstants.RED))
 
         //Sets the robot's starting position
         robot.pose = Pose(2110.0, 3352.0, 0.0)
 
         //Creates potential scoring positions for the purple pixel on the spike marks
-        val leftSpikeScore = Pose(1865.0, 2816.0, 0.0)
-        val middleSpikeScore = Pose(1505.0, 2706.0, 0.0)
-        val rightSpikeScore = Pose(1243.0, 2816.0, 0.0)
+        val leftSpikeScore = Pose(2410.0, 2816.0, 0.0)
+        val middleSpikeScore = Pose(2110.0, 2706.0, 0.0)
+        val rightSpikeScore = Pose(1810.0, 2816.0, 0.0)
 
         //Creates potential scoring positions for the yellow pixel on the backdrop
         val leftBackdropScore = Pose(3070.0, 2580.0, 90.0)
-        val middleBackdropScore = Pose(3070.0, 2740.0, 90.0)
+        val middleBackdropScore = Pose(3070.0, 2640.0, 90.0)
         val rightBackdropScore = Pose(3070.0, 2900.0, 90.0)
 
         //Positions between backdrop scoring and parking
@@ -53,31 +53,32 @@ class RedPreloadRight : LinearOpMode() {
         var detection: Detection? = null
 
         //Create Commands
-        val getDetection = ConditionalCommand({
+        val getDetection = Command({
             val result = openCv.getDetection()
+            println(result)
             detection = when (result?.position?.x?.toInt()) {
                 in 0..(1280 / 3) -> Detection.Left
                 in (1280 / 3)..(1280 / 3 * 2) -> Detection.Center
                 in (1280 / 3 * 2)..1280 -> Detection.Right
                 else -> null
             }
-        }) {return@ConditionalCommand detection == null || autoTime.seconds() >= 5}
+        }) {detection == null}
 
-        fun moveToSpike(): ConditionalCommand? {
+        fun moveToSpike(): Command {
             return when (detection) {
                 Detection.Left -> drivetrain.moveToPosition(leftSpikeScore)
                 Detection.Center -> drivetrain.moveToPosition(middleSpikeScore)
                 Detection.Right -> drivetrain.moveToPosition(rightSpikeScore)
-                else -> null
+                else -> drivetrain.moveToPosition(middleSpikeScore)
             }
         }
 
-        fun moveToBackdrop(): ConditionalCommand? {
+        fun moveToBackdrop(): Command {
             return when (detection) {
                 Detection.Left -> drivetrain.moveToPosition(leftBackdropScore)
                 Detection.Center -> drivetrain.moveToPosition(middleBackdropScore)
                 Detection.Right -> drivetrain.moveToPosition(rightBackdropScore)
-                else -> null
+                else -> drivetrain.moveToPosition(middleBackdropScore)
             }
         }
 
@@ -86,23 +87,17 @@ class RedPreloadRight : LinearOpMode() {
 
         val group1 = CommandGroup()
             .add(getDetection) //Gets camera detection
-            .await(getDetection) //Waits for previous command to end
+            .add(Command { println(detection) })
             .add(moveToSpike()) //Moves to correct spike scoring position
-            .await(moveToSpike())
             .add(moveToBackdrop()) //Moves to correct backdrop scoring position
-            .await(moveToBackdrop())
-            .add(OnceCommand { chainbar.up() }) //Raises slides
-            .await(400) //Waits 400 ms
-            .add(OnceCommand { arm.up() })
-            .await(100)
-            .add(OnceCommand { output.open() }) //Opens the right side of the output
-            .await(200) //Waits 200 ms
+            .add(Command { chainbar.up() }) //Raises slides
+            .add(Command { arm.up() })
+            .add(Command { output.open() }) //Opens the right side of the output
             .add(preParkCommand) //Moves to the pre-parking position
-            .await(preParkCommand)
             .add(parkCommand) //Moves to park position
             .build() //Builds all commands
 
-        Scheduler.add(ContinuousCommand { slides.update() })
+        Scheduler.add(continuousCommand { slides.update() })
         Scheduler.add(group1)
         waitForStart()
         autoTime.reset()

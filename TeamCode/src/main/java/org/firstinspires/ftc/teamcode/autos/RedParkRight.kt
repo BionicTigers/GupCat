@@ -7,12 +7,12 @@ import org.firstinspires.ftc.teamcode.mechanisms.Intake
 import org.firstinspires.ftc.teamcode.utils.Pose
 import org.firstinspires.ftc.teamcode.utils.Robot
 import org.firstinspires.ftc.teamcode.utils.command.CommandGroup
-import org.firstinspires.ftc.teamcode.utils.command.OnceCommand
 import org.firstinspires.ftc.teamcode.utils.command.Scheduler
 
 @Autonomous(name = "RedParkRight", group = "Autonomous")
 class RedParkRight : LinearOpMode() {
     override fun runOpMode() {
+        Scheduler.clear() //Clears all commands from the scheduler to allow a new OpMode to run
         val robot = Robot(this)
         val drivetrain = Drivetrain(hardwareMap, robot)
         val intake = Intake(hardwareMap)
@@ -24,7 +24,6 @@ class RedParkRight : LinearOpMode() {
 //            .add(drivetrain.moveToPosition(wiggle))
 //            .await(750)
             .add(drivetrain.moveToPosition(parkPoint))
-            .add(OnceCommand { intake.startSlow() })
             .build()
         Scheduler.add(group)
 

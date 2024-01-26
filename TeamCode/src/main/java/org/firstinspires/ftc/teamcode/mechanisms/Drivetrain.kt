@@ -1,20 +1,22 @@
 package org.firstinspires.ftc.teamcode.mechanisms
 
+import com.acmerobotics.dashboard.FtcDashboard
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.HardwareMap
+import com.qualcomm.robotcore.util.ElapsedTime
+import org.firstinspires.ftc.teamcode.utils.ControlHub
 import org.firstinspires.ftc.teamcode.utils.PID
 import org.firstinspires.ftc.teamcode.utils.PIDTerms
 import org.firstinspires.ftc.teamcode.utils.Pose
 import org.firstinspires.ftc.teamcode.utils.Robot
 import org.firstinspires.ftc.teamcode.utils.Vector2
-import org.firstinspires.ftc.teamcode.utils.command.ConditionalCommand
-import org.firstinspires.ftc.teamcode.utils.command.ContinuousCommand
+import org.firstinspires.ftc.teamcode.utils.command.Command
 import org.firstinspires.ftc.teamcode.utils.command.Scheduler
+import org.firstinspires.ftc.teamcode.utils.command.continuousCommand
 import org.firstinspires.ftc.teamcode.utils.generateMotionProfile
 import org.firstinspires.ftc.teamcode.utils.input.GamepadEx
-import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.atan2
 import kotlin.math.cos
@@ -27,6 +29,10 @@ private fun lerp(start: Double, end: Double, t: Double): Double {
 }
 
 class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
+    private val hub = ControlHub(hardwareMap, "Control Hub")
+    private val dashboard = FtcDashboard.getInstance()
+    private val dashTelemetry = dashboard.telemetry
+
     private val motors: HashMap<String, DcMotorEx> = hashMapOf(
         "frontLeft" to hardwareMap.get(DcMotorEx::class.java, "frontLeft"),
         "frontRight" to hardwareMap.get(DcMotorEx::class.java, "frontRight"),
@@ -44,6 +50,10 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
     private val bl = 1.0
     private val br = 1.0
 
+    private var x = 0.0
+    private var y = 0.0
+    private var rot = 0.0
+
     private var velocity = 0.0
 
     init {
@@ -55,12 +65,18 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
         motors["backLeft"]?.direction = DcMotorSimple.Direction.REVERSE
     }
 
+    fun setJunkPosition() {
+        x = robot.pose.x
+        y = robot.pose.y
+        rot = robot.pose.radians
+    }
+
     //Robot Centric - Determine Motor Powers
     fun robotDMP(pos: Vector2, mod: Double, turn: Double = 0.0) {
         println(pos)
         //Create Motor Powers HashMap
         val setPowers: HashMap<String, Double> = HashMap(4)
-        velocity = lerp(velocity, max(pos.magnitude(), abs(turn)), Scheduler.deltaTime * 2)
+        velocity = lerp(velocity, max(pos.magnitude(), abs(turn)), Scheduler.deltaTime.seconds() * 2)
 
         //Finds the ratio to scale the motor powers to
         val ratio: Double = max(abs(pos.x) + abs(pos.y) + abs(turn), 1.0)
@@ -79,11 +95,12 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
     }
 
     //Field Centric - Determine Motor Powers
-    fun fieldDMP(pos: Vector2, mod: Double, turn: Double = 0.0) {
+    fun fieldDMP(pos: Vector2, modVal: Double, turn: Double = 0.0) {
         //Create Motor Powers HashMap
         val setPowers: HashMap<String, Double> = HashMap(4)
+        var mod = modVal
 
-        val heading: Double = robot.pose.radians
+        val heading: Double = robot.pose.radians - rot
 
         //Defines the movement direction
         val angleX: Double = (pos.x * cos(-heading) - pos.y * sin(-heading))
@@ -91,6 +108,8 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
 
         //Finds the ratio to scale the motor powers to
         val ratio: Double = max(abs(angleX) + abs(angleY) + abs(turn), 1.0)
+        if (hub.getVoltage() <= 8.0)
+            mod *= .5
 
         setPowers["frontLeft"] = (mod * (angleY - angleX + turn) ) * fl
         setPowers["frontRight"] = (mod * (angleY + angleX - turn) ) * fr
@@ -105,22 +124,28 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
         fieldDMP(pos, 1.0, turn)
     }
 
-    fun moveToPosition(target: Pose): ConditionalCommand {
+    fun moveToPosition(target: Pose): Command {
         val xPid = PID(PIDTerms(1.0), 0.0, 3657.6, -1000.0, 1000.0)
         val yPid = PID(PIDTerms(1.0), 0.0, 3657.6, -1000.0, 1000.0)
         val rPid = PID(PIDTerms(1.0), -360.0, 360.0, -360.0, 360.0)
 
-        val xProfile = generateMotionProfile(robot.pose.x, target.x, 30.0, 30.0, 30.0) //TODO get correct mv
-        val yProfile = generateMotionProfile(robot.pose.y, target.y, 30.0, 30.0, 30.0) //TODO get correct mv
+        val xProfile = generateMotionProfile(robot.pose.x, target.x, 30000.0, 4000.0, 3000.0) //TODO get correct mv
+        val yProfile = generateMotionProfile(robot.pose.y, target.y, 30000.0, 4000.0, 3000.0) //TODO get correct mv
+        val elapsedTime = ElapsedTime()
 
-        return ConditionalCommand({
+        return Command({
             val setPowers: HashMap<String, Double> = HashMap(4)
 
+
             val error = Pose(
-                xPid.calculate(target.x, robot.pose.x),
-                yPid.calculate(target.y, robot.pose.y),
+                xPid.calculate(xProfile.getPosition(elapsedTime), robot.pose.x),
+                yPid.calculate(yProfile.getPosition(elapsedTime), robot.pose.y),
                 rPid.calculate(target.rotation, robot.pose.rotation),
             )
+
+            dashTelemetry.addData("x", error.x)
+            dashTelemetry.addData("y", error.y)
+            dashTelemetry.update()
 
             val heading = atan2(error.x, -error.y)
             val angleError = Math.toRadians(robot.pose.rotation - target.rotation)
@@ -137,16 +162,16 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
 
             var highest = 0.0
             setPowers.forEach { (_, value) -> highest = if (highest < abs(value)) abs(value) else highest }
-            highest *= 2
+            highest *= 1.25
             setPowers.forEach { (name, value) -> motors[name]!!.power = (value / highest) }
         }, {
             val diff = robot.pose - target
             val compare = Pose(20.0, 20.0, 20.0)
             if (diff.abs() >= compare) {
-                return@ConditionalCommand true
+                return@Command true
             } else {
                 this.stop()
-                return@ConditionalCommand false
+                return@Command false
             }
         })
     }
@@ -156,7 +181,7 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
         val left = gamepad1.getJoystick(GamepadEx.Joysticks.LEFT_JOYSTICK)
         val right = gamepad1.getJoystick(GamepadEx.Joysticks.RIGHT_JOYSTICK)
 
-        Scheduler.add(ContinuousCommand {
+        Scheduler.add(continuousCommand {
             fieldDMP(left.state!!, right.state!!.x)
         })
     }

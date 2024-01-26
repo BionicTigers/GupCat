@@ -11,7 +11,7 @@ import org.firstinspires.ftc.teamcode.utils.ControlHub
 /** Runs a tape measure up to the rigging in order to lift the robot */
 class Hang (hardwareMap: HardwareMap) {
     private val motor = hardwareMap.get(DcMotorEx::class.java, "hangMotor")
-    val hub = ControlHub(hardwareMap, hardwareMap.get("Control Hub") as LynxDcMotorController)
+    private val hub = ControlHub(hardwareMap, "Control Hub")
 
     init {
         motor.mode = DcMotor.RunMode.RUN_USING_ENCODER

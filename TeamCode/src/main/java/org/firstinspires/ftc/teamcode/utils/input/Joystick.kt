@@ -4,7 +4,7 @@ import org.firstinspires.ftc.teamcode.utils.Vector2
 import kotlin.math.abs
 
 class Joystick {
-    var state: Vector2? = null
+    var state: Vector2 = Vector2()
     var deadzone: Double = 0.05
 
     private val changeCallbacks = arrayListOf<((Vector2) -> Unit)>()

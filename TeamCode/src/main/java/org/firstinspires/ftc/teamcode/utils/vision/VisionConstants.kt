@@ -6,8 +6,8 @@ import org.opencv.core.Scalar
 @Config
 object VisionConstants {
 
-    val RED = Color(Scalar(0.0, 120.0, 70.0), Scalar(20.0, 200.0, 180.0), 1000)
-    val BLUE =  Color(Scalar(80.0, 50.0, 20.0), Scalar(140.0, 250.0, 250.0), 1000)
+    val RED = Color(Scalar(0.0, 160.0, 100.0), Scalar(10.0, 255.0, 255.0), 1000)
+    val BLUE =  Color(Scalar(80.0, 100.0, 100.0), Scalar(140.0, 250.0, 250.0), 1000)
 
     const val EXPOSURE: Long = 20
     const val GAIN = 0

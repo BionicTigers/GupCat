@@ -1,6 +1,10 @@
 package org.firstinspires.ftc.teamcode.utils
 
+import com.qualcomm.robotcore.util.ElapsedTime
+import kotlin.math.abs
+import kotlin.math.hypot
 import kotlin.math.pow
+import kotlin.math.sign
 import kotlin.math.sqrt
 
 data class MotionResult(
@@ -8,9 +12,21 @@ data class MotionResult(
     val velocity: List<Double>,
     val position: List<Double>,
     val time: List<Double>,
-    val deltaTime: Double
-)
+    val deltaTime: Double,
+    private val target: Double
+) {
+    fun getPosition(elapsedTime: ElapsedTime): Double {
+        return position.getOrElse((elapsedTime.seconds() / deltaTime).toInt()) {target}
+    }
+}
 
+/**
+ * Generate a motion profile based off certain parameters
+ *
+ * @param jerk mm/s^3
+ * @param maxAcceleration mm/s^2
+ * @param maxVelocity mm/s
+ */
 /**
  * Generate a motion profile based off certain parameters
  *
@@ -20,15 +36,12 @@ data class MotionResult(
  */
 fun generateMotionProfile(
     start: Double,
-    target: Double,
+    final: Double,
     jerk: Double,
     maxAcceleration: Double,
     maxVelocity: Double,
     points: Int = 500
-): MotionResult? {
-    if (target == start || target == 0.0)
-        return null
-
+): MotionResult {
     val va = maxAcceleration.pow(2) / jerk
     val sa = 2.0 * maxAcceleration.pow(3) / jerk.pow(2)
     val sv =
@@ -62,6 +75,9 @@ fun generateMotionProfile(
     val a4: Double
     val a5: Double
     val a6: Double
+
+    val target = abs(final - start)
+    if (target <= 0) return MotionResult(listOf(0.0), listOf(0.0), listOf(start), listOf(0.0), 1.0, start)
 
     if ((va > maxVelocity && sa < target) || (va > maxVelocity && sa > target && sv < target)) {
         //A & C.1
@@ -175,11 +191,15 @@ fun generateMotionProfile(
         else acceleration[i] = acceleration[i - 1] + jerk * timeslice
 
         velocity[i] = velocity.getOrElse(i - 1) { 0.0 } + acceleration[i] * timeslice
-        position[i] = position.getOrElse(i - 1) { start } + velocity[i] * timeslice
+        position[i] = position.getOrElse(i - 1) { 0.0 } + velocity[i] * timeslice
         timeList[i] = time
     }
 
-    return MotionResult(acceleration, velocity, position, timeList, timeslice)
+    for (i in 0..<points) {
+        position[i] = start + position[i] * (final - start).sign
+    }
+
+    return MotionResult(acceleration, velocity, position, timeList, timeslice, final)
 }
 
 fun <T> ArrayList(points: Int, function: () -> T): ArrayList<T> {

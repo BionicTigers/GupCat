@@ -1,90 +1,122 @@
 package org.firstinspires.ftc.teamcode.utils.command
 
-import com.qualcomm.robotcore.eventloop.opmode.OpMode
-import com.qualcomm.robotcore.eventloop.opmode.OpModeManagerNotifier
-import com.qualcomm.robotcore.util.ElapsedTime
+import org.firstinspires.ftc.teamcode.utils.Time
+import java.util.UUID
 
-/**
- * Task Scheduler used to maintain the order of code execution
- */
-object Scheduler : OpModeManagerNotifier.Notifications {
-    private val schedule: ArrayList<Command?> = ArrayList()
-    private val elapsedTime = ElapsedTime()
-    var deltaTime = 0.0
-        internal set
+object Scheduler {
+    private val commandList: HashMap<UUID, Command> = hashMapOf()
+    private val orderedList: HashMap<Int, UUID> = hashMapOf()
+    private val unorderedList: HashMap<Int, UUID> = hashMapOf()
 
-    /**
-     * Run's all the commands in order of priority
-     */
+    private val addQueue: ArrayList<Command> = arrayListOf()
+
+    private var totalAdded = 0
+
+    private var loopStartTime = System.currentTimeMillis()
+    var deltaTime = Time.fromSeconds(0.0)
+
+    private fun refreshDeltaTime() {
+        deltaTime = Time.fromMilliseconds((System.currentTimeMillis() - loopStartTime).toDouble())
+        loopStartTime = System.currentTimeMillis()
+    }
+
+    private fun setupInternals(command: Command) {
+        command.context.inScheduler = true
+        command.context.startTime = Time.fromMilliseconds(System.currentTimeMillis().toDouble())
+        commandList[command.context.id] = command
+    }
+
+    fun add(command: Command): CommandContext {
+        commandList[command.context.id] = command
+        unorderedList[totalAdded] = command.context.id
+        setupInternals(command)
+        totalAdded += 1
+
+        return command.context
+    }
+
+    fun add(command: Command, index: Int): CommandContext {
+        commandList[command.context.id] = command
+        orderedList[totalAdded] = command.context.id
+        setupInternals(command)
+        totalAdded += 1
+
+        return command.context
+    }
+
+    internal fun addToQueue(command: Command) {
+        addQueue.add(command)
+        totalAdded += 1
+    }
+
+    fun contains(id: UUID): Boolean {
+        return commandList.contains(id)
+    }
+
+    fun remove(context: CommandContext) {
+        remove(context.id)
+    }
+
+    fun remove(id: UUID) {
+        val command = commandList[id]
+        if (command != null && command.context.inScheduler) {
+            command.context.inScheduler = false
+            commandList.remove(id)
+        }
+    }
+
+    private fun updateContext(command: Command) {
+        command.context.elapsedTime += deltaTime
+    }
+
+    private fun executeCommand(command: Command) {
+        updateContext(command)
+        command.execute()
+    }
+
     fun update() {
-        deltaTime = elapsedTime.milliseconds()
+        refreshDeltaTime()
+        val orderedRemoveQueue = arrayListOf<Int>()
+        val unorderedRemoveQueue = arrayListOf<Int>()
 
-        for (command in schedule.toArray()) {
-            command?.let {(it as Command).run()}
+        orderedList.forEach { (index, id) ->
+            val command = commandList[id]
+            if (command != null)
+                executeCommand(command)
+            else
+                orderedRemoveQueue.add(index)
         }
 
-        elapsedTime.reset()
-    }
-    /**
-     *Removes a command at a given index from the scheduler
-     */
-    fun remove(priority: Int) {
-        schedule[priority] = null
-    }
+        orderedRemoveQueue.forEach {
+            orderedList.remove(it)
+        }
 
-    /**
-     *Removes a command from the scheduler
-     */
-    fun remove(command: Command) {
-        command.priority?.let {schedule[it] = null}
-    }
+        unorderedList.forEach { (index, id) ->
+            val command = commandList[id]
+            if (command != null) {
+                executeCommand(command)
+            }else
+                unorderedRemoveQueue.add(index)
+        }
 
-    /**
-     * Removes a command at a given index from the scheduler while pushing the index's ahead back one.
-     */
-    fun removeAndPush(priority: Int) {
-        schedule.removeAt(priority)
-    }
+        unorderedRemoveQueue.forEach {
+            unorderedList.remove(it)
+        }
 
-    /**
-     * Removes a command from the scheduler while pushing the index's ahead back one.
-     */
-    fun removeAndPush(command: Command) {
-        command.priority?.let {schedule.removeAt(it)}
-    }
+        addQueue.forEach {
+            setupInternals(it)
+            commandList[it.context.id] = it
+            unorderedList[totalAdded] = it.context.id
+        }
 
-    /**
-     * Adds a command to the next free index
-     */
-    fun add(command: Command) {
-        schedule.add(command)
-    }
-
-    /**
-     * Adds a command to the scheduler, pushing forward the element it replaces (if any) and any that are connected to it.
-     */
-    fun add(command: Command, priority: Int) {
-        schedule.add(priority, command)
-    }
-
-    /**
-     *  Returns the first found priority of the passed in command.
-     *
-     *  If not found, returns null.
-     */
-    fun getPriority(command: Command): Int? {
-        return schedule.indexOf(command).takeIf { it != -1 }
+        addQueue.clear()
     }
 
     fun clear() {
-        schedule.clear()
-    }
+        commandList.clear()
+        unorderedList.clear()
+        orderedList.clear()
 
-    override fun onOpModePreInit(opMode: OpMode?) {}
-
-    override fun onOpModePreStart(opMode: OpMode?) {}
-
-    override fun onOpModePostStop(opMode: OpMode?) {
-        this.clear()
+        update()
     }
 }
