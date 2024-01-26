@@ -20,8 +20,8 @@ class Odometry(private val robot: Robot) {
     private val backOffset: Double = 165.1
 
     //hubs
-    private val hub = ControlHub(robot.hardwareMap, robot.hardwareMap.get("Control Hub") as LynxDcMotorController)
-    private val exHub = ControlHub(robot.hardwareMap, robot.hardwareMap.get("Expansion Hub 2") as LynxDcMotorController)
+    private val hub = ControlHub(robot.hardwareMap, "Control Hub")
+    private val exHub = ControlHub(robot.hardwareMap, "Expansion Hub 2")
 
     init {
         hub.setJunkTicks()

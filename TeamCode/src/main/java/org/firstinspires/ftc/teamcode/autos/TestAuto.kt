@@ -6,8 +6,8 @@ import org.firstinspires.ftc.teamcode.mechanisms.Drivetrain
 import org.firstinspires.ftc.teamcode.mechanisms.Intake
 import org.firstinspires.ftc.teamcode.utils.Pose
 import org.firstinspires.ftc.teamcode.utils.Robot
+import org.firstinspires.ftc.teamcode.utils.command.Command
 import org.firstinspires.ftc.teamcode.utils.command.CommandGroup
-import org.firstinspires.ftc.teamcode.utils.command.OnceCommand
 import org.firstinspires.ftc.teamcode.utils.command.Scheduler
 
 @Autonomous(name = "Test", group = "Autonomous")
@@ -24,12 +24,12 @@ class TestAuto : LinearOpMode() {
 
         val group = CommandGroup()
 //            .add(drivetrain.moveToPosition(middleSpikeScore))
-            .add(OnceCommand { intake.down() })
-            .add(OnceCommand { intake.startSlow() })
+            .add(Command { intake.up() })
+            .add(Command { intake.startSlow() })
             .await(1)
-            .add(OnceCommand { intake.stop() })
-            .add(OnceCommand { intake.up() })
-            .await(OnceCommand { intake.up() })
+            .add(Command { intake.stop() })
+            .add(Command { intake.down() })
+            .await(Command { intake.down() })
 //            .add(drivetrain.moveToPosition())
             .build()
         Scheduler.add(group)

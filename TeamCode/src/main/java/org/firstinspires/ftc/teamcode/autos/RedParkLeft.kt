@@ -6,8 +6,8 @@ import org.firstinspires.ftc.teamcode.mechanisms.Drivetrain
 import org.firstinspires.ftc.teamcode.mechanisms.Intake
 import org.firstinspires.ftc.teamcode.utils.Pose
 import org.firstinspires.ftc.teamcode.utils.Robot
+import org.firstinspires.ftc.teamcode.utils.command.Command
 import org.firstinspires.ftc.teamcode.utils.command.CommandGroup
-import org.firstinspires.ftc.teamcode.utils.command.OnceCommand
 import org.firstinspires.ftc.teamcode.utils.command.Scheduler
 
 @Autonomous(name = "RedParkLeft", group = "Autonomous")
@@ -22,7 +22,7 @@ class RedParkLeft : LinearOpMode() {
 //        val spin = Pose(2895.0, 1370.0, 180.0)
 
         val group = CommandGroup()
-            .add(OnceCommand { intake.up() })
+            .add(Command { intake.down() })
             .add(drivetrain.moveToPosition(forward))
 //            .await(750)
             .add(drivetrain.moveToPosition(parkPoint))

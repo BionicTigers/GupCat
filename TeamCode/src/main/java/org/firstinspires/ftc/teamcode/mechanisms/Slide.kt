@@ -22,13 +22,14 @@ class Slide(hardwareMap: HardwareMap) {
     val left = hardwareMap.get(DcMotorEx::class.java, "slideBack")
     val right = hardwareMap.get(DcMotorEx::class.java, "slideFront")
     val limitSwitch = hardwareMap.get(DigitalChannel::class.java, "limitSwitch")
-    private val pid = PID(PIDTerms(), 0.0, 1000.0, -1.0, 1.0)
-    private val hub = ControlHub(hardwareMap, hardwareMap.get("Control Hub") as LynxDcMotorController)
+    private val pid = PID(PIDTerms(2.0), 0.0, 1450.0, -1.0, 1.0)
+    private val hub = ControlHub(hardwareMap, "Control Hub")
     private val dashboard = FtcDashboard.getInstance()
     private val dashTelemetry = dashboard.telemetry
 
+    private var canReset = true
     private var profile: MotionResult? = null
-    private lateinit var elapsedTime: ElapsedTime
+    private var elapsedTime: ElapsedTime = ElapsedTime()
 
     /**
      * Sets initial height of the slides to 0
@@ -36,9 +37,10 @@ class Slide(hardwareMap: HardwareMap) {
     var height = 0.0
         set(value) {
             hub.refreshBulkData()
-            field = value.coerceIn(-50.0, 1450.0)
-//            profile = generateMotionProfile(hub.getEncoderTicks(2).toDouble(), field, 7000.0, 7000.0, 20000.0)
-            elapsedTime = ElapsedTime()
+            field = value.coerceIn(0.0, 1450.0)
+            if (hub.getEncoderTicks(2).toDouble() != field) profile = generateMotionProfile(hub.getEncoderTicks(2).toDouble(), field, 80.0, 2200.0, 1800.0)
+//            if (elapsedTime.seconds() > 5)
+//                elapsedTime.reset()
         }
 
     /**
@@ -57,17 +59,25 @@ class Slide(hardwareMap: HardwareMap) {
      */
     fun update() {
         hub.refreshBulkData()
-        if (!limitSwitch.state) {
+        //once above 50 height, check again
+        if (height > 50.0) {
+            canReset = true
+        }
+
+        if (!limitSwitch.state && canReset) {
             hub.setJunkTicks()
             height = 0.0
+            canReset = false
         }
+
         val encoderTicks = hub.getEncoderTicks(2).toDouble()
-        val targetHeight = if (profile != null) profile!!.position.getOrElse(floor(elapsedTime.seconds() / profile!!.deltaTime).toInt()) { height } else height
-        var power = pid.calculate(targetHeight, encoderTicks)
+//        val targetHeight = if (profile != null) profile!!.position.getOrElse(floor(elapsedTime.seconds() / profile!!.deltaTime).toInt()) { height } else height
+        var power = pid.calculate(height, encoderTicks)
         if (height > 50)
             power += .15
         left.power = power
         right.power = power
+        dashTelemetry.addData("power", power * height)
         dashTelemetry.addData("pv", encoderTicks)
         dashTelemetry.addData("sp", height)
         dashTelemetry.update()

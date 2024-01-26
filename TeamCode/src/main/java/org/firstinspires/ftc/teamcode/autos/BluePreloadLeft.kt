@@ -12,11 +12,10 @@ import org.firstinspires.ftc.teamcode.mechanisms.Slide
 import org.firstinspires.ftc.teamcode.utils.Robot
 import org.firstinspires.ftc.teamcode.utils.vision.OpenCv
 import org.firstinspires.ftc.teamcode.utils.Pose
+import org.firstinspires.ftc.teamcode.utils.command.Command
 import org.firstinspires.ftc.teamcode.utils.command.CommandGroup
-import org.firstinspires.ftc.teamcode.utils.command.ConditionalCommand
-import org.firstinspires.ftc.teamcode.utils.command.ContinuousCommand
-import org.firstinspires.ftc.teamcode.utils.command.OnceCommand
 import org.firstinspires.ftc.teamcode.utils.command.Scheduler
+import org.firstinspires.ftc.teamcode.utils.command.continuousCommand
 import org.firstinspires.ftc.teamcode.utils.vision.VisionConstants
 
 @Autonomous(name = "BluePreloadLeft")
@@ -53,7 +52,7 @@ class BluePreloadLeft : LinearOpMode() {
         var detection: Detection? = null
 
         //Create Commands
-        val getDetection = ConditionalCommand({
+        val getDetection = Command({
             val result = openCv.getDetection()
             detection = when (result?.position?.x?.toInt()) {
                 in 0..(1280 / 3) -> Detection.Left
@@ -61,9 +60,9 @@ class BluePreloadLeft : LinearOpMode() {
                 in (1280 / 3 * 2)..1280 -> Detection.Right
                 else -> null
             }
-        }) {return@ConditionalCommand detection == null || autoTime.seconds() >= 5}
+        }) {return@Command detection == null || autoTime.seconds() >= 5}
 
-        fun moveToSpike(): ConditionalCommand? {
+        fun moveToSpike(): Command? {
             return when (detection) {
                 Detection.Left -> drivetrain.moveToPosition(leftSpikeScore)
                 Detection.Center -> drivetrain.moveToPosition(middleSpikeScore)
@@ -72,7 +71,7 @@ class BluePreloadLeft : LinearOpMode() {
             }
         }
 
-        fun moveToBackdrop(): ConditionalCommand? {
+        fun moveToBackdrop(): Command? {
             return when (detection) {
                 Detection.Left -> drivetrain.moveToPosition(leftBackdropScore)
                 Detection.Center -> drivetrain.moveToPosition(middleBackdropScore)
@@ -91,18 +90,18 @@ class BluePreloadLeft : LinearOpMode() {
             .await(moveToSpike())
             .add(moveToBackdrop()) //Moves to correct backdrop scoring position
             .await(moveToBackdrop())
-            .add(OnceCommand { chainbar.up()})
+            .add(Command { chainbar.up()})
             .await(400)
-            .add(OnceCommand { arm.up() })
+            .add(Command { arm.up() })
             .await(100)
-            .add(OnceCommand { output.open() }) //Opens the right side of the output
+            .add(Command { output.open() }) //Opens the right side of the output
             .await(200) //Waits 200 ms
             .add(preParkCommand) //Moves to the pre-parking position
             .await(preParkCommand)
             .add(parkCommand) //Moves to park position
             .build() //Builds all commands
 
-        Scheduler.add(ContinuousCommand { slides.update() })
+        Scheduler.add(continuousCommand { slides.update() })
         Scheduler.add(group1)
         waitForStart()
         autoTime.reset()

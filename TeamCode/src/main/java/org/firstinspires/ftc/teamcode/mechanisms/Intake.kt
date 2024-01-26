@@ -1,8 +1,6 @@
 package org.firstinspires.ftc.teamcode.mechanisms
 
-import com.qualcomm.robotcore.hardware.ColorSensor
 import com.qualcomm.robotcore.hardware.DcMotorEx
-import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.HardwareMap
 import com.qualcomm.robotcore.hardware.Servo
 
@@ -20,11 +18,11 @@ class Intake(hardwareMap: HardwareMap) {
      * Runs the intake
      */
     fun start() {
-        intakeMotor.power = -0.8
+        intakeMotor.power = -1.0
     }
 
     fun reverse() {
-        intakeMotor.power = 0.8
+        intakeMotor.power = 1.0
     }
 
     /**
@@ -35,17 +33,17 @@ class Intake(hardwareMap: HardwareMap) {
     }
 
     /**
-     * Raises the intake to its storage position
+     * Raises the intake to its intaking position
      */
-    fun up() {
-        leftServo.position = 1.0
-        rightServo.position = 0.4
+    fun down() {
+        leftServo.position = .55
+        rightServo.position = 0.5
     }
 
     /**
-     * Lowers the intake into intaking position
+     * Lowers the intake into storage position
      */
-    fun down() {
+    fun up() {
         leftServo.position = 0.0
         rightServo.position = 1.0
     }

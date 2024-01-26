@@ -6,13 +6,13 @@ import org.firstinspires.ftc.teamcode.mechanisms.Arm
 import org.firstinspires.ftc.teamcode.mechanisms.Hang
 import org.firstinspires.ftc.teamcode.mechanisms.Chainbar
 import org.firstinspires.ftc.teamcode.mechanisms.Drivetrain
-import org.firstinspires.ftc.teamcode.mechanisms.Drone
 import org.firstinspires.ftc.teamcode.mechanisms.Intake
 import org.firstinspires.ftc.teamcode.mechanisms.Output
 import org.firstinspires.ftc.teamcode.mechanisms.Slide
 import org.firstinspires.ftc.teamcode.utils.Robot
-import org.firstinspires.ftc.teamcode.utils.command.ContinuousCommand
+import org.firstinspires.ftc.teamcode.utils.command.Command
 import org.firstinspires.ftc.teamcode.utils.command.Scheduler
+import org.firstinspires.ftc.teamcode.utils.command.continuousCommand
 import org.firstinspires.ftc.teamcode.utils.input.GamepadEx
 
 /**
@@ -35,25 +35,37 @@ class TeleOpMain : LinearOpMode() {
         val leftJoystick = gamepad1.getJoystick(GamepadEx.Joysticks.LEFT_JOYSTICK)
         val rightJoystick = gamepad1.getJoystick(GamepadEx.Joysticks.RIGHT_JOYSTICK)
 
+
+
         //intake
         //When the up button on GP2 is pressed, the intake starts
-        gamepad1.getTrigger(GamepadEx.Triggers.LEFT_TRIGGER).onStart {
+        gamepad1.getTrigger(GamepadEx.Triggers.LEFT_TRIGGER).onHold {
             intake.start()
+        }
+        gamepad1.getTrigger(GamepadEx.Triggers.LEFT_TRIGGER).onEnd {
+            intake.stop()
         }
 
         //When the down button on GP2 is pressed, the intake stops
-        gamepad1.getTrigger(GamepadEx.Triggers.RIGHT_TRIGGER).onStart {
+        gamepad1.getTrigger(GamepadEx.Triggers.RIGHT_TRIGGER).onHold {
+            intake.reverse()
+        }
+        gamepad1.getTrigger(GamepadEx.Triggers.RIGHT_TRIGGER).onEnd {
             intake.stop()
+        }
+
+        gamepad1.getButton(GamepadEx.Buttons.BACK).onStart {
+            drivetrain.setJunkPosition()
         }
 
         //When the left trigger on GP2 is pressed, the intake is raised
         gamepad2.getButton(GamepadEx.Buttons.DPAD_DOWN).onStart {
-            intake.up()
+            intake.down()
         }
 
         //When the right trigger on GP2 is pressed, the intake is lowered
         gamepad2.getButton(GamepadEx.Buttons.DPAD_UP).onStart {
-            intake.down()
+            intake.up()
         }
 
         //hanging
@@ -74,7 +86,7 @@ class TeleOpMain : LinearOpMode() {
 
         //drivetrain
         //Uses current joystick positions to determine the correct motor powers
-        Scheduler.add(ContinuousCommand {
+        Scheduler.add(continuousCommand {
             drivetrain.fieldDMP(leftJoystick.state!!, -rightJoystick.state!!.x)
         })
 
@@ -90,20 +102,24 @@ class TeleOpMain : LinearOpMode() {
 
         //slide
         //When the Y button is pressed on GP2, the target height of the slides is raised by 500
-        gamepad2.getButton(GamepadEx.Buttons.Y).onHold {
-            println(slide.height)
+//        gamepad2.getButton(GamepadEx.Buttons.Y).onHold {
+//            slide.height += 250 * Scheduler.deltaTime
+////            arm.up()
+//        }
+//
+//        //When the X button is pressed on GP2, the target height of the slides is lowered by 500
+//        gamepad2.getButton(GamepadEx.Buttons.X).onHold {
+//            arm.down()
+//            slide.height -= 250 * Scheduler.deltaTime
+//        }
+        val leftGP2Joystick = gamepad2.getJoystick(GamepadEx.Joysticks.LEFT_JOYSTICK)
+        Scheduler.add(continuousCommand {
+            slide.height -= 1000 * Scheduler.deltaTime.seconds() * leftGP2Joystick.state!!.y
+            println(leftGP2Joystick.state!!.y)
             println(Scheduler.deltaTime)
-            slide.height += 250 * Scheduler.deltaTime
-//            arm.up()
-        }
+        })
 
-        //When the X button is pressed on GP2, the target height of the slides is lowered by 500
-        gamepad2.getButton(GamepadEx.Buttons.X).onHold {
-            arm.down()
-            slide.height -= 250 * Scheduler.deltaTime
-        }
-
-        Scheduler.add(ContinuousCommand({ slide.update() }))
+        Scheduler.add(continuousCommand { slide.update() })
 
         //output
         //When the up button on GP1 is pressed, the claw opens
@@ -142,6 +158,11 @@ class TeleOpMain : LinearOpMode() {
         gamepad2.getButton(GamepadEx.Buttons.RIGHT_BUMPER).onStart {
             arm.down()
         }
+
+        Scheduler.add(Command {
+            arm.down()
+            chainbar.down()
+        })
 
         robot.onStart{
             robot.update() //Updates position telemetry and gamepads
