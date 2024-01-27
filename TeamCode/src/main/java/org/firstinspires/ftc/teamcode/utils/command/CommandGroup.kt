@@ -13,18 +13,16 @@ class CommandGroup {
         return Command({
             if (commandList.isEmpty()) return@Command
 
+            if (!commandList[0].context.inScheduler && executed) {
+                commandList.removeAt(0)
+                println("Moving to ${commandList.size}")
+                if (commandList.isNotEmpty())
+                    Scheduler.addToQueue(commandList[0])
+            }
+
             if (!executed) {
                 Scheduler.addToQueue(commandList[0])
                 executed = true
-            }
-
-            println(commandList[0].context.inScheduler)
-
-            if (!commandList[0].context.inScheduler && executed) {
-                println(commandList.count())
-                commandList.removeAt(0)
-                if (commandList.isNotEmpty())
-                    Scheduler.addToQueue(commandList[0])
             }
         }) { commandList.isNotEmpty() }
     }
