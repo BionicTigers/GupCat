@@ -5,6 +5,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName
 import org.firstinspires.ftc.teamcode.utils.Pose
 import org.firstinspires.ftc.teamcode.utils.Robot
+import org.firstinspires.ftc.teamcode.utils.command.Command
 import org.firstinspires.ftc.vision.VisionPortal
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection
 import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase
@@ -21,13 +22,13 @@ class AprilTags(val robot: Robot, hardwareMap : HardwareMap) {
 
     // get measurement from bot  **make it negative if the distance is negative when placed on the field** (neg if camera is to the left or down, pos if camera is right or up)
     private val camPosX = 0.0 // in mm, camera position from the middle left/right
-    private val camPosY = 0.0 // in mm, camera position from the middle forward/back
+    private val camPosY = -152.4 // in mm, camera position from the middle forward/back
 
     // rotation is counterclockwise 0 being facing 5040s side (this is different from the robot's rotation, which is clockwise)
     // x and y are from the bottom left corner while facing 5040's side
     private val aprilTagData = arrayOf(
         Pair(Pose(3437.6, 2914.6, 90.0), "Blue Left"), // poses in mm, mm, deg
-        Pair(Pose(3437.6, 2861.1, 90.0), "Blue Mid"),
+        Pair(Pose(3437.6, 2861.1, 90.0), "Blue Mid"), // alex reference
         Pair(Pose(3437.6, 2807.6, 90.0), "Blue Right"),
         Pair(Pose(3437.6, 850.0, 90.0), "Red Left"),
         Pair(Pose(3437.6, 796.5, 90.0), "Red Mid"),
@@ -61,7 +62,6 @@ class AprilTags(val robot: Robot, hardwareMap : HardwareMap) {
     // returns the list of apriltags the camera sees when called (id and name)
     fun getAprilTagDetections(): Array<AprilTag> {
         val list = ArrayList<AprilTag>()
-
         for (currentDetection in aprilTagProcessor.detections) {
             if (currentDetection.metadata != null) {
                 list.add(
@@ -72,7 +72,6 @@ class AprilTags(val robot: Robot, hardwareMap : HardwareMap) {
                 )
             }
         }
-
         return list.toTypedArray()
     }
 
@@ -117,7 +116,7 @@ class AprilTags(val robot: Robot, hardwareMap : HardwareMap) {
                         270 + (-bearing + -yaw)
                     }
                 } else {
-                    if (yaw<0) {
+                    if (yaw < 0) {
                         90 + (bearing + -yaw)
                     } else {
                         90 + (-bearing + -yaw)
@@ -166,22 +165,17 @@ class AprilTags(val robot: Robot, hardwareMap : HardwareMap) {
                 else
                     globalPose.x + dirY + camToMidX
 
-                // flipping the rotation (im not redoing all that math <3)
+                // flipping the rotation bc its not in the right orientation the first time (im not redoing all that math <3)
                 robotRot = -robotRot + 360
+                robotRot += 180
+                if (robotRot >= 360) {
+                    robotRot -= 360
+                }
 
-                // makes pose
+                // makes pose and adds it to the array
                 val botPose = Pose(robotX, robotY, robotRot)
                 poses.add(botPose)
             }
-        }
-
-        fun tooCloseToBackdrop(): Boolean {
-            for (currentDetection in aprilTagProcessor.detections) {
-                if (currentDetection.rawPose != null && currentDetection.id <= 6 && currentDetection.ftcPose.range < 7.0) {
-                    return true
-                }
-            }
-            return false
         }
 
         var newPose = Pose()
@@ -192,10 +186,36 @@ class AprilTags(val robot: Robot, hardwareMap : HardwareMap) {
         }
         newPose /= poses.size.toDouble()
 
-        // sets the robots pose to the final pose
-        robot.pose = newPose
+//        // sets the robots pose to the final pose
+//        robot.pose = newPose
 
         return newPose
+    }
+
+//    fun findAvgPos() : Pose {
+//        var average = Pose()
+//        repeat(100) { average += this.calculateRobotPos() }
+//        robot.pose = average / 100.0
+//        return average / 100.0
+//    }
+    fun findAvgPos() : Pose {
+        var average = Pose()
+        var count = 0
+        val startPose = robot.pose
+        Command({
+            count++
+            average += calculateRobotPos() - (robot.pose - startPose)
+        }, {count >= 100})
+        val pose = average + (robot.pose - startPose)
+        if (pose != Pose(0.0, 0.0, 0.0))
+            robot.pose = pose
+        return pose
+    }
+
+    fun tooCloseToBackdrop(): Boolean {
+        for (currentDetection in aprilTagProcessor.detections)
+                return currentDetection.rawPose != null && currentDetection.id <= 6 && currentDetection.ftcPose.range < 7.0
+        return false
     }
 
     fun toggleLiveView() { // saves CPU resources while off
@@ -203,7 +223,6 @@ class AprilTags(val robot: Robot, hardwareMap : HardwareMap) {
             visionPortal.stopLiveView()
         else
             visionPortal.resumeLiveView()
-
         liveViewOn = !liveViewOn
     }
 
@@ -212,29 +231,22 @@ class AprilTags(val robot: Robot, hardwareMap : HardwareMap) {
             visionPortal.setProcessorEnabled(aprilTagProcessor, false)
          else
             visionPortal.setProcessorEnabled(aprilTagProcessor, true)
-
-
         processorOn = !processorOn
     }
 
     fun aprilTagLog(finalPose: Pose, telemetry: Telemetry) { // outputs id, name, xy coords, and range, bearing, yaw, calculated pose for each apriltag and the final pose
         telemetry.addData(currentDetections.size.toString(), " apriltags detected")
-
         for (currentDetection in aprilTagProcessor.detections) {
             if (currentDetection.metadata != null) {
-
                 val currentId = currentDetection.id
-                if (currentId == 4) {
+                telemetry.addLine("ID: $currentId Name: ${aprilTagData[(currentId - 1)].first}")
+                telemetry.addLine("Global Field Pos: ${aprilTagData[(currentId - 1)].second}")
 
-                    telemetry.addLine("ID: $currentId Name: ${aprilTagData[(currentId - 1)].first}")
-                    telemetry.addLine("Global Field Pos: ${aprilTagData[(currentId - 1)].second}")
-
-                    telemetry.addLine("  X: ${currentDetection.ftcPose.x} Y: ${currentDetection.ftcPose.y}")
-                    telemetry.addLine("  Yaw ${currentDetection.ftcPose.yaw} (deg)") // rotation of the tag away or towards the camera
-                    telemetry.addLine("  Range: ${currentDetection.ftcPose.range} Bearing: ${currentDetection.ftcPose.bearing} (inch, deg)/n")
-                    /* Range: direct distance to the tag center
-                    Bearing: the angle the camera must turn (left/right) to point directly at the tag center */
-                }
+                telemetry.addLine("  X: ${currentDetection.ftcPose.x} Y: ${currentDetection.ftcPose.y}")
+                telemetry.addLine("  Yaw ${currentDetection.ftcPose.yaw} (deg)") // rotation of the tag away or towards the camera
+                telemetry.addLine("  Range: ${currentDetection.ftcPose.range} Bearing: ${currentDetection.ftcPose.bearing} (inch, deg)/n")
+                /* Range: direct distance to the tag center
+                Bearing: the angle the camera must turn (left/right) to point directly at the tag center */
             } else {
                 telemetry.addLine("no metadata for apriltags")
             }

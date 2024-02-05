@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.teleop
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
+import org.firstinspires.ftc.teamcode.utils.Pose
 import org.firstinspires.ftc.teamcode.utils.Robot
 import org.firstinspires.ftc.teamcode.utils.input.GamepadEx
 import org.firstinspires.ftc.teamcode.utils.vision.AprilTags
@@ -13,10 +14,11 @@ class AprilTagOp : LinearOpMode() {
         val robot = Robot(this)
         val (gamepad1, _) = robot.getGamepads()
         val aprilTags = AprilTags(robot, hardwareMap)
+        robot.pose = Pose(863.6, 310.0, 0.0)
 
         gamepad1.getButton(GamepadEx.Buttons.A).onStart{
-            aprilTags.aprilTagLog(aprilTags.calculateRobotPos(), telemetry)
-            println(aprilTags.aprilTagLog(aprilTags.calculateRobotPos(), telemetry))
+            aprilTags.aprilTagLog(aprilTags.findAvgPos(), telemetry)
+            println(aprilTags.aprilTagLog(aprilTags.findAvgPos(), telemetry))
         }
 
         gamepad1.getButton(GamepadEx.Buttons.B).onStart {
@@ -41,7 +43,7 @@ class AprilTagOp : LinearOpMode() {
 
         while (opModeIsActive()) {
             robot.update()
-            aprilTags.calculateRobotPos()
+            aprilTags.findAvgPos()
             aprilTags.printEverything()
 
         }
