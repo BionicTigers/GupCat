@@ -114,6 +114,22 @@ class TeleOpMain : LinearOpMode() {
 //            arm.down()
 //            slide.height -= 250 * Scheduler.deltaTime
 //        }
+        //Button to decrement slide height to given position when pressed
+        gamepad2.getButton(GamepadEx.Buttons.DPAD_DOWN).onStart{
+            slide.height -= 100
+        }
+
+        //Button to increment slide height to given position when pressed
+        gamepad2.getButton(GamepadEx.Buttons.DPAD_UP).onStart{
+            slide.height += 100
+        }
+
+        //Button to reset slide height to zero position when pressed
+        gamepad2.getButton(GamepadEx.Buttons.DPAD_RIGHT).onStart{
+            slide.height = 0.0
+        }
+
+
         val leftGP2Joystick = gamepad2.getJoystick(GamepadEx.Joysticks.LEFT_JOYSTICK)
         Scheduler.add(continuousCommand {
             println(leftGP2Joystick.state)
@@ -129,6 +145,7 @@ class TeleOpMain : LinearOpMode() {
         gamepad2.getButton(GamepadEx.Buttons.A).onStart {
             output.open()
         }
+
 
         //When the down button on GP                                                                                                                          1 is pressed, the claw closes
         gamepad2.getButton(GamepadEx.Buttons.B).onStart {
