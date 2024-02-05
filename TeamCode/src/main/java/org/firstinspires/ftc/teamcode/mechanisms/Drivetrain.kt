@@ -163,11 +163,11 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
 
             var highest = 0.0
             setPowers.forEach { (_, value) -> highest = if (highest < abs(value)) abs(value) else highest }
-            highest *= 1.25
+            highest *= 2
             setPowers.forEach { (name, value) -> motors[name]!!.power = (value / highest) }
         }, {
             val diff = robot.pose - target
-            val compare = Pose(20.0, 20.0, 20.0)
+            val compare = Pose(20.0, 20.0, 5.0)
             if (diff.abs() >= compare) {
                 return@Command true
             } else {

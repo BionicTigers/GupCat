@@ -36,7 +36,7 @@ fun continuousCommand(callback: (CommandContext) -> Unit): Command {
 }
 
 fun timedCommand(callback: (CommandContext) -> Unit, time: Time): Command {
-    return Command(callback) { it.elapsedTime >= time }
+    return Command(callback) { println("${it.elapsedTime.seconds()} == ${time.seconds()}"); it.elapsedTime <= time }
 }
 
 fun timedCommand(callback: (CommandContext) -> Unit, predicate: (CommandContext) -> Boolean, time: Time): Command {
