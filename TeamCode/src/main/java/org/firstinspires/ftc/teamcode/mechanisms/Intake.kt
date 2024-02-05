@@ -25,6 +25,10 @@ class Intake(hardwareMap: HardwareMap) {
         intakeMotor.power = 1.0
     }
 
+    fun reverseSlow() {
+        intakeMotor.power = .5
+    }
+
     /**
      * Stops the intake
      */

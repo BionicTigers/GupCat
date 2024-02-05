@@ -10,6 +10,7 @@ import org.firstinspires.ftc.teamcode.utils.command.Scheduler
 @Autonomous(name="MTP")
 class MTP : LinearOpMode() {
     override fun runOpMode() {
+        Scheduler.clear()
         val robot = Robot(this)
         val drivetrain = Drivetrain(hardwareMap, robot)
 

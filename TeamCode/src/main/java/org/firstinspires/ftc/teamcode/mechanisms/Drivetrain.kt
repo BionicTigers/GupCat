@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.HardwareMap
 import com.qualcomm.robotcore.util.ElapsedTime
+import com.qualcomm.robotcore.util.RobotLog
 import org.firstinspires.ftc.teamcode.utils.ControlHub
 import org.firstinspires.ftc.teamcode.utils.PID
 import org.firstinspires.ftc.teamcode.utils.PIDTerms
@@ -125,8 +126,8 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
     }
 
     fun moveToPosition(target: Pose): Command {
-        val xPid = PID(PIDTerms(1.0), 0.0, 3657.6, -1000.0, 1000.0)
-        val yPid = PID(PIDTerms(1.0), 0.0, 3657.6, -1000.0, 1000.0)
+        val xPid = PID(PIDTerms(1.0), 0.0, 3657.6, -1.0, 1.0)
+        val yPid = PID(PIDTerms(1.0), 0.0, 3657.6, -1.0, 1.0)
         val rPid = PID(PIDTerms(1.0), -360.0, 360.0, -360.0, 360.0)
 
         val xProfile = generateMotionProfile(robot.pose.x, target.x, 30000.0, 4000.0, 3000.0) //TODO get correct mv
@@ -162,11 +163,11 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
 
             var highest = 0.0
             setPowers.forEach { (_, value) -> highest = if (highest < abs(value)) abs(value) else highest }
-            highest *= 1.25
+            highest *= 2
             setPowers.forEach { (name, value) -> motors[name]!!.power = (value / highest) }
         }, {
             val diff = robot.pose - target
-            val compare = Pose(20.0, 20.0, 20.0)
+            val compare = Pose(20.0, 20.0, 5.0)
             if (diff.abs() >= compare) {
                 return@Command true
             } else {

@@ -13,7 +13,6 @@ data class CommandContext internal constructor(
 
 open class Command(val callback: (CommandContext) -> Unit, val predicate: (CommandContext) -> Boolean) {
     constructor(callback: (deltaTime: CommandContext) -> Unit) : this(callback, { false })
-
     internal val context = CommandContext()
 
     fun execute() {
@@ -37,5 +36,9 @@ fun continuousCommand(callback: (CommandContext) -> Unit): Command {
 }
 
 fun timedCommand(callback: (CommandContext) -> Unit, time: Time): Command {
-    return Command(callback) { it.elapsedTime >= time }
+    return Command(callback) { println("${it.elapsedTime.seconds()} == ${time.seconds()}"); it.elapsedTime <= time }
+}
+
+fun timedCommand(callback: (CommandContext) -> Unit, predicate: (CommandContext) -> Boolean, time: Time): Command {
+    return Command(callback) { predicate(it) || it.elapsedTime >= time }
 }
