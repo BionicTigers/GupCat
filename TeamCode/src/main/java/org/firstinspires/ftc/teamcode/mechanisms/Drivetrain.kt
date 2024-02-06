@@ -135,8 +135,8 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
         val elapsedTime = ElapsedTime()
 
         return Command({
+            println("Ran!")
             val setPowers: HashMap<String, Double> = HashMap(4)
-
 
             val error = Pose(
                 xPid.calculate(xProfile.getPosition(elapsedTime), robot.pose.x),

@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.autos
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.util.ElapsedTime
+import com.qualcomm.robotcore.util.RobotLog
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName
 import org.firstinspires.ftc.teamcode.mechanisms.Arm
 import org.firstinspires.ftc.teamcode.mechanisms.Chainbar
@@ -66,16 +67,8 @@ class BluePreloadLeft : LinearOpMode() {
                 in (1280 / 3 * 2)..1280 -> Detection.Right
                 else -> null
             }
-        }) {return@Command detection == null || autoTime.seconds() >= 5}
+        }) {return@Command detection == null || it.elapsedTime <= Time(5.0)}
 
-        fun moveToSpike(): Command {
-            return when (detection) {
-                Detection.Left -> drivetrain.moveToPosition(leftSpikeScore)
-                Detection.Center -> drivetrain.moveToPosition(middleSpikeScore)
-                Detection.Right -> drivetrain.moveToPosition(rightSpikeScore)
-                else -> drivetrain.moveToPosition(middleSpikeScore)
-            }
-        }
 
         fun moveToBackdrop(): Command {
             return when (detection) {
@@ -92,7 +85,18 @@ class BluePreloadLeft : LinearOpMode() {
         val group1 = CommandGroup()
             .add(Command { intake.up() })
             .add(getDetection) //Gets camera detection
-            .add(moveToSpike()) //Moves to correct spike scoring position
+            .add {
+                RobotLog.ii("Team", detection?.name + " :)")
+                when (detection) {
+                    Detection.Left -> return@add drivetrain.moveToPosition(leftSpikeScore)
+                    Detection.Center -> return@add drivetrain.moveToPosition(middleSpikeScore)
+                    Detection.Right -> return@add drivetrain.moveToPosition(rightSpikeScore)
+                    else -> {
+                        RobotLog.ii("Team", detection?.name + " Default :(")
+                        return@add drivetrain.moveToPosition(middleSpikeScore)
+                    }
+                }
+            } //Moves to correct spike scoring position
             .add(timedCommand({ intake.reverse() }, Time.fromSeconds(2.0)))
             .add(Command { intake.stop() })
             .build() //Builds all commands
