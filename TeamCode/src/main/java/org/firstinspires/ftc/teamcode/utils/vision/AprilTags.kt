@@ -6,6 +6,7 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName
 import org.firstinspires.ftc.teamcode.utils.Pose
 import org.firstinspires.ftc.teamcode.utils.Robot
 import org.firstinspires.ftc.teamcode.utils.command.Command
+import org.firstinspires.ftc.teamcode.utils.command.CommandGroup
 import org.firstinspires.ftc.vision.VisionPortal
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection
 import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase
@@ -18,7 +19,7 @@ import kotlin.math.sin
 
 data class AprilTag(val id: Int, val name: String)
 
-class AprilTags(val robot: Robot, hardwareMap : HardwareMap) {
+class AprilTags(val robot: Robot, hardwareMap: HardwareMap) {
 
     // get measurement from bot  **make it negative if the distance is negative when placed on the field** (neg if camera is to the left or down, pos if camera is right or up)
     private val camPosX = 0.0 // in mm, camera position from the middle left/right
@@ -28,7 +29,7 @@ class AprilTags(val robot: Robot, hardwareMap : HardwareMap) {
     // x and y are from the bottom left corner while facing 5040's side
     private val aprilTagData = arrayOf(
         Pair(Pose(3437.6, 2914.6, 90.0), "Blue Left"), // poses in mm, mm, deg
-        Pair(Pose(3437.6, 2861.1, 90.0), "Blue Mid"), // alex reference
+        Pair(Pose(3437.6, 2861.1, 90.0), "Blue Mid"), // alex reference lol mid
         Pair(Pose(3437.6, 2807.6, 90.0), "Blue Right"),
         Pair(Pose(3437.6, 850.0, 90.0), "Red Left"),
         Pair(Pose(3437.6, 796.5, 90.0), "Red Mid"),
@@ -57,7 +58,8 @@ class AprilTags(val robot: Robot, hardwareMap : HardwareMap) {
         .build()
     private var liveViewOn = true
 
-    private val currentDetections : List<AprilTagDetection> = aprilTagProcessor.detections // an array of the apriltags the camera sees
+    private val currentDetections: List<AprilTagDetection> =
+        aprilTagProcessor.detections // an array of the apriltags the camera sees
 
     // returns the list of apriltags the camera sees when called (id and name)
     fun getAprilTagDetections(): Array<AprilTag> {
@@ -91,16 +93,20 @@ class AprilTags(val robot: Robot, hardwareMap : HardwareMap) {
 
     // returns the final global robot pose and sets the robot's pose to that pose
     fun calculateRobotPos(): Pose { // none of this code works if the apriltags' rotations are anything other than 90 or 270 :3
-        val poses : ArrayList<Pose> = arrayListOf()
+        val poses: ArrayList<Pose> = arrayListOf()
 
         // for each apriltags the camera sees, find the global pose of the robot and put each pose in an array
         for (currentDetection in aprilTagProcessor.detections) {
             if (currentDetection.rawPose != null) {
-                val globalPose = aprilTagData[currentDetection.id - 1].first // pose of the apriltags from aprilTagData array
+                val globalPose =
+                    aprilTagData[currentDetection.id - 1].first // pose of the apriltags from aprilTagData array
 
-                val range = currentDetection.ftcPose.range * 25.4 // inches converted into mm, direct dist from the center of the aptg to the camera
-                val bearing = currentDetection.ftcPose.bearing // deg, how much the robot would have to rotate to directly face the aptg
-                val yaw = currentDetection.ftcPose.yaw // deg, rotation of the tag away or towards the camera
+                val range =
+                    currentDetection.ftcPose.range * 25.4 // inches converted into mm, direct dist from the center of the aptg to the camera
+                val bearing =
+                    currentDetection.ftcPose.bearing // deg, how much the robot would have to rotate to directly face the aptg
+                val yaw =
+                    currentDetection.ftcPose.yaw // deg, rotation of the tag away or towards the camera
                 val rawX = currentDetection.ftcPose.x // x val from the camera
                 // there is a diagram of these values here: https://ftc-docs.firstinspires.org/en/latest/apriltag/understanding_apriltag_detection_values/understanding-apriltag-detection-values.html
 
@@ -126,7 +132,7 @@ class AprilTags(val robot: Robot, hardwareMap : HardwareMap) {
                 // finding pos of center of robot from the camera pos
                 val h = (2.0.pow(camPosX) + 2.0.pow(camPosY)).pow(.5)
 
-                val camToMidX = sin(robotRot)*camPosY+cos(robotRot)*camPosX
+                val camToMidX = sin(robotRot) * camPosY + cos(robotRot) * camPosX
 
                 val camToMidY = (2.0.pow(h) + 2.0.pow(camToMidX)).pow(.5)
 
@@ -192,29 +198,27 @@ class AprilTags(val robot: Robot, hardwareMap : HardwareMap) {
         return newPose
     }
 
-//    fun findAvgPos() : Pose {
-//        var average = Pose()
-//        repeat(100) { average += this.calculateRobotPos() }
-//        robot.pose = average / 100.0
-//        return average / 100.0
-//    }
-    fun findAvgPos() : Pose {
+    fun findAvgPos(): Command {
         var average = Pose()
         var count = 0
         val startPose = robot.pose
-        Command({
-            count++
-            average += calculateRobotPos() - (robot.pose - startPose)
-        }, {count >= 100})
-        val pose = average + (robot.pose - startPose)
-        if (pose != Pose(0.0, 0.0, 0.0))
-            robot.pose = pose
-        return pose
+
+        val group = CommandGroup()
+            .add(Command({
+                count++
+                average += calculateRobotPos() - (robot.pose - startPose)
+            }, { count >= 100 }))
+            .add(Command {
+                robot.pose = average + (robot.pose - startPose)
+            })
+            .build()
+
+        return group
     }
 
     fun tooCloseToBackdrop(): Boolean {
         for (currentDetection in aprilTagProcessor.detections)
-                return currentDetection.rawPose != null && currentDetection.id <= 6 && currentDetection.ftcPose.range < 7.0
+            return currentDetection.rawPose != null && currentDetection.id <= 6 && currentDetection.ftcPose.range < 7.0
         return false
     }
 
@@ -229,12 +233,15 @@ class AprilTags(val robot: Robot, hardwareMap : HardwareMap) {
     fun toggleATProcessor() { // saves more CPU resources while off
         if (processorOn)
             visionPortal.setProcessorEnabled(aprilTagProcessor, false)
-         else
+        else
             visionPortal.setProcessorEnabled(aprilTagProcessor, true)
         processorOn = !processorOn
     }
 
-    fun aprilTagLog(finalPose: Pose, telemetry: Telemetry) { // outputs id, name, xy coords, and range, bearing, yaw, calculated pose for each apriltag and the final pose
+    fun aprilTagLog(
+        finalPose: Pose,
+        telemetry: Telemetry
+    ) { // outputs id, name, xy coords, and range, bearing, yaw, calculated pose for each apriltag and the final pose
         telemetry.addData(currentDetections.size.toString(), " apriltags detected")
         for (currentDetection in aprilTagProcessor.detections) {
             if (currentDetection.metadata != null) {
