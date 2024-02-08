@@ -38,8 +38,8 @@ data class Pose(val x: Double, val y: Double, val rotation: Double) {
         val thisDistance = sqrt(x * x + y * y)
         val otherDistance = sqrt(other.x * other.x + other.y * other.y)
 
-        val thisCombined = thisDistance + rotation
-        val otherCombined = otherDistance + other.rotation
+        val thisCombined = thisDistance
+        val otherCombined = otherDistance
 
         return thisCombined.compareTo(otherCombined)
     }

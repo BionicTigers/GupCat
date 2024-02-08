@@ -193,7 +193,7 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
                 val diff = (robot.pose - target).abs()
                 val compare = Pose(20.0, 20.0, 5.0)
                 println("${diff.rotation} <= ${compare.rotation}")
-                return@Command diff.x >= compare.x && diff.y >= compare.y && diff.rotation >= compare.rotation
+                return@Command diff <= compare && (diff.rotation <= compare.rotation && diff.rotation >= -compare.rotation)
             }))
             .add(Command {
                 this.stop()
