@@ -1,8 +1,7 @@
 package org.firstinspires.ftc.teamcode.utils
 
-import kotlin.math.abs
 import kotlin.math.absoluteValue
-import kotlin.math.sign
+import kotlin.math.sqrt
 
 /**
  * Combines a Vector2 and a Rotation variable
@@ -36,16 +35,13 @@ data class Pose(val x: Double, val y: Double, val rotation: Double) {
     }
 
     operator fun compareTo(other: Pose): Int {
-        var i = 0
+        val thisDistance = sqrt(x * x + y * y)
+        val otherDistance = sqrt(other.x * other.x + other.y * other.y)
 
-        if (abs(this.x) < other.x && abs(this.y) < other.y && abs(this.rotation) < other.rotation) {
-            i = -1
-        } else if (abs(this.x) == other.x && abs(this.y) == other.y && abs(this.rotation) == other.rotation) {
-            i = 0
-        } else if (abs(this.x) > other.x && abs(this.y) > other.y && abs(this.rotation) > other.rotation) {
-            i = 1
-        }
-        return i
+        val thisCombined = thisDistance + rotation
+        val otherCombined = otherDistance + other.rotation
+
+        return thisCombined.compareTo(otherCombined)
     }
 
     operator fun plus(other: Pose): Pose {

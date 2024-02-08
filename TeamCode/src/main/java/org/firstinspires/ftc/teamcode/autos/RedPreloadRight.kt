@@ -39,12 +39,15 @@ class RedPreloadRight : LinearOpMode() {
             hashMapOf("Red" to VisionConstants.RED))
 
         //Sets the robot's starting position
-        robot.pose = Pose(2110.0, 3352.0, 0.0)
+        robot.pose = Pose(2110.0, 3352.0, 180.0)
 
         //Creates potential scoring positions for the purple pixel on the spike marks
-        val leftSpikeScore = Pose(2110.0, 2500.0, 90.0)
-        val middleSpikeScore = Pose(2110.0, 2500.0, 180.0)
-        val rightSpikeScore = Pose(2110.0, 2500.0, -90.0)
+        val leftSpikeScore = Pose(2110.0, 3800.0, 180.0)
+        val middleSpikeScore = Pose(2110.0, 3965.1, 180.0)
+        val rightSpikeScore = Pose(2110.0, 3800.0, 180.0)
+
+        val intermediate = Pose(2110.0, 3850.0, 180.0)
+        val turn = Pose(2110.0, 3850.0, 90.0)
 
         //Creates potential scoring positions for the yellow pixel on the backdrop
         val leftBackdropScore = Pose(2800.0, 2816.0, 0.0)
@@ -89,7 +92,6 @@ class RedPreloadRight : LinearOpMode() {
         val parkCommand = drivetrain.moveToPosition(park)
 
         val group1 = CommandGroup()
-            .add(Command { intake.up() })
             .add(Command({
                 val result = openCv.getDetection()
                 detection = when (result?.position?.x?.toInt()) {
@@ -101,10 +103,11 @@ class RedPreloadRight : LinearOpMode() {
             }) {detection == null}
             ) //Gets camera detection
             .add(Command { RobotLog.ii("Team", "early ${detection?.name}") })
-            .add(drivetrain.moveToPosition(Pose(2110.0, 3000.0, 0.0)))
             .add(moveToSpike()) //Moves to correct spike scoring position
-            .add(timedCommand({ intake.reverseSlow() }, Time.fromSeconds(1.0)))
-            .add(Command { intake.stop() })
+            .add(timedCommand({ drivetrain.stop() }, Time.fromSeconds(1.0)))
+            .add(drivetrain.moveToPosition(intermediate))
+            .add(timedCommand({ drivetrain.stop() }, Time.fromSeconds(1.0)))
+            .add(drivetrain.moveToPosition(turn))
             .build() //Builds all commands
 
         Scheduler.add(continuousCommand { slides.update() })

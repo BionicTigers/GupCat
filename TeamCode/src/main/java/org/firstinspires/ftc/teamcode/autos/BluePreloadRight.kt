@@ -29,7 +29,7 @@ class BluePreloadRight : LinearOpMode() {
         val slides = Slide(hardwareMap)
         val chainbar = Chainbar(hardwareMap)
         val arm = Arm(hardwareMap)
-        val openCv = OpenCv(hardwareMap.get(WebcamName::class.java, "webcam"),
+        val openCv = OpenCv(hardwareMap.get(WebcamName::class.java, "Webcam 1"),
             hashMapOf("Blue" to VisionConstants.BLUE))
 
         // Sets the robot's starting position
@@ -62,7 +62,7 @@ class BluePreloadRight : LinearOpMode() {
                 in (1280 / 3 * 2)..1280 -> Detection.Right
                 else -> null
             }
-        }) {return@Command detection == null || autoTime.seconds() >= 5}
+        }) {return@Command detection == null}
 
         fun moveToSpike(): Command {
             return when (detection) {

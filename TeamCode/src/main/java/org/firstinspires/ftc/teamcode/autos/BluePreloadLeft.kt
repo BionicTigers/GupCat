@@ -38,18 +38,19 @@ class BluePreloadLeft : LinearOpMode() {
             hashMapOf("Blue" to VisionConstants.BLUE))
 
         //Sets the robot's starting position
-        robot.pose = Pose(2121.0, 286.0, 90.0)
+        robot.pose = Pose(2121.0, 286.0, 180.0)
 
         //Creates potential scoring positions for the purple pixel on the spike marks
-        val leftSpikeScore = Pose(1853.0, 853.0, 90.0)
-        val middleSpikeScore = Pose(2121.0, 926.0, 90.0)
-        val rightSpikeScore = Pose(2426.0, 853.0, 90.0)
+        val leftSpikeScore = Pose(2121.8, 700.0, 180.0)
+        val middleSpikeScore = Pose(2121.8, 1000.0, 180.0)
+        val rightSpikeScore = Pose(2121.8, 1300.0, 180.0)
 
-        val intermediate = Pose(2000.0, 800.0, 90.0)
+        val intermediate = Pose(2650.0, 286.0, 90.0)
+        val turn = Pose(2650.0, 200.0, 180.0)
        //Creates potential scoring positions for the yellow pixel on the backdrop
-        val leftBackdropScore = Pose(2700.0, 676.0, 90.0)
-        val middleBackdropScore = Pose(2000.0, 900.0, 90.0)
-        val rightBackdropScore = Pose(2700.0, 1109.0, 90.0)
+        val leftBackdropScore = Pose(2600.0, 1276.0, 0.0)
+        val middleBackdropScore = Pose(2000.0, 900.0, 0.0)
+        val rightBackdropScore = Pose(2700.0, 1109.0, 0.0)
 
         //Positions between backdrop scoring and parking
         val prePark = Pose(3060.0, 249.0, 90.0)
@@ -59,16 +60,14 @@ class BluePreloadLeft : LinearOpMode() {
         var detection: Detection? = null
 
         //Create Commands
-        val getDetection = Command({
-            val result = openCv.getDetection()
-            detection = when (result?.position?.x?.toInt()) {
-                in 0..(1280 / 3) -> Detection.Left
-                in (1280 / 3)..(1280 / 3 * 2) -> Detection.Center
-                in (1280 / 3 * 2)..1280 -> Detection.Right
-                else -> null
+        fun moveToSpike(): Command {
+            return when (detection) {
+                Detection.Left -> drivetrain.moveToPosition(leftSpikeScore)
+                Detection.Center -> drivetrain.moveToPosition(middleSpikeScore)
+                Detection.Right -> drivetrain.moveToPosition(rightSpikeScore)
+                else -> drivetrain.moveToPosition(middleSpikeScore)
             }
-        }) {return@Command detection == null || it.elapsedTime <= Time(5.0)}
-
+        }
 
         fun moveToBackdrop(): Command {
             return when (detection) {
@@ -83,22 +82,23 @@ class BluePreloadLeft : LinearOpMode() {
         val parkCommand = drivetrain.moveToPosition(park)
 
         val group1 = CommandGroup()
-            .add(Command { intake.up() })
-            .add(getDetection) //Gets camera detection
-            .add {
-                RobotLog.ii("Team", detection?.name + " :)")
-                when (detection) {
-                    Detection.Left -> return@add drivetrain.moveToPosition(leftSpikeScore)
-                    Detection.Center -> return@add drivetrain.moveToPosition(middleSpikeScore)
-                    Detection.Right -> return@add drivetrain.moveToPosition(rightSpikeScore)
-                    else -> {
-                        RobotLog.ii("Team", detection?.name + " Default :(")
-                        return@add drivetrain.moveToPosition(middleSpikeScore)
-                    }
+            .add(Command({
+                val result = openCv.getDetection()
+                detection = when (result?.position?.x?.toInt()) {
+                    in 0..300 -> Detection.Left
+                    in 300..(1280 / 3 * 2) -> Detection.Center
+                    in (1280 / 3 * 2)..1280 -> Detection.Right
+                    else -> null
                 }
-            } //Moves to correct spike scoring position
-            .add(timedCommand({ intake.reverse() }, Time.fromSeconds(2.0)))
-            .add(Command { intake.stop() })
+            }) {detection == null}
+            ) //Gets camera detection
+            .add(Command{ RobotLog.ii("Team", "early ${detection?.name}")})
+            .add(moveToSpike()) //Moves to correct spike scoring position
+            .add(timedCommand({ drivetrain.stop() }, Time.fromSeconds(1.0)))
+            .add(drivetrain.moveToPosition(intermediate))
+            .add(timedCommand({ drivetrain.stop() }, Time.fromSeconds(1.0)))
+            .add(drivetrain.moveToPosition(turn))
+//            .add(moveToBackdrop())
             .build() //Builds all commands
 
         Scheduler.add(continuousCommand { slides.update() })
