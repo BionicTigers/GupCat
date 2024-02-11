@@ -18,15 +18,19 @@ import kotlin.math.floor
  * Raises and lowers arm and chainbar for more versatile scoring positions
  */
 class Slide(hardwareMap: HardwareMap) {
+    //TODO (Melia) Declare an enum with the different heights the slides can be in
+
     val left = hardwareMap.get(DcMotorEx::class.java, "slideBack")
     val right = hardwareMap.get(DcMotorEx::class.java, "slideFront")
     val limitSwitch = hardwareMap.get(DigitalChannel::class.java, "limitSwitch")
-    private val pid = PID(PIDTerms(), 0.0, 1000.0, -1.0, 1.0)
     private val hub = ControlHub(hardwareMap, "Control Hub")
-    private val dashboard = FtcDashboard.getInstance()
-    private val dashTelemetry = dashboard.telemetry
+
+    private val pid = PID(PIDTerms(), 0.0, 1000.0, -1.0, 1.0)
     private var profile: MotionResult? = null
     private lateinit var elapsedTime: ElapsedTime
+
+    private val dashboard = FtcDashboard.getInstance()
+    private val dashTelemetry = dashboard.telemetry
 
     /**
      * Sets initial height of the slides to 0

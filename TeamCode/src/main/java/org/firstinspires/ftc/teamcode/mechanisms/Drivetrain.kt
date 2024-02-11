@@ -57,6 +57,7 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
     private var rot = 0.0
 
     private var velocity = 0.0
+    private var isInSlowMode = false
 
     init {
         for (motor in motors.values) {
@@ -113,6 +114,9 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
         val ratio: Double = max(abs(angleX) + abs(angleY) + abs(turn), 1.0)
         if (hub.getVoltage() <= 8.0)
             mod *= .5
+
+        if (isInSlowMode)
+            mod *= .75
 
         setPowers["frontLeft"] = (mod * (angleY - angleX + turn)) * fl
         setPowers["frontRight"] = (mod * (angleY + angleX - turn)) * fr
@@ -233,10 +237,8 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
         }
     }
 
-    fun slow() {
-        for (motor in motors.values) {
-            motor.power = 0.75
-        }
+    fun slowToggle() {
+        isInSlowMode = !isInSlowMode
     }
 
 

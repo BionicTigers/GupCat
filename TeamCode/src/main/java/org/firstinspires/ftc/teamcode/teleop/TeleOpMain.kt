@@ -115,6 +115,10 @@ class TeleOpMain : LinearOpMode() {
 //            slide.height -= 250 * Scheduler.deltaTime
 //        }
         //Button to decrement slide height to given position when pressed
+
+
+        //TODO (Melia) A increment and decrement method should be added to 2 buttons, which will change the target position, then a reset button should be added which sets to 0
+
         gamepad2.getButton(GamepadEx.Buttons.DPAD_DOWN).onStart{
             slide.height -= 100
         }
@@ -161,11 +165,6 @@ class TeleOpMain : LinearOpMode() {
         //When the B button on GP2 is pressed, the chainbar lowers
         gamepad2.getTrigger(GamepadEx.Triggers.RIGHT_TRIGGER).onStart {
             chainbar.down()
-        }
-
-        //When the triangle button on GP1 is pressed, the drivetrain enters slow mode.
-        gamepad1.getButton(GamepadEx.Buttons.Y).onStart {
-            drivetrain.slow()
         }
 
         //arm

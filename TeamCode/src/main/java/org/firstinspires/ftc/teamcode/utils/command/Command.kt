@@ -40,5 +40,5 @@ fun timedCommand(callback: (CommandContext) -> Unit, time: Time): Command {
 }
 
 fun timedCommand(callback: (CommandContext) -> Unit, predicate: (CommandContext) -> Boolean, time: Time): Command {
-    return Command(callback) { predicate(it) || it.elapsedTime >= time }
+    return Command(callback) { predicate(it) && it.elapsedTime >= time }
 }

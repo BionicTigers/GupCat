@@ -59,25 +59,6 @@ class BluePreloadLeft : LinearOpMode() {
         val autoTime = ElapsedTime()
         var detection: Detection? = null
 
-        //Create Commands
-        fun moveToSpike(): Command {
-            return when (detection) {
-                Detection.Left -> drivetrain.moveToPosition(leftSpikeScore)
-                Detection.Center -> drivetrain.moveToPosition(middleSpikeScore)
-                Detection.Right -> drivetrain.moveToPosition(rightSpikeScore)
-                else -> drivetrain.moveToPosition(middleSpikeScore)
-            }
-        }
-
-        fun moveToBackdrop(): Command {
-            return when (detection) {
-                Detection.Left -> drivetrain.moveToPosition(leftBackdropScore)
-                Detection.Center -> drivetrain.moveToPosition(middleBackdropScore)
-                Detection.Right -> drivetrain.moveToPosition(rightBackdropScore)
-                else -> drivetrain.moveToPosition(middleBackdropScore)
-            }
-        }
-
         val preParkCommand = drivetrain.moveToPosition(prePark)
         val parkCommand = drivetrain.moveToPosition(park)
 
@@ -90,15 +71,27 @@ class BluePreloadLeft : LinearOpMode() {
                     in (1280 / 3 * 2)..1280 -> Detection.Right
                     else -> null
                 }
-            }) {detection == null}
-            ) //Gets camera detection
-            .add(Command{ RobotLog.ii("Team", "early ${detection?.name}")})
-            .add(moveToSpike()) //Moves to correct spike scoring position
+            }) {detection == null}) //Gets camera detection
+            .add {
+                return@add when (detection) {
+                    Detection.Left -> drivetrain.moveToPosition(leftSpikeScore)
+                    Detection.Center -> drivetrain.moveToPosition(middleSpikeScore)
+                    Detection.Right -> drivetrain.moveToPosition(rightSpikeScore)
+                    else -> drivetrain.moveToPosition(middleSpikeScore)
+                }
+            } //Moves to correct spike scoring position
             .add(timedCommand({ drivetrain.stop() }, Time.fromSeconds(1.0)))
             .add(drivetrain.moveToPosition(intermediate))
             .add(timedCommand({ drivetrain.stop() }, Time.fromSeconds(1.0)))
             .add(drivetrain.moveToPosition(turn))
-//            .add(moveToBackdrop())
+            /*.add {
+                return@add when (detection) {
+                    Detection.Left -> drivetrain.moveToPosition(leftBackdropScore)
+                    Detection.Center -> drivetrain.moveToPosition(middleBackdropScore)
+                    Detection.Right -> drivetrain.moveToPosition(rightBackdropScore)
+                    else -> drivetrain.moveToPosition(middleBackdropScore)
+                }
+            }*/
             .build() //Builds all commands
 
         Scheduler.add(continuousCommand { slides.update() })
