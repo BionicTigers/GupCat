@@ -167,9 +167,9 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
                 dashTelemetry.addData("y", error.y)
                 dashTelemetry.update()
 
-                val heading = atan2(error.x, -error.y)
+                val heading = atan2(error.x, error.y)
                 val angleError = Math.toRadians(robot.pose.rotation - target.rotation) * 2.0
-                val y = cos(heading)
+                val y = -cos(heading)
                 val x = sin(heading)
 
                 val power = hypot(x, y)
@@ -179,25 +179,26 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
                 )
 
                 setPowers["frontLeft"] =
-                    (power * (angleVector.x - angleVector.y) + angleError) * fl
+                    (power * (angleVector.x - angleVector.y) + angleError * (1.0/2)) * fl
                 setPowers["frontRight"] =
-                    (power * (angleVector.x + angleVector.y) - angleError) * fr
+                    (power * (angleVector.x + angleVector.y) - angleError * (1.0/2)) * fr
                 setPowers["backLeft"] =
-                    (power * (angleVector.x + angleVector.y) + angleError) * bl
+                    (power * (angleVector.x + angleVector.y) + angleError * (1.0/2)) * bl
                 setPowers["backRight"] =
-                    (power * (angleVector.x - angleVector.y) - angleError) * br
+                    (power * (angleVector.x - angleVector.y) - angleError * (1.0/2)) * br
 
                 var highest = 0.0
                 setPowers.forEach { (_, value) ->
                     highest = if (highest < abs(value)) abs(value) else highest
                 }
-                highest *= 2
+                highest *= 3
                 setPowers.forEach { (name, value) -> motors[name]!!.power = (value / highest) }
             }, {
                 val diff = (robot.pose - target).abs()
                 val compare = Pose(20.0, 20.0, 5.0)
-                println("${diff.rotation} <= ${compare.rotation}")
-                return@Command diff <= compare && (diff.rotation <= compare.rotation && diff.rotation >= -compare.rotation)
+                println("$diff")
+                println(diff.rotation >= compare.rotation || diff.rotation <= -compare.rotation)
+                return@Command diff >= compare || (diff.rotation >= compare.rotation || diff.rotation <= -compare.rotation)
             }))
             .add(Command {
                 this.stop()

@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import org.firstinspires.ftc.teamcode.mechanisms.Drivetrain
 import org.firstinspires.ftc.teamcode.utils.Pose
 import org.firstinspires.ftc.teamcode.utils.Robot
+import org.firstinspires.ftc.teamcode.utils.command.CommandGroup
 import org.firstinspires.ftc.teamcode.utils.command.Scheduler
 
 @Autonomous(name="MTP")
@@ -14,7 +15,13 @@ class MTP : LinearOpMode() {
         val robot = Robot(this)
         val drivetrain = Drivetrain(hardwareMap, robot)
 
-        val cmd = drivetrain.moveToPosition(Pose(0.0, 609.0, 180.0))
+        robot.pose = Pose(0.0, 0.0, 0.0)
+
+        val cmd = CommandGroup()
+//            .add(drivetrain.moveToPosition(Pose(0.0, 0.0, 180.0)))
+            .add(drivetrain.moveToPosition(Pose(0.0, 600.0, 0.0)))
+            .add(drivetrain.moveToPosition(Pose(0.0, 900.0, 90.0)))
+            .build()
         Scheduler.add(cmd)
 
         waitForStart()
