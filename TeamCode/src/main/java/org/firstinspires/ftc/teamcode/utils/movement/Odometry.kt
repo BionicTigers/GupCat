@@ -48,7 +48,7 @@ class Odometry(private val robot: Robot) {
         val deltaLeftMM = circumference * exHub.getEncoderTicks(3) / 2000
         val deltaRightMM = -circumference * exHub.getEncoderTicks(0) / 2000
         val deltaBackMM = -circumference * hub.getEncoderTicks(3) / 2000
-        println("Left: $deltaLeftMM, Right: $deltaRightMM, Back: $deltaBackMM")
+//        println("Left: $deltaLeftMM, Right: $deltaRightMM, Back: $deltaBackMM")
 
         //Find the amount the robot has rotated
         val localRotation = (deltaLeftMM - deltaRightMM) / (leftOffset + rightOffset)

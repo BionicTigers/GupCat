@@ -46,13 +46,13 @@ class RedPreloadRight : LinearOpMode() {
         val middleSpikeScore = Pose(2110.0, 1000.0, 180.0)
         val rightSpikeScore = Pose(2110.0, 900.0, 180.0)
 
-        val intermediate = Pose(2110.0, 500.0, 180.0)
-        val turn = Pose(2110.0, 500.0, 90.0)
+        val intermediate = Pose(2110.0, 700.0, 270.0)
+//        val turn = Pose(2110.0, 500.0, 90.0)
 
         //Creates potential scoring positions for the yellow pixel on the backdrop
-        val leftBackdropScore = Pose(2400.0, 4100.0, 270.0)
-        val middleBackdropScore = Pose(2400.0, 4100.0, 270.0)
-        val rightBackdropScore = Pose(2400.0, 4100.0, 270.0)
+        val leftBackdropScore = Pose(3100.0, 900.0, 270.0)
+        val middleBackdropScore = Pose(3100.0, 900.0, 270.0)
+        val rightBackdropScore = Pose(3100.0, 900.0, 270.0)
 
         //Positions between backdrop scoring and parking
         val prePark = Pose(3070.0, 3328.0, 90.0)
@@ -60,9 +60,6 @@ class RedPreloadRight : LinearOpMode() {
 
         val autoTime = ElapsedTime()
         var detection: Detection? = null
-
-        val preParkCommand = drivetrain.moveToPosition(prePark)
-        val parkCommand = drivetrain.moveToPosition(park)
 
         val group1 = CommandGroup()
             .add(Command({
@@ -82,18 +79,18 @@ class RedPreloadRight : LinearOpMode() {
                     else -> drivetrain.moveToPosition(middleSpikeScore)
                 }
             } //Moves to correct spike scoring position
-            .add(timedCommand({ drivetrain.stop() }, Time.fromSeconds(1.0)))
+//            .add(timedCommand({ drivetrain.stop() }, Time.fromSeconds(1.0)))
             .add(drivetrain.moveToPosition(intermediate))
-            .add(timedCommand({ drivetrain.stop() }, Time.fromSeconds(1.0)))
-            .add(drivetrain.moveToPosition(turn))
-            /*.add {
+//            .add(timedCommand({ drivetrain.stop() }, Time.fromSeconds(1.0)))
+//            .add(drivetrain.moveToPosition(turn))
+            .add {
                 return@add when (detection) {
                     Detection.Left -> drivetrain.moveToPosition(leftBackdropScore)
                     Detection.Center -> drivetrain.moveToPosition(middleBackdropScore)
                     Detection.Right -> drivetrain.moveToPosition(rightBackdropScore)
                     else -> drivetrain.moveToPosition(middleBackdropScore)
                 }
-            }*/
+            }
             .build() //Builds all commands
 
         Scheduler.add(continuousCommand { slides.update() })

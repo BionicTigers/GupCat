@@ -76,7 +76,6 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
 
     //Robot Centric - Determine Motor Powers
     fun robotDMP(pos: Vector2, mod: Double, turn: Double = 0.0) {
-        println(pos)
         //Create Motor Powers HashMap
         val setPowers: HashMap<String, Double> = HashMap(4)
         velocity =
@@ -118,10 +117,12 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
         if (isInSlowMode)
             mod *= .75
 
-        setPowers["frontLeft"] = (mod * (angleY - angleX + turn)) * fl
-        setPowers["frontRight"] = (mod * (angleY + angleX - turn)) * fr
-        setPowers["backLeft"] = (mod * (angleY + angleX + turn)) * bl
-        setPowers["backRight"] = (mod * (angleY - angleX - turn)) * br
+        val rotM = 1.0
+
+        setPowers["frontLeft"] = (mod * (angleY - angleX + turn * rotM)) * fl
+        setPowers["frontRight"] = (mod * (angleY + angleX - turn * rotM)) * fr
+        setPowers["backLeft"] = (mod * (angleY + angleX + turn * rotM)) * bl
+        setPowers["backRight"] = (mod * (angleY - angleX - turn * rotM)) * br
 
         //Set motor powers scaled to the ratio
         setPowers.forEach { (name, value) -> motors[name]!!.power = (value / ratio) }
@@ -132,34 +133,32 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
     }
 
     fun moveToPosition(target: Pose): Command {
-        val xPid = PID(PIDTerms(1.0), 0.0, 3657.6, -1.0, 1.0)
-        val yPid = PID(PIDTerms(1.0), 0.0, 3657.6, -1.0, 1.0)
-        val rPid = PID(PIDTerms(1.0), -360.0, 360.0, -360.0, 360.0)
+        val xPid = PID(PIDTerms(10.0, .5), 0.0, 3657.6, -1.0, 1.0)
+        val yPid = PID(PIDTerms(10.0, .5), 0.0, 3657.6, -1.0, 1.0)
+        val rPid = PID(PIDTerms(5.0), -360.0, 360.0, -360.0, 360.0)
 
         val xProfile = generateMotionProfile(
             robot.pose.x,
             target.x,
-            30000.0,
-            4000.0,
-            3000.0
+            3000.0,
+            7000.0,
+            4000.0
         ) //TODO get correct mv
         val yProfile = generateMotionProfile(
             robot.pose.y,
             target.y,
-            30000.0,
-            4000.0,
-            3000.0
+            3000.0,
+            7000.0,
+            4000.0
         ) //TODO get correct mv
-        val elapsedTime = ElapsedTime()
 
         return CommandGroup()
             .add(Command({
-                println("Ran!")
                 val setPowers: HashMap<String, Double> = HashMap(4)
 
                 val error = Pose(
-                    xPid.calculate(xProfile.getPosition(elapsedTime), robot.pose.x),
-                    yPid.calculate(yProfile.getPosition(elapsedTime), robot.pose.y),
+                    xPid.calculate(xProfile.getPosition(it.elapsedTime), robot.pose.x),
+                    yPid.calculate(yProfile.getPosition(it.elapsedTime), robot.pose.y),
                     rPid.calculate(target.rotation, robot.pose.rotation),
                 )
 
@@ -167,37 +166,10 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
                 dashTelemetry.addData("y", error.y)
                 dashTelemetry.update()
 
-                val heading = atan2(error.x, error.y)
-                val angleError = Math.toRadians(robot.pose.rotation - target.rotation) * 2.0
-                val y = -cos(heading)
-                val x = sin(heading)
-
-                val power = hypot(x, y)
-                val angleVector = Vector2(
-                    x * sin(robot.pose.radians) + y * cos(robot.pose.radians),
-                    x * cos(robot.pose.radians) - y * sin(robot.pose.radians)
-                )
-
-                setPowers["frontLeft"] =
-                    (power * (angleVector.x - angleVector.y) + angleError * (1.0/2)) * fl
-                setPowers["frontRight"] =
-                    (power * (angleVector.x + angleVector.y) - angleError * (1.0/2)) * fr
-                setPowers["backLeft"] =
-                    (power * (angleVector.x + angleVector.y) + angleError * (1.0/2)) * bl
-                setPowers["backRight"] =
-                    (power * (angleVector.x - angleVector.y) - angleError * (1.0/2)) * br
-
-                var highest = 0.0
-                setPowers.forEach { (_, value) ->
-                    highest = if (highest < abs(value)) abs(value) else highest
-                }
-                highest *= 3
-                setPowers.forEach { (name, value) -> motors[name]!!.power = (value / highest) }
+                fieldDMP(Vector2(error.x, -error.y), -error.rotation)
             }, {
                 val diff = (robot.pose - target).abs()
-                val compare = Pose(20.0, 20.0, 5.0)
-                println("$diff")
-                println(diff.rotation >= compare.rotation || diff.rotation <= -compare.rotation)
+                val compare = Pose(10.0, 10.0, 5.0)
                 return@Command diff >= compare || (diff.rotation >= compare.rotation || diff.rotation <= -compare.rotation)
             }))
             .add(Command {

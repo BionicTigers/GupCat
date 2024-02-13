@@ -15,8 +15,8 @@ data class MotionResult(
     val deltaTime: Double,
     private val target: Double
 ) {
-    fun getPosition(elapsedTime: ElapsedTime): Double {
-        return position.getOrElse((elapsedTime.seconds() / deltaTime).toInt()) {target}
+    fun getPosition(time: Time): Double {
+        return position.getOrElse((time.seconds() / deltaTime).toInt()) {position.last()}
     }
 }
 
