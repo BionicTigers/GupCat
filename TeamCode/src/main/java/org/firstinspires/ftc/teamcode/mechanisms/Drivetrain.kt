@@ -135,7 +135,7 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
     fun moveToPosition(target: Pose): Command {
         val xPid = PID(PIDTerms(10.0, .5), 0.0, 3657.6, -1.0, 1.0)
         val yPid = PID(PIDTerms(10.0, .5), 0.0, 3657.6, -1.0, 1.0)
-        val rPid = PID(PIDTerms(5.0), -360.0, 360.0, -360.0, 360.0)
+        val rPid = PID(PIDTerms(7.0, .35), -360.0, 360.0, -360.0, 360.0)
 
         val xProfile = generateMotionProfile(
             robot.pose.x,
