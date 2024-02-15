@@ -42,12 +42,12 @@ class RedPreloadRight : LinearOpMode() {
         robot.pose = Pose(2110.0, 300.0, 180.0)
 
         //Creates potential scoring positions for the purple pixel on the spike marks
-        val leftSpikeScore = Pose(1856.0, 950.0, 180.0)
-        val middleSpikeScore = Pose(2110.0, 1075.0, 180.0)
-        val rightSpikeScore = Pose(2364.0, 950.0, 180.0)
+        val leftSpikeScore = Pose(1830.0, 1010.0, 180.0)
+        val middleSpikeScore = Pose(2110.0, 1100.0, 180.0)
+        val rightSpikeScore = Pose(2420.0, 1000.0, 180.0)
 
         val intermediate = Pose(2110.0, 840.0, 180.0)
-        val preTurn = Pose(2110.0, 950.0, 270.0)
+        val preTurn = Pose(2110.0, 950.0, 180.0)
         val turn = Pose(2110.0, 850.0, 270.0)
 
         //Creates potential scoring positions for the yellow pixel on the backdrop
@@ -66,10 +66,11 @@ class RedPreloadRight : LinearOpMode() {
         val group1 = CommandGroup()
             .add(Command({
                 val result = openCv.getDetection()
+                RobotLog.ii("Contour x: ", result?.position?.x.toString())
                 detection = when (result?.position?.x?.toInt()) {
-                    in 0..1185 -> Detection.Right
-                    in 1185..1200 -> Detection.Center
-                    in 1200..1280 -> Detection.Left
+                    in 1140..1280 -> Detection.Right
+                    in 500..1140 -> Detection.Center
+                    in 0..500 -> Detection.Left
                     else -> null
                 }
             }) {detection == null}) //Gets camera detection

@@ -166,7 +166,7 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
                 dashTelemetry.addData("y", error.y)
                 dashTelemetry.update()
 
-                fieldDMP(Vector2(error.x, -error.y), -error.rotation)
+                fieldDMP(Vector2(error.x, -error.y), -error.rotation * 1.5)
             }, {
                 val diff = (robot.pose - target).abs()
                 val compare = Pose(10.0, 10.0, 5.0)
