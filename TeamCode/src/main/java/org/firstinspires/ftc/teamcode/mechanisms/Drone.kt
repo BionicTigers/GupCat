@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap
 /**
  * Launches drones from robot
  */
+//TODO Melia: update this mechanism to work with a servo instead of a motor
 class Drone(hardwareMap: HardwareMap) {
     private val drone = hardwareMap.get(DcMotorEx::class.java, "motor")
 
