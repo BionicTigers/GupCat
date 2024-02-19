@@ -81,7 +81,7 @@ object Scheduler {
 
         orderedList.forEach { (index, id) ->
             val command = commandList[id]
-            if (command != null)
+            if (command != null) 
                 executeCommand(command)
             else
                 orderedRemoveQueue.add(index)

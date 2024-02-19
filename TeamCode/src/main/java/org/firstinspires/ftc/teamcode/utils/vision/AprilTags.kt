@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.utils.vision
 
 import com.qualcomm.robotcore.hardware.HardwareMap
+import com.qualcomm.robotcore.util.RobotLog
 import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName
 import org.firstinspires.ftc.teamcode.utils.Pose
@@ -20,13 +21,12 @@ import kotlin.math.sin
 data class AprilTag(val id: Int, val name: String)
 
 class AprilTags(val robot: Robot, hardwareMap: HardwareMap) {
-
     // get measurement from bot  **make it negative if the distance is negative when placed on the field** (neg if camera is to the left or down, pos if camera is right or up)
     private val camPosX = 0.0 // in mm, camera position from the middle left/right
     private val camPosY = -152.4 // in mm, camera position from the middle forward/back
 
     // rotation is counterclockwise 0 being facing 5040s side (this is different from the robot's rotation, which is clockwise)
-    // x and y are from the bottom left corner while facing 5040's side
+    // x and y are from the bottom left corner while facing 5040's side (blue wing)
     private val aprilTagData = arrayOf(
         Pair(Pose(3437.6, 2914.6, 90.0), "Blue Left"), // poses in mm, mm, deg
         Pair(Pose(3437.6, 2861.1, 90.0), "Blue Mid"), // alex reference lol mid
@@ -194,7 +194,6 @@ class AprilTags(val robot: Robot, hardwareMap: HardwareMap) {
 
 //        // sets the robots pose to the final pose
 //        robot.pose = newPose
-
         return newPose
     }
 
@@ -210,6 +209,7 @@ class AprilTags(val robot: Robot, hardwareMap: HardwareMap) {
             }, { count >= 100 }))
             .add(Command {
                 robot.pose = average + (robot.pose - startPose)
+                RobotLog.ii("Apriltag", average.toString())
             })
             .build()
 
@@ -218,7 +218,8 @@ class AprilTags(val robot: Robot, hardwareMap: HardwareMap) {
 
     fun tooCloseToBackdrop(): Boolean {
         for (currentDetection in aprilTagProcessor.detections)
-            return currentDetection.rawPose != null && currentDetection.id <= 6 && currentDetection.ftcPose.range < 7.0
+            if (currentDetection.rawPose != null && currentDetection.id <= 6 && currentDetection.ftcPose.range < 7.0)
+                return true
         return false
     }
 

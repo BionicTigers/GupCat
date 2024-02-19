@@ -38,41 +38,42 @@ class BluePreloadLeft : LinearOpMode() {
             hashMapOf("Blue" to VisionConstants.BLUE))
 
         //Sets the robot's starting position
-        robot.pose = Pose(2121.0, 286.0, 180.0)
+        robot.pose = Pose(2082.0, 3347.0, 0.0)
 
         //Creates potential scoring positions for the purple pixel on the spike marks
-        val leftSpikeScore = Pose(2121.8, 700.0, 180.0)
-        val middleSpikeScore = Pose(2121.8, 1000.0, 180.0)
-        val rightSpikeScore = Pose(2121.8, 1300.0, 180.0)
+        val leftSpikeScore = Pose(2318.0, 2670.0, 0.0)
+        val middleSpikeScore = Pose(2082.0, 2570.0, 0.0)
+        val rightSpikeScore = Pose(1986.0, 2609.0, 41.5)
 
-        val intermediate = Pose(2650.0, 286.0, 90.0)
-        val turn = Pose(2650.0, 200.0, 180.0)
+        val intermediate = Pose(2082.0, 2787.0, 0.0)
+        val turn = Pose(2082.0, 2700.0, -90.0)
+
        //Creates potential scoring positions for the yellow pixel on the backdrop
-        val leftBackdropScore = Pose(2600.0, 1276.0, 0.0)
-        val middleBackdropScore = Pose(2000.0, 900.0, 0.0)
-        val rightBackdropScore = Pose(2700.0, 1109.0, 0.0)
+        val leftBackdropScore = Pose(3000.0, 2600.0, -90.0)
+        val middleBackdropScore = Pose(3000.0, 2500.0, -90.0)
+        val rightBackdropScore = Pose(3000.0, 2400.0, -90.0)
 
         //Positions between backdrop scoring and parking
-        val prePark = Pose(3060.0, 249.0, 90.0)
-        val park = Pose(3352.0, 249.0, 0.0)
+        val prePark = Pose(3020.0, 2000.0, -90.0)
+        val park = Pose(3347.0, 3347.0, -90.0)
 
         val autoTime = ElapsedTime()
         var detection: Detection? = null
 
-        val preParkCommand = drivetrain.moveToPosition(prePark)
-        val parkCommand = drivetrain.moveToPosition(park)
-
         val group1 = CommandGroup()
             .add(Command({
                 val result = openCv.getDetection()
+                RobotLog.ii("Contour x: ", result?.position?.x.toString())
                 detection = when (result?.position?.x?.toInt()) {
-                    in 0..300 -> Detection.Left
-                    in 300..(1280 / 3 * 2) -> Detection.Center
+                    in 0..500 -> Detection.Left
+                    in 500..(1280 / 3 * 2) -> Detection.Center
                     in (1280 / 3 * 2)..1280 -> Detection.Right
                     else -> null
                 }
             }) {detection == null}) //Gets camera detection
+            .add(drivetrain.moveToPosition(intermediate))
             .add {
+                RobotLog.ii("Detection: ", detection?.name)
                 return@add when (detection) {
                     Detection.Left -> drivetrain.moveToPosition(leftSpikeScore)
                     Detection.Center -> drivetrain.moveToPosition(middleSpikeScore)
@@ -82,16 +83,18 @@ class BluePreloadLeft : LinearOpMode() {
             } //Moves to correct spike scoring position
             .add(timedCommand({ drivetrain.stop() }, Time.fromSeconds(1.0)))
             .add(drivetrain.moveToPosition(intermediate))
-            .add(timedCommand({ drivetrain.stop() }, Time.fromSeconds(1.0)))
-            .add(drivetrain.moveToPosition(turn))
-            /*.add {
-                return@add when (detection) {
-                    Detection.Left -> drivetrain.moveToPosition(leftBackdropScore)
-                    Detection.Center -> drivetrain.moveToPosition(middleBackdropScore)
-                    Detection.Right -> drivetrain.moveToPosition(rightBackdropScore)
-                    else -> drivetrain.moveToPosition(middleBackdropScore)
-                }
-            }*/
+//            .add(timedCommand({ drivetrain.stop() }, Time.fromSeconds(1.0)))
+//            .add(drivetrain.moveToPosition(turn))
+//            .add {
+//                return@add when (detection) {
+//                    Detection.Left -> drivetrain.moveToPosition(leftBackdropScore)
+//                    Detection.Center -> drivetrain.moveToPosition(middleBackdropScore)
+//                    Detection.Right -> drivetrain.moveToPosition(rightBackdropScore)
+//                    else -> drivetrain.moveToPosition(middleBackdropScore)
+//                }
+//            }
+//            .add(drivetrain.moveToPosition(prePark))
+//            .add(drivetrain.moveToPosition(park))
             .build() //Builds all commands
 
         Scheduler.add(continuousCommand { slides.update() })

@@ -133,9 +133,9 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
     }
 
     fun moveToPosition(target: Pose): Command {
-        val xPid = PID(PIDTerms(10.0, .5), 0.0, 3657.6, -1.0, 1.0)
-        val yPid = PID(PIDTerms(10.0, .5), 0.0, 3657.6, -1.0, 1.0)
-        val rPid = PID(PIDTerms(7.0, .5), -360.0, 360.0, -360.0, 360.0)
+        val xPid = PID(PIDTerms(6.0), 0.0, 3657.6, -1.0, 1.0)
+        val yPid = PID(PIDTerms(6.0), 0.0, 3657.6, -1.0, 1.0)
+        val rPid = PID(PIDTerms(10.0, .5), -360.0, 360.0, -360.0, 360.0)
 
         val xProfile = generateMotionProfile(
             robot.pose.x,
@@ -157,8 +157,10 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
                 val setPowers: HashMap<String, Double> = HashMap(4)
 
                 val error = Pose(
-                    xPid.calculate(xProfile.getPosition(it.elapsedTime), robot.pose.x),
-                    yPid.calculate(yProfile.getPosition(it.elapsedTime), robot.pose.y),
+//                    xPid.calculate(xProfile.getPosition(it.elapsedTime), robot.pose.x),
+//                    yPid.calculate(yProfile.getPosition(it.elapsedTime), robot.pose.y),
+                    xPid.calculate(target.x, robot.pose.x),
+                    yPid.calculate(target.y, robot.pose.y),
                     rPid.calculate(target.rotation, robot.pose.rotation),
                 )
 
@@ -169,7 +171,7 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
                 fieldDMP(Vector2(error.x, -error.y), -error.rotation * 1.5)
             }, {
                 val diff = (robot.pose - target).abs()
-                val compare = Pose(10.0, 10.0, 5.0)
+                val compare = Pose(30.0, 30.0, 10.0)
                 return@Command diff >= compare || (diff.rotation >= compare.rotation || diff.rotation <= -compare.rotation)
             }))
             .add(Command {
