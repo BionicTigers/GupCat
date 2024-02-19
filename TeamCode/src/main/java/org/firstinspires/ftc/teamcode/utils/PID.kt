@@ -18,7 +18,7 @@ class PID(
     private val cvMax: Double)
 {
     //Time between cycles, in ms
-    private val sampleTime = 20
+    private val sampleTime = Time.fromMilliseconds(20.0)
 
     private val elapsedTime = ElapsedTime(ElapsedTime.Resolution.MILLISECONDS)
 
@@ -47,10 +47,10 @@ class PID(
      * Calculate the control variable (Output)
      */
     fun calculate(setPoint: Double, processValue: Double): Double {
-        val dt = elapsedTime.seconds()
+        val dt = Time(elapsedTime.seconds())
 
         //Check if pid should calculate again
-        if (dt > sampleTime / 1000.0) {
+        if (dt > sampleTime / Time(1.0)) {
             //Error in terms of processValue (percentage)
             val error = (setPoint - processValue) / (pvMax - pvMin)
 
