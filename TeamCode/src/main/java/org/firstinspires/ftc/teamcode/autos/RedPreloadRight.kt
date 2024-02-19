@@ -48,7 +48,7 @@ class RedPreloadRight : LinearOpMode() {
 
         val intermediate = Pose(2110.0, 840.0, 180.0)
         val preTurn = Pose(2110.0, 950.0, 180.0)
-        val turn = Pose(2110.0, 850.0, 270.0)
+        val turn = Pose(2110.0, 950.0, 270.0)
 
         //Creates potential scoring positions for the yellow pixel on the backdrop
         val leftBackdropScore = Pose(3090.0, 1130.0, 270.0)
@@ -69,8 +69,8 @@ class RedPreloadRight : LinearOpMode() {
                 RobotLog.ii("Contour x: ", result?.position?.x.toString())
                 detection = when (result?.position?.x?.toInt()) {
                     in 1140..1280 -> Detection.Right
-                    in 500..1140 -> Detection.Center
-                    in 0..500 -> Detection.Left
+                    in 450..1140 -> Detection.Center
+                    in 0..450 -> Detection.Left
                     else -> null
                 }
             }) {detection == null}) //Gets camera detection
@@ -85,6 +85,7 @@ class RedPreloadRight : LinearOpMode() {
                 }
             } //Moves to correct spike scoring position
             .add { drivetrain.moveToPosition(preTurn) }
+            .add(timedCommand({ drivetrain.stop() }, Time.fromSeconds(1.0)))
             .add { drivetrain.moveToPosition(turn) }
             .add {
                 return@add when (detection) {

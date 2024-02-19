@@ -139,39 +139,39 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
         val yPid = PID(PIDTerms(10.0, .5), 0.0, 3657.6, -1.0, 1.0)
         val rPid = PID(PIDTerms(7.0, .5), -360.0, 360.0, -360.0, 360.0)
 
-        val xProfile = generateMotionProfile(
-            robot.pose.x,
-            target.x,
-            3000.0,
-            7000.0,
-            4000.0
-        ) //TODO get correct mv
-        val yProfile = generateMotionProfile(
-            robot.pose.y,
-            target.y,
-            3000.0,
-            7000.0,
-            4000.0
-        ) //TODO get correct mv
+//        val xProfile = generateMotionProfile(
+//            robot.pose.x,
+//            target.x,
+//            3000.0,
+//            7000.0,
+//            4000.0
+//        ) //TODO get correct mv
+//        val yProfile = generateMotionProfile(
+//            robot.pose.y,
+//            target.y,
+//            3000.0,
+//            7000.0,
+//            4000.0
+//        ) //TODO get correct mv
 
         return CommandGroup()
             .add(Command({
                 val setPowers: HashMap<String, Double> = HashMap(4)
 
                 val error = Pose(
-                    xPid.calculate(xProfile.getPosition(it.elapsedTime), robot.pose.x),
-                    yPid.calculate(yProfile.getPosition(it.elapsedTime), robot.pose.y),
-                    rPid.calculate(target.rotation, robot.pose.rotation),
+                    xPid.calculate(target.x, robot.pose.x),
+                    yPid.calculate(target.y, robot.pose.y),
+                    rPid.calculate(target.rotation, robot.pose.rotation)
                 )
 
-                dashTelemetry.addData("x", error.x)
-                dashTelemetry.addData("y", error.y)
-                dashTelemetry.update()
-
+//                dashTelemetry.addData("x", error.x)
+//                dashTelemetry.addData("y", error.y)
+//                dashTelemetry.update()
+//
                 fieldDMP(Vector2(error.x, -error.y), -error.rotation * 1.5)
             }, {
                 val diff = (robot.pose - target).abs()
-                val compare = Pose(10.0, 10.0, 5.0)
+                val compare = Pose(20.0, 20.0, 5.0)
                 return@Command diff >= compare || (diff.rotation >= compare.rotation || diff.rotation <= -compare.rotation)
             }))
             .add(Command {
