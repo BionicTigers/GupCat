@@ -36,8 +36,6 @@ class TeleOpMain : LinearOpMode() {
         val leftJoystick = gamepad1.getJoystick(GamepadEx.Joysticks.LEFT_JOYSTICK)
         val rightJoystick = gamepad1.getJoystick(GamepadEx.Joysticks.RIGHT_JOYSTICK)
 
-
-
         //intake
         //When the up button on GP2 is pressed, the intake starts
         gamepad1.getTrigger(GamepadEx.Triggers.LEFT_TRIGGER).onHold {

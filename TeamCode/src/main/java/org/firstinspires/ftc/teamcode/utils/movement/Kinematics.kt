@@ -1,4 +1,6 @@
-package org.firstinspires.ftc.teamcode.utils
+package org.firstinspires.ftc.teamcode.utils.movement
+
+import org.firstinspires.ftc.teamcode.utils.Matrix
 
 /**
  * Kinematics for a mecanum drive

@@ -11,13 +11,13 @@ import kotlin.math.sin
 class Odometry(private val robot: Robot) {
     //Odometry Wheels
     private val odoDiameter: Double = 48.0 //MM
-    private val gearRatio: Double = 1.333//1.229
+    private val gearRatio: Double = 1.229 //1.333
     private val circumference: Double = odoDiameter * gearRatio * PI
 
     //All measurements are in MM
-    private val leftOffset: Double = 169.0 //170.7
-    private val rightOffset: Double = 169.0 //170.7
-    private val backOffset: Double = 152.4 //Comp bot = 165.1
+    private val leftOffset: Double = 170.7 //169.0
+    private val rightOffset: Double = 170.7 //169.0
+    private val backOffset: Double = 165.1 //152.4
 
     //hubs
     private val hub = ControlHub(robot.hardwareMap, "Control Hub")

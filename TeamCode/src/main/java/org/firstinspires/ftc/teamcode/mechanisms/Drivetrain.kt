@@ -117,6 +117,8 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
         if (isInSlowMode)
             mod *= .75
 
+        mod *= -1
+
         val rotM = 1.0
 
         setPowers["frontLeft"] = (mod * (angleY - angleX + turn * rotM)) * fl
@@ -129,7 +131,7 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
     }
 
     fun fieldDMP(pos: Vector2, turn: Double = 0.0) {
-        fieldDMP(pos, 1.0, turn)
+        fieldDMP(Vector2(-pos.x, pos.y), 1.0, -turn)
     }
 
     fun moveToPosition(target: Pose): Command {
@@ -166,7 +168,7 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
                 dashTelemetry.addData("y", error.y)
                 dashTelemetry.update()
 
-                fieldDMP(Vector2(error.x, -error.y), -error.rotation * 1.5)
+                fieldDMP(Vector2(error.x, error.y), -error.rotation * 1.5)
             }, {
                 val diff = (robot.pose - target).abs()
                 val compare = Pose(10.0, 10.0, 5.0)

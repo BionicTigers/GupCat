@@ -35,11 +35,10 @@ object Scheduler {
         return command.context
     }
 
-    fun add(command: Command, index: Int): CommandContext {
+    fun set(command: Command, index: Int): CommandContext {
         commandList[command.context.id] = command
-        orderedList[totalAdded] = command.context.id
+        orderedList[index] = command.context.id
         setupInternals(command)
-        totalAdded += 1
 
         return command.context
     }
