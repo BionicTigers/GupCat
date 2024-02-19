@@ -44,7 +44,7 @@ class RedPreloadRight : LinearOpMode() {
         //Creates potential scoring positions for the purple pixel on the spike marks
         val leftSpikeScore = Pose(1830.0, 1010.0, 180.0)
         val middleSpikeScore = Pose(2110.0, 1100.0, 180.0)
-        val rightSpikeScore = Pose(2420.0, 1000.0, 180.0)
+        val rightSpikeScore = Pose(2364.0, 950.0, 180.0)
 
         val intermediate = Pose(2110.0, 840.0, 180.0)
         val preTurn = Pose(2110.0, 950.0, 180.0)
