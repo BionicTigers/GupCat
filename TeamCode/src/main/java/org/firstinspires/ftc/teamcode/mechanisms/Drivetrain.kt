@@ -135,9 +135,11 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
     }
 
     fun moveToPosition(target: Pose): Command {
-        val xPid = PID(PIDTerms(10.0, .5), 0.0, 3657.6, -1.0, 1.0)
-        val yPid = PID(PIDTerms(10.0, .5), 0.0, 3657.6, -1.0, 1.0)
-        val rPid = PID(PIDTerms(7.0, .5), -360.0, 360.0, -360.0, 360.0)
+        println("x: ${robot.pose.x} ${target.x}")
+        println("y: ${robot.pose.y} ${target.y}")
+        val xPid = PID(PIDTerms(10.0), 0.0, 3600.0, -1.0, 1.0)
+        val yPid = PID(PIDTerms(10.0), 0.0, 3600.0, -1.0, 1.0)
+        val rPid = PID(PIDTerms(7.0), -360.0, 360.0, -360.0, 360.0)
 
 //        val xProfile = generateMotionProfile(
 //            robot.pose.x,
@@ -164,11 +166,15 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
                     rPid.calculate(target.rotation, robot.pose.rotation)
                 )
 
+                println("----------------x------------------")
+                xPid.log()
+                println("----------------y-----------------")
+                yPid.log()
 //                dashTelemetry.addData("x", error.x)
 //                dashTelemetry.addData("y", error.y)
 //                dashTelemetry.update()
 //
-                fieldDMP(Vector2(error.x, -error.y), -error.rotation * 1.5)
+                fieldDMP(Vector2(error.x, error.y), -error.rotation * 1.5)
             }, {
                 val diff = (robot.pose - target).abs()
                 val compare = Pose(20.0, 20.0, 5.0)
