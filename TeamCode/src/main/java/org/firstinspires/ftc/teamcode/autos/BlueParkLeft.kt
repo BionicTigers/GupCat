@@ -17,7 +17,7 @@ class BlueParkLeft : LinearOpMode() {
         robot.pose = Pose(2082.0, 3347.0, 180.0)
 
 
-        val parkPoint = Pose(3000.0, 3347.0, 180.0)
+        val parkPoint = Pose(3200.0, 3347.0, 180.0)
 
         val group = CommandGroup()
             .add(drivetrain.moveToPosition(parkPoint))

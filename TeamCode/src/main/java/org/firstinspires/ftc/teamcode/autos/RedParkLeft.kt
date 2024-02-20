@@ -19,15 +19,14 @@ class RedParkLeft : LinearOpMode() {
         val intake = Intake(hardwareMap)
         robot.pose = Pose(863.6, 310.0, 0.0)
         val forward = Pose(863.6, 1400.0, 0.0)
-        val parkPoint = Pose(2895.6, 1400.0, 0.0)
-//        val spin = Pose(2895.0, 1370.0, 180.0)
+        val intermediate = Pose(2013.6, 1600.0, 0.0)
+        val parkPoint = Pose(3000.0, 1400.0, 0.0)
 
         val group = CommandGroup()
             .add(Command { intake.down() })
             .add(drivetrain.moveToPosition(forward))
-//            .await(750)
+            .add(drivetrain.moveToPosition(intermediate))
             .add(drivetrain.moveToPosition(parkPoint))
-//            .add(drivetrain.moveToPosition(spin))
             .build()
         Scheduler.add(group)
 
