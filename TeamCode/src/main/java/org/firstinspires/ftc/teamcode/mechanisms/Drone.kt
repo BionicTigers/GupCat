@@ -2,24 +2,25 @@ package org.firstinspires.ftc.teamcode.mechanisms
 
 import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.HardwareMap
+import com.qualcomm.robotcore.hardware.Servo
+
 /**
  * Launches drones from robot
  */
-//TODO Melia: update this mechanism to work with a servo instead of a motor
 class Drone(hardwareMap: HardwareMap) {
-    private val drone = hardwareMap.get(DcMotorEx::class.java, "motor")
+    private val drone = hardwareMap.get(Servo::class.java, "drone")
 
     /**
      * Starts drone flywheel
      */
     fun start() {
-        drone.power = 1.0
+        drone.position = 0.46
     }
 
     /**
      * Stops drone flywheel
      */
-    fun stop() {  //Stops drone flywheel
-        drone.power = 0.0
+    fun stop() {
+        drone.position = 0.5
     }
 }
