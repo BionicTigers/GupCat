@@ -6,7 +6,7 @@ import org.firstinspires.ftc.teamcode.mechanisms.Drone
 import org.firstinspires.ftc.teamcode.utils.Robot
 import org.firstinspires.ftc.teamcode.utils.input.GamepadEx
 
-@TeleOp(name="LiftOp", group = "mechanisms")
+@TeleOp(name="DroneOp", group = "mechanisms")
 class DroneOp : LinearOpMode() {
     override fun runOpMode() {
         val robot = Robot(this)
@@ -17,7 +17,7 @@ class DroneOp : LinearOpMode() {
             drone.start()
         }
 
-        gamepad2.getButton(GamepadEx.Buttons.DPAD_UP).onStart {
+        gamepad2.getButton(GamepadEx.Buttons.DPAD_DOWN).onStart {
             drone.stop()
         }
 

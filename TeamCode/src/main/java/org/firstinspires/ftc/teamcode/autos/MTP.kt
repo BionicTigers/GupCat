@@ -19,7 +19,7 @@ class MTP : LinearOpMode() {
 
         val cmd = CommandGroup()
 //            .add(drivetrain.moveToPosition(Pose(0.0, 0.0, 180.0)))
-            .add(drivetrain.moveToPosition(Pose(0.0, 600.0, 360.0 * 5)))
+            .add(drivetrain.moveToPosition(Pose(0.0, 0.0, 360.0)))
             .build()
         Scheduler.add(cmd)
 
