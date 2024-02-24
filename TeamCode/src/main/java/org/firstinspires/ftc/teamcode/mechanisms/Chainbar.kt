@@ -29,7 +29,7 @@ class Chainbar(hardwareMap: HardwareMap) {
      * Rotates the arm down (towards transfer)
      */
     fun down() {
-        leftServo.position = 0.55
-        rightServo.position = 0.55
+        leftServo.position = 1.0
+        rightServo.position = 1.0
     }
 }

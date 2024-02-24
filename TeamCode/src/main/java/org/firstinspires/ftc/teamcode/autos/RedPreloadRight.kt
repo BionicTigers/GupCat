@@ -86,6 +86,7 @@ class RedPreloadRight : LinearOpMode() {
             } //Moves to correct spike scoring position
             .add { drivetrain.moveToPosition(preTurn) }
             .add(timedCommand({ drivetrain.stop() }, Time.fromSeconds(1.0)))
+            .add(Command { RobotLog.ii("team", "rotation rosmation!") })
             .add { drivetrain.moveToPosition(turn) }
             .add {
                 return@add when (detection) {

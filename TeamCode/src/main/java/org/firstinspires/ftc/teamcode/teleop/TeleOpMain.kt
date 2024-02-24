@@ -10,6 +10,7 @@ import org.firstinspires.ftc.teamcode.mechanisms.Intake
 import org.firstinspires.ftc.teamcode.mechanisms.Output
 import org.firstinspires.ftc.teamcode.mechanisms.Slide
 import org.firstinspires.ftc.teamcode.utils.Robot
+import org.firstinspires.ftc.teamcode.utils.Vector2
 import org.firstinspires.ftc.teamcode.utils.command.Command
 import org.firstinspires.ftc.teamcode.utils.command.Scheduler
 import org.firstinspires.ftc.teamcode.utils.command.continuousCommand
@@ -87,7 +88,7 @@ class TeleOpMain : LinearOpMode() {
         //Uses current joystick positions to determine the correct motor powers
         Scheduler.add(continuousCommand {
             println(leftJoystick.state)
-            drivetrain.fieldDMP(leftJoystick.state!!, -rightJoystick.state!!.x)
+            drivetrain.fieldDMP(Vector2(1.0, -1.0) * leftJoystick.state, -rightJoystick.state!!.x)
         })
 
         //drone
@@ -136,7 +137,7 @@ class TeleOpMain : LinearOpMode() {
         Scheduler.add(continuousCommand {
             println(leftGP2Joystick.state)
             slide.height -= 1000 * Scheduler.deltaTime.seconds() * leftGP2Joystick.state!!.y
-            println(leftGP2Joystick.state?.y)
+            println(leftGP2Joystick.state.y)
             println(Scheduler.deltaTime)
         })
 
