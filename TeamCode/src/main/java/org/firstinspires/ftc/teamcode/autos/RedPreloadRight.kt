@@ -69,8 +69,8 @@ class RedPreloadRight : LinearOpMode() {
                 RobotLog.ii("Contour x: ", result?.position?.x.toString())
                 detection = when (result?.position?.x?.toInt()) {
                     in 1140..1280 -> Detection.Right
-                    in 450..1140 -> Detection.Center
-                    in 0..450 -> Detection.Left
+                    in 600..1140 -> Detection.Center
+                    in 0..600 -> Detection.Left
                     else -> null
                 }
             }) {detection == null}) //Gets camera detection

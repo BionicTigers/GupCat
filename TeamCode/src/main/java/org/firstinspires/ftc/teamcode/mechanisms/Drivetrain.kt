@@ -24,6 +24,7 @@ import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.hypot
 import kotlin.math.max
+import kotlin.math.min
 import kotlin.math.sin
 
 private fun lerp(start: Double, end: Double, t: Double): Double {
@@ -137,43 +138,42 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
     fun moveToPosition(target: Pose): Command {
         println("x: ${robot.pose.x} ${target.x}")
         println("y: ${robot.pose.y} ${target.y}")
-        val xPid = PID(PIDTerms(10.0), 0.0, 3600.0, -1.0, 1.0)
-        val yPid = PID(PIDTerms(10.0), 0.0, 3600.0, -1.0, 1.0)
-        val rPid = PID(PIDTerms(7.0), -360.0, 360.0, -360.0, 360.0)
+        val xPid = PID(PIDTerms(40.0), 0.0, 3600.0, -1.0, 1.0)
+        val yPid = PID(PIDTerms(40.0), 0.0, 3600.0, -1.0, 1.0)
+        val rPid = PID(PIDTerms(10.0), -360.0, 360.0, -360.0, 360.0)
 
-//        val xProfile = generateMotionProfile(
-//            robot.pose.x,
-//            target.x,
-//            3000.0,
-//            7000.0,
-//            4000.0
-//        ) //TODO get correct mv
-//        val yProfile = generateMotionProfile(
-//            robot.pose.y,
-//            target.y,
-//            3000.0,
-//            7000.0,
-//            4000.0
-//        ) //TODO get correct mv
+        val xProfile = generateMotionProfile(
+            robot.pose.x,
+            target.x,
+            3000.0,
+            7000.0,
+            4000.0
+        ) //TODO get correct mv
+        val yProfile = generateMotionProfile(
+            robot.pose.y,
+            target.y,
+            3000.0,
+            7000.0,
+            4000.0
+        ) //TODO get correct mv
 
         return CommandGroup()
             .add(Command({
                 val setPowers: HashMap<String, Double> = HashMap(4)
 
                 val error = Pose(
-                    xPid.calculate(target.x, robot.pose.x),
-                    yPid.calculate(target.y, robot.pose.y),
+                    xPid.calculate(xProfile.getPosition(it.elapsedTime), robot.pose.x),
+                    yPid.calculate(yProfile.getPosition(it.elapsedTime), robot.pose.y),
                     rPid.calculate(target.rotation, robot.pose.rotation)
                 )
 
-                println("----------------x------------------")
-                xPid.log()
-                println("----------------y-----------------")
-                yPid.log()
-//                dashTelemetry.addData("x", error.x)
-//                dashTelemetry.addData("y", error.y)
-//                dashTelemetry.update()
-//
+                dashTelemetry.addData("xPV", robot.pose.x)
+                dashTelemetry.addData("yPV", robot.pose.y)
+                dashTelemetry.addData("xSP", xProfile.getPosition(it.elapsedTime))
+                dashTelemetry.addData("ySP", yProfile.getPosition(it.elapsedTime))
+                dashTelemetry.addData("yAccel", yProfile.getAcceleration(it.elapsedTime))
+                dashTelemetry.update()
+
                 fieldDMP(Vector2(error.x, error.y), -error.rotation * 1.5)
             }, {
                 val diff = (robot.pose - target).abs()
@@ -192,7 +192,7 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
         val right = gamepad1.getJoystick(GamepadEx.Joysticks.RIGHT_JOYSTICK)
 
         Scheduler.add(continuousCommand {
-            fieldDMP(left.state!!, right.state!!.x)
+            fieldDMP(left.state, right.state.x)
         })
     }
 
