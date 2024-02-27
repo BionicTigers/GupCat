@@ -21,7 +21,6 @@ class Slide(hardwareMap: HardwareMap) {
     //TODO (Melia) Declare an enum with the different heights the slides can be in
 
     val left = hardwareMap.get(DcMotorEx::class.java, "slideBack")
-    val right = hardwareMap.get(DcMotorEx::class.java, "slideFront")
     val limitSwitch = hardwareMap.get(DigitalChannel::class.java, "limitSwitch")
     private val hub = ControlHub(hardwareMap, "Control Hub")
 
@@ -52,9 +51,8 @@ class Slide(hardwareMap: HardwareMap) {
      */
     init {
         hub.setJunkTicks() //Allows hub to ignore old encoder ticks
-        right.direction = DcMotorSimple.Direction.REVERSE //Reverses one motor to prevent conflicts
-        right.mode = DcMotor.RunMode.RUN_USING_ENCODER
         left.mode = DcMotor.RunMode.RUN_USING_ENCODER
+        left.direction = DcMotorSimple.Direction.REVERSE
         height = 0.0
     }
 
@@ -73,7 +71,6 @@ class Slide(hardwareMap: HardwareMap) {
         if (height > 50)
             power += .15
         left.power = power
-        right.power = power
         dashTelemetry.addData("pv", encoderTicks)
         dashTelemetry.addData("sp", height)
         dashTelemetry.update()

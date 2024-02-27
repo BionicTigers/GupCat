@@ -4,6 +4,8 @@ import com.qualcomm.hardware.lynx.LynxDcMotorController
 import org.firstinspires.ftc.teamcode.utils.ControlHub
 import org.firstinspires.ftc.teamcode.utils.Pose
 import org.firstinspires.ftc.teamcode.utils.Robot
+import org.firstinspires.ftc.teamcode.utils.Vector2
+import org.firstinspires.ftc.teamcode.utils.command.Scheduler
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
@@ -22,6 +24,12 @@ class Odometry(private val robot: Robot) {
     //hubs
     private val hub = ControlHub(robot.hardwareMap, "Control Hub")
     private val exHub = ControlHub(robot.hardwareMap, "Expansion Hub 2")
+
+    var velocity = Vector2()
+        private set
+
+    var acceleration = Vector2()
+        private set
 
     init {
         hub.setJunkTicks()
@@ -88,6 +96,12 @@ class Odometry(private val robot: Robot) {
 
         //Update the current pose
         robot.pose = Pose(globalX, globalY, Math.toDegrees(globalRotation + localRotation))
+
+        //Update velocity and acceleration
+        val deltaTime = Scheduler.deltaTime.seconds()
+        val oldVelocity = velocity
+        velocity = Vector2(deltaXFinal / deltaTime, deltaYFinal / deltaTime)
+        acceleration = Vector2((velocity.x - oldVelocity.x) / deltaTime, (velocity.y - oldVelocity.y) / deltaTime)
 
         //Reset junk ticks for next cycle
         hub.setJunkTicks()

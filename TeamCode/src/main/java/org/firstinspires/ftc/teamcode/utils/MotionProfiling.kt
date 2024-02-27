@@ -18,6 +18,14 @@ data class MotionResult(
     fun getPosition(time: Time): Double {
         return position.getOrElse((time.seconds() / deltaTime).toInt()) {position.last()}
     }
+
+    fun getAcceleration(time: Time): Double {
+        return acceleration.getOrElse((time.seconds() / deltaTime).toInt()) {acceleration.last()}
+    }
+
+    fun getVelocity(time: Time): Double {
+        return velocity.getOrElse((time.seconds() / deltaTime).toInt()) {velocity.last()}
+    }
 }
 
 /**

@@ -10,6 +10,9 @@ import org.firstinspires.ftc.teamcode.utils.movement.Odometry
 
 class Robot(private val opMode: LinearOpMode) {
     var pose: Pose = Pose()
+    var velocity: Vector2 = Vector2()
+    var acceleration: Vector2 = Vector2()
+
     val hardwareMap: HardwareMap = opMode.hardwareMap
 
     val telemetry: Telemetry = opMode.telemetry
@@ -20,21 +23,23 @@ class Robot(private val opMode: LinearOpMode) {
     private val gamepad2: GamepadEx = GamepadEx(opMode.gamepad2)
 
     init {
-        Scheduler.add(continuousCommand
-        {
-
+        Scheduler.set(continuousCommand {
             odometry.update()
             opMode.telemetry.addData("x", pose.x)
             opMode.telemetry.addData("y", pose.y)
             opMode.telemetry.addData("rot", pose.rotation)
             opMode.telemetry.update()
-        })
+        }, 0)
 
-        Scheduler.add(continuousCommand
-        {
+        Scheduler.set(continuousCommand {
             gamepad1.update()
             gamepad2.update()
-        })
+        }, 1)
+
+        Scheduler.set(continuousCommand {
+            velocity = odometry.velocity
+            acceleration = odometry.acceleration
+        }, 2)
 
 //        val a = arrayListOf<Double>()
 //        val b = ElapsedTime()

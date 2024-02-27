@@ -89,7 +89,7 @@ class BluePreloadRight : LinearOpMode() {
             .add(getDetection) //Gets camera detection
             .add(moveToSpike()) //Moves to correct spike scoring position
             .add(moveToBackdrop()) //Moves to correct backdrop scoring position
-            .add(Command { chainbar.up() }) //Raises slides
+            .add(Command { chainbar.down() }) //Raises slides
             .add(Command { arm.up() })
             .add(Command { output.open() }) //Opens the right side of the output
             .add(preParkCommand) //Moves to the pre-parking position

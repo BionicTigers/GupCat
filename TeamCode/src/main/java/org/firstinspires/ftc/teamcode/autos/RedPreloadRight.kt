@@ -44,21 +44,21 @@ class RedPreloadRight : LinearOpMode() {
         //Creates potential scoring positions for the purple pixel on the spike marks
         val leftSpikeScore = Pose(1830.0, 1010.0, 180.0)
         val middleSpikeScore = Pose(2110.0, 1100.0, 180.0)
-        val rightSpikeScore = Pose(2364.0, 950.0, 180.0)
+        val rightSpikeScore = Pose(2474.0, 1010.0, 180.0)
 
         val intermediate = Pose(2110.0, 950.0, 180.0)
-        val preTurn = Pose(2110.0, 950.0, 180.0)
-        val turn = Pose(2110.0, 950.0, 270.0)
+        val preTurn = Pose(2110.0, 860.0, 180.0)
+        val turn = Pose(2110.0, 860.0, 270.0)
 
         //Creates potential scoring positions for the yellow pixel on the backdrop
-        val leftBackdropScore = Pose(3090.0, 1130.0, 270.0)
-        val middleBackdropScore = Pose(3090.0, 980.0, 270.0)
-        val rightBackdropScore = Pose(3090.0, 830.0, 270.0)
+        val leftBackdropScore = Pose(3250.0, 1130.0, 270.0)
+        val middleBackdropScore = Pose(3250.0, 980.0, 270.0)
+        val rightBackdropScore = Pose(3250.0, 810.0, 270.0)
 
         //Positions between backdrop scoring and parking
         val parkRight = Pose(3065.0, 345.0, 270.0)
         val preParkLeft = Pose(3065.0, 1615.0, 270.0)
-        val parkLeft = Pose(3300.0, 1615.0, 270.0)
+        val parkLeft = Pose(3450.0, 1615.0, 270.0)
 
         val autoTime = ElapsedTime()
         var detection: Detection? = null
@@ -69,8 +69,8 @@ class RedPreloadRight : LinearOpMode() {
                 RobotLog.ii("Contour x: ", result?.position?.x.toString())
                 detection = when (result?.position?.x?.toInt()) {
                     in 1140..1280 -> Detection.Right
-                    in 450..1140 -> Detection.Center
-                    in 0..450 -> Detection.Left
+                    in 600..1140 -> Detection.Center
+                    in 0..600 -> Detection.Left
                     else -> null
                 }
             }) {detection == null}) //Gets camera detection
