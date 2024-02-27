@@ -138,8 +138,8 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
     fun moveToPosition(target: Pose): Command {
         println("x: ${robot.pose.x} ${target.x}")
         println("y: ${robot.pose.y} ${target.y}")
-        val xPid = PID(PIDTerms(40.0), 0.0, 3600.0, -1.0, 1.0)
-        val yPid = PID(PIDTerms(40.0), 0.0, 3600.0, -1.0, 1.0)
+        val xPid = PID(PIDTerms(30.0), 0.0, 3600.0, -1.0, 1.0)
+        val yPid = PID(PIDTerms(30.0), 0.0, 3600.0, -1.0, 1.0)
         val rPid = PID(PIDTerms(10.0), -360.0, 360.0, -360.0, 360.0)
 
         val xProfile = generateMotionProfile(
@@ -171,7 +171,14 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
                 dashTelemetry.addData("yPV", robot.pose.y)
                 dashTelemetry.addData("xSP", xProfile.getPosition(it.elapsedTime))
                 dashTelemetry.addData("ySP", yProfile.getPosition(it.elapsedTime))
-                dashTelemetry.addData("yAccel", yProfile.getAcceleration(it.elapsedTime))
+                dashTelemetry.addData("xActualAccel", robot.acceleration.x)
+                dashTelemetry.addData("yActualAccel", robot.acceleration.y)
+                dashTelemetry.addData("xCommandedAccel", xProfile.getAcceleration(it.elapsedTime))
+                dashTelemetry.addData("yCommandedAccel", yProfile.getAcceleration(it.elapsedTime))
+                dashTelemetry.addData("xActualVelocity", robot.velocity.x)
+                dashTelemetry.addData("yActualVelocity", robot.velocity.y)
+                dashTelemetry.addData("xCommandedVelocity", xProfile.getVelocity(it.elapsedTime))
+                dashTelemetry.addData("yCommandedVelocity", yProfile.getVelocity(it.elapsedTime))
                 dashTelemetry.update()
 
                 fieldDMP(Vector2(error.x, error.y), -error.rotation * 1.5)
