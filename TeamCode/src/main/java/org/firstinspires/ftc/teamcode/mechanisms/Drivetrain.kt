@@ -189,6 +189,7 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
             }))
             .add(Command {
                 this.stop()
+                println("Alex")
             })
             .build()
     }

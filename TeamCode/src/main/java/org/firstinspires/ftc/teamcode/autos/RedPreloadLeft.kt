@@ -50,7 +50,7 @@ class RedPreloadLeft : LinearOpMode() {
 
         //Creates potential scoring positions for the purple pixel on the backdrop
         val leftBackdropScore = Pose(3225.0, 1130.0, 270.0)
-        val middleBackdropScore = Pose(3225.0, 980.0, 270.0)
+        val middleBackdropScore = Pose(3225.0, 900.0, 270.0)
         val rightBackdropScore = Pose(3225.0, 810.0, 270.0)
 
         //Positions between backdrop scoring and parking
