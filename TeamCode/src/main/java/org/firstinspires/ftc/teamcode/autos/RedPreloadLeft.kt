@@ -95,6 +95,7 @@ class RedPreloadLeft : LinearOpMode() {
                     else -> drivetrain.moveToPosition(middleBackdropScore)
                 }
             }
+            .add(Command { slides.height = 1000.0 })
 //            .add { drivetrain.moveToPosition(parkRight) }
             .add { drivetrain.moveToPosition(preParkLeft) }
             .add { drivetrain.moveToPosition(parkLeft) }
