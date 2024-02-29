@@ -46,15 +46,15 @@ class BluePreloadRight : LinearOpMode() {
 
         val intermediate = Pose(902.0, 2707.6, 0.0)
         val preTurn = Pose(902.0, 2767.6, 0.0)
-        val turn = Pose(902.0, 3300.0, 90.0)
-        val travel = Pose(2110.0, 3300.0, 90.0)
+        val turn = Pose(902.0, 3250.0, 90.0)
+        val travel = Pose(2110.0, 3250.0, 90.0)
         //Creates potential scoring positions for the yellow pixel on the backdrop
-        val leftBackdropScore = Pose(3200.0, 2375.2, 90.0)
-        val middleBackdropScore = Pose(3200.0, 2515.2, 90.0)
-        val rightBackdropScore = Pose(3200.0, 2725.2, 90.0)
+        val leftBackdropScore = Pose(3150.0, 2375.2, 90.0)
+        val middleBackdropScore = Pose(3150.0, 2515.2, 90.0)
+        val rightBackdropScore = Pose(3150.0, 2725.2, 90.0)
 
         //Positions between backdrop scoring and parking
-        val parkLeft = Pose(3105.0, 3250.6, 90.0)
+        val parkLeft = Pose(3150.0, 3150.6, 90.0)
         val preParkRight = Pose(3065.0, 2057.6, 90.0)
         val parkRight = Pose(3450.0, 2047.6, 90.0)
 
