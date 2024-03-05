@@ -61,11 +61,11 @@ class Slide(hardwareMap: HardwareMap) {
      */
     fun update() {
         hub.refreshBulkData()
-        if (!limitSwitch.state) {
-            hub.setJunkTicks()
-            height = 0.0
-        }
-        val encoderTicks = hub.getEncoderTicks(2).toDouble()
+//        if (!limitSwitch.state) {
+//            hub.setJunkTicks()
+//            height = 0.0
+//        }
+        val encoderTicks = hub.getEncoderTicks(0).toDouble()
         val targetHeight = if (profile != null) profile!!.position.getOrElse(floor(elapsedTime.seconds() / profile!!.deltaTime).toInt()) { height } else height
         var power = pid.calculate(targetHeight, encoderTicks)
         if (height > 50)

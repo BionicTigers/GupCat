@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.teleop
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
+import com.qualcomm.robotcore.util.RobotLog
 import org.firstinspires.ftc.teamcode.mechanisms.Arm
 import org.firstinspires.ftc.teamcode.mechanisms.Hang
 import org.firstinspires.ftc.teamcode.mechanisms.Chainbar
@@ -59,28 +60,28 @@ class TeleOpMain : LinearOpMode() {
         }
 
         //When the left trigger on GP2 is pressed, the intake is raised
-        gamepad2.getButton(GamepadEx.Buttons.DPAD_DOWN).onStart {
+        gamepad1.getButton(GamepadEx.Buttons.LEFT_BUMPER).onStart {
             intake.down()
         }
 
         //When the right trigger on GP2 is pressed, the intake is lowered
-        gamepad2.getButton(GamepadEx.Buttons.DPAD_UP).onStart {
+        gamepad1.getButton(GamepadEx.Buttons.RIGHT_BUMPER).onStart {
             intake.up()
         }
 
         //hanging
         //When the down button on GP1 is pressed, the hanging pulls down on the bar
-        gamepad1.getButton(GamepadEx.Buttons.DPAD_DOWN).onStart {
+        gamepad2.getButton(GamepadEx.Buttons.Y).onStart {
             cables.pull()
         }
 
         //When the up button on GP1 is pressed, the hanging mechanism raises up
-        gamepad1.getButton(GamepadEx.Buttons.DPAD_UP).onStart {
+        gamepad2.getButton(GamepadEx.Buttons.DPAD_LEFT).onStart {
             cables.raise()
         }
 
         //When the A (X) button on GP1 is pressed, the hanging mechanism stops
-        gamepad1.getButton(GamepadEx.Buttons.A).onStart {
+        gamepad2.getButton(GamepadEx.Buttons.X).onStart {
             cables.stop()
         }
 
@@ -119,12 +120,12 @@ class TeleOpMain : LinearOpMode() {
         //TODO (Melia) A increment and decrement method should be added to 2 buttons, which will change the target position, then a reset button should be added which sets to 0
 
         gamepad2.getButton(GamepadEx.Buttons.DPAD_DOWN).onStart{
-            slide.height -= 300
+            slide.height -= 100
         }
 
         //Button to increment slide height to given position when pressed
         gamepad2.getButton(GamepadEx.Buttons.DPAD_UP).onStart{
-            slide.height += 300
+            slide.height += 100
         }
 
         //Button to reset slide height to zero position when pressed
@@ -133,13 +134,13 @@ class TeleOpMain : LinearOpMode() {
         }
 
 
-        val leftGP2Joystick = gamepad2.getJoystick(GamepadEx.Joysticks.LEFT_JOYSTICK)
-        Scheduler.add(continuousCommand {
-            println(leftGP2Joystick.state)
-            slide.height -= 1000 * Scheduler.deltaTime.seconds() * leftGP2Joystick.state!!.y
-            println(leftGP2Joystick.state.y)
-            println(Scheduler.deltaTime)
-        })
+//        val leftGP2Joystick = gamepad2.getJoystick(GamepadEx.Joysticks.LEFT_JOYSTICK)
+//        Scheduler.add(continuousCommand {
+//            println(leftGP2Joystick.state)
+//            slide.height -= 1000 * Scheduler.deltaTime.seconds() * leftGP2Joystick.state!!.y
+//            println(leftGP2Joystick.state.y)
+//            println(Scheduler.deltaTime)
+//        })
 
         Scheduler.add(continuousCommand { slide.update() })
 
@@ -148,7 +149,6 @@ class TeleOpMain : LinearOpMode() {
         gamepad2.getButton(GamepadEx.Buttons.A).onStart {
             output.open()
         }
-
 
         //When the down button on GP                                                                                                                          1 is pressed, the claw closes
         gamepad2.getButton(GamepadEx.Buttons.B).onStart {
@@ -179,11 +179,12 @@ class TeleOpMain : LinearOpMode() {
 
         Scheduler.add(Command {
             arm.down()
-            chainbar.up()
+            chainbar.down()
         })
 
         robot.onStart{
             robot.update() //Updates position telemetry and gamepads
+            RobotLog.ii("height", slide.height.toString())
 //            slide.update() //Runs slides to current target position
         }
 }}

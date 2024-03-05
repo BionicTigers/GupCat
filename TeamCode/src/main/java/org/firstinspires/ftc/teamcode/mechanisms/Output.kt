@@ -14,13 +14,13 @@ class Output (hardwareMap: HardwareMap) {
      * Opens the claw
      */
     fun open() {
-        claw.position = 0.8
+        claw.position = 1.0
     }
 
     /**
      * Closes the claw
      */
     fun close() {
-        claw.position = 0.1
+        claw.position = 0.0
     }
 }
