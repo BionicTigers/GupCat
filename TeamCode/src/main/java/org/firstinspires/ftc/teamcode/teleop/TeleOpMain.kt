@@ -2,11 +2,11 @@ package org.firstinspires.ftc.teamcode.teleop
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
-import com.qualcomm.robotcore.util.RobotLog
 import org.firstinspires.ftc.teamcode.mechanisms.Arm
 import org.firstinspires.ftc.teamcode.mechanisms.Hang
 import org.firstinspires.ftc.teamcode.mechanisms.Chainbar
 import org.firstinspires.ftc.teamcode.mechanisms.Drivetrain
+import org.firstinspires.ftc.teamcode.mechanisms.Drone
 import org.firstinspires.ftc.teamcode.mechanisms.Intake
 import org.firstinspires.ftc.teamcode.mechanisms.Output
 import org.firstinspires.ftc.teamcode.mechanisms.Slide
@@ -16,6 +16,7 @@ import org.firstinspires.ftc.teamcode.utils.command.Command
 import org.firstinspires.ftc.teamcode.utils.command.Scheduler
 import org.firstinspires.ftc.teamcode.utils.command.continuousCommand
 import org.firstinspires.ftc.teamcode.utils.input.GamepadEx
+import kotlin.math.floor
 
 /**
  * Main TeleOp for the 2023-24 season, contains all mechanisms and matches functions to buttons
@@ -26,9 +27,9 @@ class TeleOpMain : LinearOpMode() {
         Scheduler.clear() //Clears all commands from the scheduler to allow a new OpMode to run
         val robot = Robot(this)
         val (gamepad1, gamepad2) = robot.getGamepads()
-        val cables = Hang(hardwareMap)
+        val hang = Hang(hardwareMap)
         val drivetrain = Drivetrain(hardwareMap, robot)
-//        val drone = Drone(hardwareMap)
+        val drone = Drone(hardwareMap)
         val intake = Intake(hardwareMap)
         val output = Output(hardwareMap)
         val slide = Slide(hardwareMap)
@@ -72,17 +73,12 @@ class TeleOpMain : LinearOpMode() {
         //hanging
         //When the down button on GP1 is pressed, the hanging pulls down on the bar
         gamepad2.getButton(GamepadEx.Buttons.Y).onStart {
-            cables.pull()
-        }
-
-        //When the up button on GP1 is pressed, the hanging mechanism raises up
-        gamepad2.getButton(GamepadEx.Buttons.DPAD_LEFT).onStart {
-            cables.raise()
+            hang.pull()
         }
 
         //When the A (X) button on GP1 is pressed, the hanging mechanism stops
         gamepad2.getButton(GamepadEx.Buttons.X).onStart {
-            cables.stop()
+            hang.raise()
         }
 
         //drivetrain
@@ -92,55 +88,36 @@ class TeleOpMain : LinearOpMode() {
             drivetrain.fieldDMP(Vector2(1.0, -1.0) * leftJoystick.state, -rightJoystick.state!!.x)
         })
 
-        //drone
-        //When the right button on GP2 is pressed, the drone flywheel runs
-//        gamepad2.getButton(GamepadEx.Buttons.DPAD_RIGHT).onStart {
-//            drone.start()
-//        }
-//        When the left button on GP2 is pressed, the flywheel stops
-//        gamepad2.getButton(GamepadEx.Buttons.DPAD_LEFT).onStart {
-//            drone.stop()
-//        }
-
-        //slide
-        //When the Y button is pressed on GP2, the target height of the slides is raised by 500
-//        gamepad2.getButton(GamepadEx.Buttons.Y).onHold {
-//            slide.height += 250 * Scheduler.deltaTime
-////            arm.up()
-//        }
-//
-//        //When the X button is pressed on GP2, the target height of the slides is lowered by 500
-//        gamepad2.getButton(GamepadEx.Buttons.X).onHold {
-//            arm.down()
-//            slide.height -= 250 * Scheduler.deltaTime
-//        }
-        //Button to decrement slide height to given position when pressed
-
+//        drone
+//        When the right button on GP2 is pressed, the drone flywheel runs
+        gamepad1.getButton(GamepadEx.Buttons.DPAD_RIGHT).onStart {
+            drone.start()
+        }
 
         //TODO (Melia) A increment and decrement method should be added to 2 buttons, which will change the target position, then a reset button should be added which sets to 0
 
-        gamepad2.getButton(GamepadEx.Buttons.DPAD_DOWN).onStart{
-            slide.height -= 100
+        gamepad2.getButton(GamepadEx.Buttons.DPAD_RIGHT).onStart{
+            slide.height = floor((slide.height - 300) / 300) * 300
         }
 
         //Button to increment slide height to given position when pressed
         gamepad2.getButton(GamepadEx.Buttons.DPAD_UP).onStart{
-            slide.height += 100
+            slide.height = floor((slide.height + 300) / 300) * 300
         }
 
         //Button to reset slide height to zero position when pressed
-        gamepad2.getButton(GamepadEx.Buttons.DPAD_RIGHT).onStart{
+        gamepad2.getButton(GamepadEx.Buttons.DPAD_DOWN).onStart{
             slide.height = 0.0
         }
 
 
-//        val leftGP2Joystick = gamepad2.getJoystick(GamepadEx.Joysticks.LEFT_JOYSTICK)
-//        Scheduler.add(continuousCommand {
-//            println(leftGP2Joystick.state)
-//            slide.height -= 1000 * Scheduler.deltaTime.seconds() * leftGP2Joystick.state!!.y
-//            println(leftGP2Joystick.state.y)
-//            println(Scheduler.deltaTime)
-//        })
+        val leftGP2Joystick = gamepad2.getJoystick(GamepadEx.Joysticks.LEFT_JOYSTICK)
+        Scheduler.add(continuousCommand {
+            println(leftGP2Joystick.state)
+            slide.height -= 300 * Scheduler.deltaTime.seconds() * leftGP2Joystick.state!!.y
+            println(leftGP2Joystick.state.y)
+            println(Scheduler.deltaTime)
+        })
 
         Scheduler.add(continuousCommand { slide.update() })
 
@@ -150,7 +127,7 @@ class TeleOpMain : LinearOpMode() {
             output.open()
         }
 
-        //When the down button on GP                                                                                                                          1 is pressed, the claw closes
+        //When the down button on GP1 is pressed, the claw closes
         gamepad2.getButton(GamepadEx.Buttons.B).onStart {
             output.close()
         }
@@ -158,12 +135,12 @@ class TeleOpMain : LinearOpMode() {
         //chainbar
         //When the A button on GP2 is pressed, the chainbar raises
         gamepad2.getTrigger(GamepadEx.Triggers.LEFT_TRIGGER).onStart {
-            chainbar.down()
+            chainbar.up()
         }
 
         //When the B button on GP2 is pressed, the chainbar lowers
         gamepad2.getTrigger(GamepadEx.Triggers.RIGHT_TRIGGER).onStart {
-            chainbar.up()
+            chainbar.down()
         }
 
         //arm
@@ -180,11 +157,20 @@ class TeleOpMain : LinearOpMode() {
         Scheduler.add(Command {
             arm.down()
             chainbar.down()
+            intake.down()
+            output.intake()
+            drone.stop()
+        })
+
+        Scheduler.add(continuousCommand {
+            if (slide.height < 150) {
+                output.intake()
+            } else if (slide.height > 150 && output.state == Output.OutputState.Intake) {
+                output.close()
+            }
         })
 
         robot.onStart{
             robot.update() //Updates position telemetry and gamepads
-            RobotLog.ii("height", slide.height.toString())
-//            slide.update() //Runs slides to current target position
         }
 }}

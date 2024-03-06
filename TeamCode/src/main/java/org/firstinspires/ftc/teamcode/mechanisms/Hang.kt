@@ -13,24 +13,39 @@ class Hang (hardwareMap: HardwareMap) {
     private val motor = hardwareMap.get(DcMotorEx::class.java, "hangMotor")
     private val hub = ControlHub(hardwareMap, "Control Hub")
 
+    enum class HangState {
+        Pull,
+        Raise,
+        Stop
+    }
+
+    var hangState = HangState.Stop
+
     init {
         motor.mode = DcMotor.RunMode.RUN_USING_ENCODER
 //        motor.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.FLOAT
         hub.setJunkTicks()
     }
 
-    /** Runs the hanging mechanism up at 100% power */
+    /** Toggle the hanging mechanism to run at 100% power */
     fun pull() {
-        motor.power = 1.0
+        if (hangState != HangState.Pull) {
+            hangState = HangState.Pull
+            motor.power = 1.0
+        } else stop()
     }
 
     /** Runs the hanging mechanism down at 100% power */
     fun raise() {
-        motor.power = -1.0
+        if (hangState != HangState.Raise) {
+            hangState = HangState.Raise
+            motor.power = -1.0
+        } else stop()
     }
 
     /** Stops the motor */
     fun stop() {
+        hangState = HangState.Stop
         motor.power = 0.0
     }
 }

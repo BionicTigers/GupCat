@@ -112,11 +112,11 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
 
         //Finds the ratio to scale the motor powers to
         val ratio: Double = max(abs(angleX) + abs(angleY) + abs(turn), 1.0)
-        if (hub.getVoltage() <= 8.0)
-            mod *= .5
-
-        if (isInSlowMode)
-            mod *= .75
+//        if (hub.getVoltage() <= 8.0)
+//            mod *= .5
+//
+//        if (isInSlowMode)
+//            mod *= .75
 
         mod *= -1
 

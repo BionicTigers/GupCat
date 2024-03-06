@@ -24,7 +24,7 @@ class Slide(hardwareMap: HardwareMap) {
     val limitSwitch = hardwareMap.get(DigitalChannel::class.java, "limitSwitch")
     private val hub = ControlHub(hardwareMap, "Control Hub")
 
-    private val pid = PID(PIDTerms(), 0.0, 1000.0, -1.0, 1.0)
+    private val pid = PID(PIDTerms(), 0.0, 2200.0, -.2, 1.0)
     private var profile: MotionResult? = null
     private lateinit var elapsedTime: ElapsedTime
 
@@ -37,14 +37,10 @@ class Slide(hardwareMap: HardwareMap) {
     var height = 0.0
         set(value) {
             hub.refreshBulkData()
-            field = value.coerceIn(-50.0, 1450.0)
+            field = value.coerceIn(-50.0, 2200.0)
 //            profile = generateMotionProfile(hub.getEncoderTicks(2).toDouble(), field, 7000.0, 7000.0, 20000.0)
             elapsedTime = ElapsedTime()
         }
-
-
-
-
 
     /**
      * Initializes slides to make sure default settings are what is needed for proper function
@@ -68,8 +64,8 @@ class Slide(hardwareMap: HardwareMap) {
         val encoderTicks = hub.getEncoderTicks(0).toDouble()
         val targetHeight = if (profile != null) profile!!.position.getOrElse(floor(elapsedTime.seconds() / profile!!.deltaTime).toInt()) { height } else height
         var power = pid.calculate(targetHeight, encoderTicks)
-        if (height > 50)
-            power += .15
+//        if (height > 50)
+//            power += .15
         left.power = power
         dashTelemetry.addData("pv", encoderTicks)
         dashTelemetry.addData("sp", height)

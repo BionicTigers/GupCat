@@ -6,21 +6,38 @@ import com.qualcomm.robotcore.hardware.Servo
 /**
  * Runs the claw with one servo to deposit a pixel onto the backdrop
  */
-class Output (hardwareMap: HardwareMap) {
+class Output(hardwareMap: HardwareMap) {
     //Creates servos
-    val claw = hardwareMap.get(Servo::class.java, "claw")
+    val holder = hardwareMap.get(Servo::class.java, "claw")
+    var state = OutputState.Close
+
+    enum class OutputState {
+        Intake,
+        Open,
+        Close,
+    }
 
     /**
-     * Opens the claw
+     * Opens the claw for intake
+     */
+    fun intake() {
+        holder.position = .4
+        state = OutputState.Intake
+    }
+
+    /**
+     * Opens the claw for output
      */
     fun open() {
-        claw.position = 1.0
+        holder.position = .2
+        state = OutputState.Open
     }
 
     /**
      * Closes the claw
      */
     fun close() {
-        claw.position = 0.0
+        holder.position = 0.0
+        state = OutputState.Close
     }
 }
