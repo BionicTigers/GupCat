@@ -10,6 +10,8 @@ class Chainbar(hardwareMap: HardwareMap) {
     private val leftServo = hardwareMap.get(Servo::class.java, "chainbarLeft")
     private val rightServo = hardwareMap.get(Servo::class.java, "chainbarRight")
 
+    var isUp = false
+
     /**
      * Sets one servo to reverse to prevent conflicts
      */
@@ -21,6 +23,7 @@ class Chainbar(hardwareMap: HardwareMap) {
      * Rotates the arm up (towards sky)
      */
     fun down() {
+        isUp = false
         leftServo.position = 0.15
         rightServo.position = 0.15
     }
@@ -29,6 +32,7 @@ class Chainbar(hardwareMap: HardwareMap) {
      * Rotates the arm down (towards transfer)
      */
     fun up() {
+        isUp = true
         leftServo.position = 1.0
         rightServo.position = 1.0
     }

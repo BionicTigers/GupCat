@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.teleop
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
+import com.qualcomm.robotcore.util.RobotLog
 import org.firstinspires.ftc.teamcode.mechanisms.Arm
 import org.firstinspires.ftc.teamcode.mechanisms.Hang
 import org.firstinspires.ftc.teamcode.mechanisms.Chainbar
@@ -136,17 +137,26 @@ class TeleOpMain : LinearOpMode() {
         //When the A button on GP2 is pressed, the chainbar raises
         gamepad2.getTrigger(GamepadEx.Triggers.LEFT_TRIGGER).onStart {
             chainbar.up()
+            if (arm.isUp) {
+                arm.upShort()
+            }
         }
 
         //When the B button on GP2 is pressed, the chainbar lowers
         gamepad2.getTrigger(GamepadEx.Triggers.RIGHT_TRIGGER).onStart {
             chainbar.down()
+            if (arm.isUp) {
+                arm.up()
+            }
         }
 
         //arm
         //When the left bumper on GP2 is pressed, the arm raises
         gamepad2.getButton(GamepadEx.Buttons.LEFT_BUMPER).onStart {
-            arm.up()
+            if (chainbar.isUp)
+                arm.upShort()
+            else
+                arm.up()
         }
 
         //When the right bumper on GP2 is pressed, the arm lowers
@@ -170,7 +180,13 @@ class TeleOpMain : LinearOpMode() {
             }
         })
 
+        Scheduler.add(continuousCommand {
+            hang.update(slide.power)
+        })
+
         robot.onStart{
             robot.update() //Updates position telemetry and gamepads
+            RobotLog.ii("height", slide.height.toString())
+//            slide.update() //Runs slides to current target position
         }
 }}

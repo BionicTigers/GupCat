@@ -23,7 +23,7 @@ class Hang (hardwareMap: HardwareMap) {
 
     init {
         motor.mode = DcMotor.RunMode.RUN_USING_ENCODER
-//        motor.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.FLOAT
+        motor.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.FLOAT
         hub.setJunkTicks()
     }
 
@@ -47,5 +47,11 @@ class Hang (hardwareMap: HardwareMap) {
     fun stop() {
         hangState = HangState.Stop
         motor.power = 0.0
+    }
+
+    fun update(power: Double) {
+        if (power < 0) {
+            motor.power = -power / 2
+        }
     }
 }
