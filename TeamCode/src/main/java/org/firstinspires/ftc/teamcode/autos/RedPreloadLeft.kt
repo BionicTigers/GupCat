@@ -28,10 +28,7 @@ class RedPreloadLeft : LinearOpMode() {
         //Object declarations
         val robot = Robot(this)
         val drivetrain = Drivetrain(hardwareMap, robot)
-        val output = Output(hardwareMap)
         val slides = Slide(hardwareMap)
-        val chainbar = Chainbar(hardwareMap)
-        val arm = Arm(hardwareMap)
         val openCv = OpenCv(hardwareMap.get(WebcamName::class.java, "Webcam 1"),
             hashMapOf("Red" to VisionConstants.RED))
 

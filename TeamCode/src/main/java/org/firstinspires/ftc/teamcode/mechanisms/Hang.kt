@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.HardwareMap
 import com.qualcomm.robotcore.hardware.Servo
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit
 import org.firstinspires.ftc.teamcode.utils.ControlHub
 
 /** Runs a tape measure up to the rigging in order to lift the robot */
@@ -50,8 +51,17 @@ class Hang (hardwareMap: HardwareMap) {
     }
 
     fun update(power: Double) {
-        if (power < 0) {
-            motor.power = -power / 2
+        println("Current: ${motor.getCurrent(CurrentUnit.MILLIAMPS)}");
+        if (motor.getCurrent(CurrentUnit.MILLIAMPS) > 8000) {
+            motor.power = motor.power * 3/4
         }
+//
+//        if (power < -.2) {
+//            motor.power = -power
+//        } else if (power > .07) {
+//            motor.power = power
+//        } else if (hangState == HangState.Stop) {
+//            motor.power = 0.0
+//        }
     }
 }

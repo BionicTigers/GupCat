@@ -55,7 +55,7 @@ class PID(
             val error = ((setPoint - processValue) / (pvMax - pvMin)).let { if (it.isNaN() || it.isInfinite()) 0.0 else it }
 
             p = kP * error
-            i += if (cv > cvMin && cv < cvMax && tI != 0.0) 1.0 / 60.0 * tI * error else 0.0
+            i += if (cv > cvMin && cv < cvMax && tI != 0.0) 1.0 / tI * error else 0.0
             d = kP * tD / 60.0 * (previousError - error)
 
             //Multiply I by kP last to allow for real time editing

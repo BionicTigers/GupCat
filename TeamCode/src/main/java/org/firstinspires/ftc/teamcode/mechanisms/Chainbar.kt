@@ -24,8 +24,8 @@ class Chainbar(hardwareMap: HardwareMap) {
      */
     fun down() {
         isUp = false
-        leftServo.position = 0.15
-        rightServo.position = 0.15
+        leftServo.position = 0.175
+        rightServo.position = 0.175
     }
 
     /**

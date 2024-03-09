@@ -33,6 +33,6 @@ class Arm(hardwareMap: HardwareMap) {
      */
     fun down() {
         isUp = false
-        arm.position = 0.05
+        arm.position = 0.11
     }
 }

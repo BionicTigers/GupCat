@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.DigitalChannel
 import com.qualcomm.robotcore.hardware.HardwareMap
 import com.qualcomm.robotcore.util.ElapsedTime
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit
 import org.firstinspires.ftc.teamcode.utils.ControlHub
 import org.firstinspires.ftc.teamcode.utils.MotionResult
 import org.firstinspires.ftc.teamcode.utils.PID
@@ -26,7 +27,7 @@ class Slide(hardwareMap: HardwareMap) {
 
     var power = 0.0
 
-    private val pid = PID(PIDTerms(.75, 0.0), 0.0, 2500.0, -.2, 1.0)
+    private val pidUp = PID(PIDTerms(3.0, 1000.0), -100.0, 2200.0, -1.0, 1.0)
     private var profile: MotionResult? = null
     private lateinit var elapsedTime: ElapsedTime
 
@@ -39,12 +40,12 @@ class Slide(hardwareMap: HardwareMap) {
     var height = 0.0
         set(value) {
             hub.refreshBulkData()
-            field = value.coerceIn(-50.0, 2500.0)
+            field = value.coerceIn(-200.0, 2200.0)
 //            profile = generateMotionProfile(hub.getEncoderTicks(2).toDouble(), field, 7000.0, 7000.0, 20000.0)
             elapsedTime = ElapsedTime()
         }
 
-    /**
+    /*
      * Initializes slides to make sure default settings are what is needed for proper function
      */
     init {
@@ -59,19 +60,30 @@ class Slide(hardwareMap: HardwareMap) {
      */
     fun update() {
         hub.refreshBulkData()
-//        if (!limitSwitch.state) {
-//            hub.setJunkTicks()
-//            height = 0.0
-//        }
+        if (!limitSwitch.state && height < 100) {
+            hub.setJunkTicks()
+            height = 0.0
+        }
+
         val encoderTicks = hub.getEncoderTicks(0).toDouble()
         val targetHeight = if (profile != null) profile!!.position.getOrElse(floor(elapsedTime.seconds() / profile!!.deltaTime).toInt()) { height } else height
-        power = pid.calculate(targetHeight, encoderTicks)
-        if (height > 50)
-            power += .05
+
+        val error: Double
+        power = pidUp.calculate(targetHeight, encoderTicks)
+        error = pidUp.previousError
+
+//        if (height > 50)
+//            power += .05
+
+        if (left.getCurrent(CurrentUnit.MILLIAMPS) > 6500)
+            power *= 3/4
+
         left.power = power
 
         dashTelemetry.addData("pv", encoderTicks)
+        dashTelemetry.addData("power", power)
         dashTelemetry.addData("sp", height)
+        dashTelemetry.addData("error", error)
         dashTelemetry.update()
     }
 }

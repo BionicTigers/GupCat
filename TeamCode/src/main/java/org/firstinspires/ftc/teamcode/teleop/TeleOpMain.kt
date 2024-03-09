@@ -97,53 +97,47 @@ class TeleOpMain : LinearOpMode() {
 
         //TODO (Melia) A increment and decrement method should be added to 2 buttons, which will change the target position, then a reset button should be added which sets to 0
 
-        gamepad2.getButton(GamepadEx.Buttons.DPAD_RIGHT).onStart{
-            slide.height = floor((slide.height - 300) / 300) * 300
+        gamepad2.getButton(GamepadEx.Buttons.DPAD_DOWN).onStart{
+            slide.height = floor((slide.height - 500) / 500) * 500
         }
 
         //Button to increment slide height to given position when pressed
         gamepad2.getButton(GamepadEx.Buttons.DPAD_UP).onStart{
-            slide.height = floor((slide.height + 300) / 300) * 300
+            slide.height = floor((slide.height + 500) / 500) * 500
         }
 
         //Button to reset slide height to zero position when pressed
-        gamepad2.getButton(GamepadEx.Buttons.DPAD_DOWN).onStart{
-            slide.height = 0.0
+        gamepad2.getButton(GamepadEx.Buttons.DPAD_LEFT).onStart{
+            arm.down()
+            chainbar.down()
+            slide.height = -100.0
         }
 
 
         val leftGP2Joystick = gamepad2.getJoystick(GamepadEx.Joysticks.LEFT_JOYSTICK)
         Scheduler.add(continuousCommand {
-            println(leftGP2Joystick.state)
             slide.height -= 300 * Scheduler.deltaTime.seconds() * leftGP2Joystick.state!!.y
-            println(leftGP2Joystick.state.y)
-            println(Scheduler.deltaTime)
         })
 
         Scheduler.add(continuousCommand { slide.update() })
 
         //output
-        //When the up button on GP1 is pressed, the claw opens
         gamepad2.getButton(GamepadEx.Buttons.A).onStart {
-            output.open()
-        }
-
-        //When the down button on GP1 is pressed, the claw closes
-        gamepad2.getButton(GamepadEx.Buttons.B).onStart {
-            output.close()
+            if (output.state == Output.OutputState.Open)
+                output.close()
+            else
+                output.open()
         }
 
         //chainbar
-        //When the A button on GP2 is pressed, the chainbar raises
-        gamepad2.getTrigger(GamepadEx.Triggers.LEFT_TRIGGER).onStart {
+        gamepad2.getTrigger(GamepadEx.Triggers.RIGHT_TRIGGER).onStart {
             chainbar.up()
             if (arm.isUp) {
                 arm.upShort()
             }
         }
 
-        //When the B button on GP2 is pressed, the chainbar lowers
-        gamepad2.getTrigger(GamepadEx.Triggers.RIGHT_TRIGGER).onStart {
+        gamepad2.getTrigger(GamepadEx.Triggers.LEFT_TRIGGER).onStart {
             chainbar.down()
             if (arm.isUp) {
                 arm.up()
@@ -152,7 +146,7 @@ class TeleOpMain : LinearOpMode() {
 
         //arm
         //When the left bumper on GP2 is pressed, the arm raises
-        gamepad2.getButton(GamepadEx.Buttons.LEFT_BUMPER).onStart {
+        gamepad2.getButton(GamepadEx.Buttons.RIGHT_BUMPER).onStart {
             if (chainbar.isUp)
                 arm.upShort()
             else
@@ -160,7 +154,7 @@ class TeleOpMain : LinearOpMode() {
         }
 
         //When the right bumper on GP2 is pressed, the arm lowers
-        gamepad2.getButton(GamepadEx.Buttons.RIGHT_BUMPER).onStart {
+        gamepad2.getButton(GamepadEx.Buttons.LEFT_BUMPER).onStart {
             arm.down()
         }
 

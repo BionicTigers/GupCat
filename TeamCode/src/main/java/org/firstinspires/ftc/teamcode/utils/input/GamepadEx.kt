@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode.utils.input
 import com.qualcomm.robotcore.hardware.Gamepad
 import org.firstinspires.ftc.teamcode.utils.Vector2
 
+fun Gamepad.into() = GamepadEx(this)
+
 class GamepadEx(private val gamepad: Gamepad) {
     //Gamepad Buttons
     enum class Buttons {
@@ -65,7 +67,7 @@ class GamepadEx(private val gamepad: Gamepad) {
         boolButtons.forEachIndexed { index, button ->
             //Find the name of the field
             //Call update with the value of the field using reflection
-            val name = Buttons.values()[index].name.lowercase()
+            val name = Buttons.entries[index].name.lowercase()
             button.update(gamepad.javaClass.getDeclaredField(name).getBoolean(gamepad))
         }
 
