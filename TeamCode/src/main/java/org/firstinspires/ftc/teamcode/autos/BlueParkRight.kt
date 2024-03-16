@@ -20,9 +20,9 @@ class BlueParkRight : LinearOpMode() {
         val parkPoint = Pose(3000.0, 2287.0, 180.0)
 
         val group = CommandGroup()
-            .add(drivetrain.moveToPosition(forward))
-            .add(drivetrain.moveToPosition(intermediate))
-            .add(drivetrain.moveToPosition(parkPoint))
+            .add({ drivetrain.moveToPosition(forward) })
+            .add({ drivetrain.moveToPosition(intermediate) })
+            .add({ drivetrain.moveToPosition(parkPoint) })
             .build()
         Scheduler.add(group)
 

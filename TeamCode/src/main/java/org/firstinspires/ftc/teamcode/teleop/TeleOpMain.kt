@@ -22,7 +22,7 @@ import kotlin.math.floor
 /**
  * Main TeleOp for the 2023-24 season, contains all mechanisms and matches functions to buttons
  */
-@TeleOp
+@TeleOp(group="disabled")
 class TeleOpMain : LinearOpMode() {
     override fun runOpMode() {
         Scheduler.clear() //Clears all commands from the scheduler to allow a new OpMode to run

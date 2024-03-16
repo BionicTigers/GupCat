@@ -79,16 +79,16 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
     fun robotDMP(pos: Vector2, mod: Double, turn: Double = 0.0) {
         //Create Motor Powers HashMap
         val setPowers: HashMap<String, Double> = HashMap(4)
-        velocity =
-            lerp(velocity, max(pos.magnitude(), abs(turn)), Scheduler.deltaTime.seconds() * 2)
+        velocity = 1.0
+//            lerp(velocity, max(pos.magnitude(), abs(turn)), Scheduler.deltaTime.seconds() * 2)
 
         //Finds the ratio to scale the motor powers to
         val ratio: Double = max(abs(pos.x) + abs(pos.y) + abs(turn), 1.0)
 
-        setPowers["frontLeft"] = (velocity * (pos.y - pos.x + turn)) * fl
-        setPowers["frontRight"] = (velocity * (pos.y + pos.x - turn)) * fr
-        setPowers["backLeft"] = (velocity * (pos.y + pos.x + turn)) * bl
-        setPowers["backRight"] = (velocity * (pos.y - pos.x - turn)) * br
+        setPowers["frontLeft"] = (velocity * (pos.y - pos.x + turn)) * fl * mod
+        setPowers["frontRight"] = (velocity * (pos.y + pos.x - turn)) * fr * mod
+        setPowers["backLeft"] = (velocity * (pos.y + pos.x + turn)) * bl * mod
+        setPowers["backRight"] = (velocity * (pos.y - pos.x - turn)) * br * mod
 
         //Set motor powers scaled to the ratio
         setPowers.forEach { (name, value) -> motors[name]!!.power = (value / ratio) }
@@ -138,23 +138,23 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
     fun moveToPosition(target: Pose): Command {
         println("x: ${robot.pose.x} ${target.x}")
         println("y: ${robot.pose.y} ${target.y}")
-        val xPid = PID(PIDTerms(40.0), 0.0, 3600.0, -1.0, 1.0)
-        val yPid = PID(PIDTerms(40.0), 0.0, 3600.0, -1.0, 1.0)
-        val rPid = PID(PIDTerms(10.0), -360.0, 360.0, -360.0, 360.0)
+        val xPid = PID(PIDTerms(37.0), 0.0, 3600.0, -1.0, 1.0)
+        val yPid = PID(PIDTerms(37.0), 0.0, 3600.0, -1.0, 1.0)
+        val rPid = PID(PIDTerms(10.0, 200.0), -360.0, 360.0, -360.0, 360.0)
 
         val xProfile = generateMotionProfile(
             robot.pose.x,
             target.x,
-            3000.0,
+            2000.0,
             7000.0,
-            4000.0
+            3000.0
         ) //TODO get correct mv
         val yProfile = generateMotionProfile(
             robot.pose.y,
             target.y,
-            3000.0,
+            2000.0,
             7000.0,
-            4000.0
+            3000.0
         ) //TODO get correct mv
 
         return CommandGroup()
@@ -181,7 +181,7 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
                 dashTelemetry.addData("yCommandedVelocity", yProfile.getVelocity(it.elapsedTime))
                 dashTelemetry.update()
 
-                fieldDMP(Vector2(error.x, error.y), -error.rotation * 1.5)
+                fieldDMP(Vector2(error.x, error.y), -error.rotation)
             }, {
                 val diff = (robot.pose - target).abs()
                 val compare = Pose(20.0, 20.0, 5.0)
@@ -189,7 +189,6 @@ class Drivetrain(hardwareMap: HardwareMap, private val robot: Robot) {
             }))
             .add(Command {
                 this.stop()
-                println("Alex")
             })
             .build()
     }

@@ -19,12 +19,17 @@ import kotlin.math.floor
  * Raises and lowers arm and chainbar for more versatile scoring positions
  */
 class Slide(hardwareMap: HardwareMap) {
-    //TODO (Melia) Declare an enum with the different heights the slides can be in
+    enum class SlideState {
+        Raising,
+        Lowering,
+        Idle
+    }
 
     val left = hardwareMap.get(DcMotorEx::class.java, "slideBack")
     val limitSwitch = hardwareMap.get(DigitalChannel::class.java, "limitSwitch")
     private val hub = ControlHub(hardwareMap, "Control Hub")
 
+    var state = SlideState.Idle
     var power = 0.0
 
     private val pidUp = PID(PIDTerms(3.0, 1000.0), -100.0, 2200.0, -1.0, 1.0)
@@ -68,22 +73,23 @@ class Slide(hardwareMap: HardwareMap) {
         val encoderTicks = hub.getEncoderTicks(0).toDouble()
         val targetHeight = if (profile != null) profile!!.position.getOrElse(floor(elapsedTime.seconds() / profile!!.deltaTime).toInt()) { height } else height
 
-        val error: Double
         power = pidUp.calculate(targetHeight, encoderTicks)
-        error = pidUp.previousError
-
-//        if (height > 50)
-//            power += .05
 
         if (left.getCurrent(CurrentUnit.MILLIAMPS) > 6500)
             power *= 3/4
 
+        if (encoderTicks - 100 > height) {
+            state = SlideState.Raising
+        } else if (encoderTicks + 100 < height) {
+            state = SlideState.Lowering
+        } else {
+            state = SlideState.Idle
+        }
+
         left.power = power
 
         dashTelemetry.addData("pv", encoderTicks)
-        dashTelemetry.addData("power", power)
         dashTelemetry.addData("sp", height)
-        dashTelemetry.addData("error", error)
         dashTelemetry.update()
     }
 }

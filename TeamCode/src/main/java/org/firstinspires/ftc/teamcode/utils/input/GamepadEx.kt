@@ -54,6 +54,10 @@ class GamepadEx(private val gamepad: Gamepad) {
         }
     }
 
+    fun getJoysticks(): Pair<Joystick, Joystick> {
+        return Pair(leftJoystick, rightJoystick)
+    }
+
     fun getTrigger(trigger: Triggers): Trigger {
         return if (trigger == Triggers.LEFT_TRIGGER) {
             leftTrigger

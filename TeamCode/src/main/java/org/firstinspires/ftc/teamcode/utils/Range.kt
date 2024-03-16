@@ -5,7 +5,7 @@ package org.firstinspires.ftc.teamcode.utils
  */
 data class Range<T: Comparable<T>>(val min: T, val max: T) {
     fun within(value: T): Boolean {
-        return value > min
+        return value > min && value < max
     }
 
     fun clamp(value: T): T {

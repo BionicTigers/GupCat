@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.autos
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import org.firstinspires.ftc.teamcode.mechanisms.Drivetrain
+import org.firstinspires.ftc.teamcode.mechanisms.Intake
 import org.firstinspires.ftc.teamcode.utils.Pose
 import org.firstinspires.ftc.teamcode.utils.Robot
 import org.firstinspires.ftc.teamcode.utils.command.CommandGroup
@@ -14,6 +15,7 @@ class BlueParkLeft : LinearOpMode() {
         Scheduler.clear() //Clears all commands from the scheduler to allow a new OpMode to run
         val robot = Robot(this)
         val drivetrain = Drivetrain(hardwareMap, robot)
+        val input = Intake(hardwareMap)
         robot.pose = Pose(2082.0, 3347.0, 180.0)
 
 
@@ -23,6 +25,8 @@ class BlueParkLeft : LinearOpMode() {
             .add(drivetrain.moveToPosition(parkPoint))
             .build()
         Scheduler.add(group)
+
+        input.up()
 
         robot.onStart {
             Scheduler.update()

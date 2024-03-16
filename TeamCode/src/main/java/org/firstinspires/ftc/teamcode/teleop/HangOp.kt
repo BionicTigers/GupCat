@@ -6,7 +6,7 @@ import org.firstinspires.ftc.teamcode.mechanisms.Hang
 import org.firstinspires.ftc.teamcode.utils.Robot
 import org.firstinspires.ftc.teamcode.utils.input.GamepadEx
 
-@TeleOp(name= "CablesOp")
+@TeleOp(name= "CablesOp", group="disabled")
 class CablesOp : LinearOpMode() {
     override fun runOpMode() {
         val robot = Robot(this)
