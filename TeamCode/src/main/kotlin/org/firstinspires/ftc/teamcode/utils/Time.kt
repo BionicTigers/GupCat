@@ -1,6 +1,7 @@
-package org.firstinspires.ftc.teamcode.utils
+package atk.utils
 
 data class Time internal constructor(private val time: Double = 0.0) {
+
     companion object {
         fun fromSeconds(seconds: Double): Time {
             return Time(seconds)
@@ -10,8 +11,8 @@ data class Time internal constructor(private val time: Double = 0.0) {
             return Time(milliseconds / 1000.0)
         }
 
-        fun fromNanoseconds(nanoseconds: Double): Time {
-            return Time(nanoseconds / 1000000000.0)
+        fun fromNanoseconds(minutes: Double): Time {
+            return Time(minutes * 60.0)
         }
     }
 
@@ -27,20 +28,20 @@ data class Time internal constructor(private val time: Double = 0.0) {
         return time * 1000000000.0
     }
 
-    operator fun plus(deltaTime: Time): Time {
-        return Time(time + deltaTime.time)
+    operator fun plus(otherTime: Time): Time {
+        return Time(time + otherTime.time)
     }
 
-    operator fun minus(deltaTime: Time): Time {
-        return Time(time - deltaTime.time)
+    operator fun minus(otherTime: Time): Time {
+        return Time(time - otherTime.time)
     }
 
-    operator fun times(deltaTime: Time): Time {
-        return Time(time * deltaTime.time)
+    operator fun times(otherTime: Time): Time {
+        return Time(time * otherTime.time)
     }
 
-    operator fun div(deltaTime: Time): Time {
-        return Time(time / deltaTime.time)
+    operator fun div(otherTime: Time): Time {
+        return Time(time / otherTime.time)
     }
 
     operator fun compareTo(otherTime: Time): Int {

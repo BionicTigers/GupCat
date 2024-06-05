@@ -1,6 +1,6 @@
-package org.firstinspires.ftc.teamcode.utils.command
+package atk.commands
 
-import org.firstinspires.ftc.teamcode.utils.Time
+import atk.utils.Time
 import java.util.UUID
 
 object Scheduler {
@@ -35,10 +35,11 @@ object Scheduler {
         return command.context
     }
 
-    fun set(command: Command, index: Int): CommandContext {
+    fun add(command: Command, index: Int): CommandContext {
         commandList[command.context.id] = command
-        orderedList[index] = command.context.id
+        orderedList[totalAdded] = command.context.id
         setupInternals(command)
+        totalAdded += 1
 
         return command.context
     }
@@ -80,7 +81,7 @@ object Scheduler {
 
         orderedList.forEach { (index, id) ->
             val command = commandList[id]
-            if (command != null) 
+            if (command != null)
                 executeCommand(command)
             else
                 orderedRemoveQueue.add(index)
@@ -113,8 +114,6 @@ object Scheduler {
 
     fun clear() {
         commandList.clear()
-        unorderedList.clear()
-        orderedList.clear()
 
         update()
     }
