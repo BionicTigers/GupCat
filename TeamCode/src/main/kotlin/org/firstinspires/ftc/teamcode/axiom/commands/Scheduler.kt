@@ -1,13 +1,14 @@
-import io.github.bionictigers.commands.Command
+package org.firstinspires.ftc.teamcode.axiom.commands
+
 import io.github.bionictigers.commands.System
 import java.util.Stack
 
-class Scheduler {
-    private val commands = HashMap<Int, Command>()
-    private val sortedCommands = ArrayList<Command>()
+object Scheduler {
+    private val commands = HashMap<Int, Command<*>>()
+    private val sortedCommands = ArrayList<Command<*>>()
 
-    private val addQueue: ArrayList<Command> = ArrayList()
-    private val removeQueue: ArrayList<Command> = ArrayList()
+    private val addQueue: ArrayList<Command<*>> = ArrayList()
+    private val removeQueue: ArrayList<Command<*>> = ArrayList()
 
     private var changed = false
 
@@ -19,11 +20,11 @@ class Scheduler {
      * @param command The commands to add.
      * @see Command
      */
-    fun add(vararg command: Command) {
+    fun add(vararg command: Command<*>) {
         addQueue.addAll(command)
     }
 
-    private fun internalAdd(command: Command) {
+    private fun internalAdd(command: Command<*>) {
         changed = true
         commands[command.hashCode()] = command
     }
@@ -49,7 +50,7 @@ class Scheduler {
      * @param command The command to remove.
      * @see Command
      */
-    fun remove(vararg command: Command) {
+    fun remove(vararg command: Command<*>) {
         command.forEach {
             if (it !in commands.values) {
                 return
@@ -59,14 +60,14 @@ class Scheduler {
         }
     }
 
-    private fun internalRemove(command: Command) {
+    private fun internalRemove(command: Command<*>) {
         changed = true
         commands.remove(command.hashCode())
     }
 
     private fun sort() {
-        val visited = HashSet<Command>()
-        val stack = Stack<Command>()
+        val visited = HashSet<Command<*>>()
+        val stack = Stack<Command<*>>()
 
         for (command in commands.values) {
             if (command !in visited) {
@@ -80,7 +81,7 @@ class Scheduler {
         }
     }
 
-    private fun topologicalSort(command: Command, visited: HashSet<Command>, stack: Stack<Command>) {
+    private fun topologicalSort(command: Command<*>, visited: HashSet<Command<*>>, stack: Stack<Command<*>>) {
         visited.add(command)
 
         for (dependency in command.dependencies) {
@@ -108,9 +109,16 @@ class Scheduler {
             changed = false
         }
 
-        sortedCommands.forEach(Command::execute)
+        sortedCommands.forEach(Command<*>::execute)
 
         removeQueue.forEach(this::internalRemove)
+        removeQueue.clear()
+    }
+
+    fun clear() {
+        commands.clear()
+        sortedCommands.clear()
+        addQueue.clear()
         removeQueue.clear()
     }
 }
