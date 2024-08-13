@@ -24,6 +24,10 @@ object Scheduler {
         addQueue.addAll(command)
     }
 
+    fun add(commands: Collection<Command<*>>) {
+        addQueue.addAll(commands)
+    }
+
     private fun internalAdd(command: Command<*>) {
         changed = true
         commands[command.hashCode()] = command

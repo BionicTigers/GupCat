@@ -153,7 +153,7 @@ class Command<T: CommandState>(val state: T) {
             result = action(state)
         }
 
-        if (result) {
+        if (result) { // why isnt this !result
             onExit(state)
             running = false
         }
@@ -162,6 +162,6 @@ class Command<T: CommandState>(val state: T) {
     }
 }
 
-fun defaultCommand(name: String = "Unnamed Command"): Command<CommandState> {
+fun statelessCommand(name: String = "Unnamed Command"): Command<CommandState> {
     return Command(CommandState.default(name))
 }

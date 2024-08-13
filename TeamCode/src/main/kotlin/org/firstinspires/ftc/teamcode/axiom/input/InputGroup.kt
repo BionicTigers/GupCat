@@ -1,5 +1,7 @@
 package io.github.bionictigers.input
 
+import org.firstinspires.ftc.teamcode.axiom.input.BaseButton
+
 class InputGroup {
     val buttonChecks = mutableListOf<BaseButton<*>>()
     val lambdaChecks = mutableListOf<() -> Boolean>()
