@@ -1,18 +1,45 @@
 package org.firstinspires.ftc.teamcode.axiom.input
 
 import com.qualcomm.robotcore.hardware.Gamepad as FTCGamepad
-import io.github.bionictigers.commands.System
 import org.firstinspires.ftc.teamcode.axiom.commands.Command
-import org.firstinspires.ftc.teamcode.axiom.commands.statelessCommand
+import org.firstinspires.ftc.teamcode.axiom.commands.CommandState
+import org.firstinspires.ftc.teamcode.axiom.commands.*
+
+interface GamepadUpdateState : CommandState {
+    val gamepads: ArrayList<Gamepad>
+
+    companion object {
+        fun default(gamepads: Pair<Gamepad, Gamepad>): GamepadUpdateState {
+            val (gamepad1, gamepad2) = gamepads
+
+            return object : GamepadUpdateState, CommandState by CommandState.default("GamepadSystem") {
+                override val gamepads = arrayListOf(gamepad1, gamepad2)
+            }
+        }
+    }
+}
+
 
 class GamepadSystem(gamepad1FTC: FTCGamepad, gamepad2FTC: FTCGamepad) : System {
-    override val beforeRun = null
+    companion object {
+        var activeSystem: GamepadSystem? = null
+            private set
+    }
+
+    val gamepads = Pair(Gamepad(gamepad1FTC, this), Gamepad(gamepad2FTC, this))
+
+    override val beforeRun = Command(GamepadUpdateState.default(gamepads))
     override val afterRun = null
 
     override val dependencies: List<System> = emptyList()
 
-    val gamepad1 = Gamepad(gamepad1FTC, this)
-    val gamepad2 = Gamepad(gamepad2FTC, this)
+    init {
+        val (gamepad1, gamepad2) = gamepads
+        gamepad1.command.dependsOn(beforeRun)
+        gamepad2.command.dependsOn(beforeRun)
 
+        Scheduler.add(gamepad1.command, gamepad2.command)
 
+        activeSystem = this
+    }
 }

@@ -1,36 +1,49 @@
-package io.github.bionictigers.input
-
-import org.firstinspires.ftc.teamcode.axiom.commands.Command
-import org.firstinspires.ftc.teamcode.axiom.commands.CommandState
-import org.firstinspires.ftc.teamcode.axiom.commands.Scheduler
-import org.firstinspires.ftc.teamcode.axiom.commands.statelessCommand
-import org.firstinspires.ftc.teamcode.axiom.input.BaseButton
-import org.firstinspires.ftc.teamcode.axiom.input.Gamepad
+package org.firstinspires.ftc.teamcode.axiom.input
 
 class BooleanButton(value: Boolean) : BaseButton<Boolean>(value) {
-    val onDown = ArrayList<() -> Unit>()
-    val onUp = ArrayList<() -> Unit>()
-    val onHold = ArrayList<() -> Unit>()
+    enum class ButtonState {
+        UP, DOWN, HOLD, NONE
+    }
 
-    fun onDown(lambda: () -> Unit): BooleanButton {
+    var state = ButtonState.NONE
+        private set
+
+    private val onDown = ArrayList<(Boolean) -> Unit>()
+    private val onUp = ArrayList<(Boolean) -> Unit>()
+    private val onHold = ArrayList<(Boolean) -> Unit>()
+
+    fun onDown(lambda: (Boolean) -> Unit): BooleanButton {
         onDown.add(lambda)
         return this
     }
 
-    fun onUp(lambda: () -> Unit): BooleanButton {
+    fun onUp(lambda: (Boolean) -> Unit): BooleanButton {
         onUp.add(lambda)
         return this
     }
 
-    override fun update(value: Boolean) {
+    fun onHold(lambda: (Boolean) -> Unit): BooleanButton {
+        onHold.add(lambda)
+        return this
+    }
+
+    override fun update(value: Boolean): List<(Boolean) -> Unit> {
+        state = when {
+            value && !this.value -> ButtonState.DOWN
+            !value && this.value -> ButtonState.UP
+            value -> ButtonState.HOLD
+            else -> ButtonState.NONE
+        }
+
+        val lambdaList = when (state) {
+            ButtonState.DOWN -> onDown
+            ButtonState.UP -> onUp
+            ButtonState.HOLD -> onHold
+            else -> emptyList()
+        }
+
         super.update(value)
 
-        if (lastValue != value && value == true) {
-            Scheduler.add(onDown.map {
-                statelessCommand("BooleanButton OnDown")
-                    .dependsOn(command as Command<CommandState>)
-                TODO("FIX REQUIREMENT OF COMMANDSTATE GENERIC")
-            })
-        }
+        return lambdaList
     }
 }

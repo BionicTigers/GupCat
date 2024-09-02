@@ -1,7 +1,4 @@
-package io.github.bionictigers.commands
-
-import org.firstinspires.ftc.teamcode.axiom.commands.Command
-import org.firstinspires.ftc.teamcode.axiom.commands.CommandState
+package org.firstinspires.ftc.teamcode.axiom.commands
 
 /**
  * A system is the base class for all systems/mechanisms.
