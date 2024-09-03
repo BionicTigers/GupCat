@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.axiom.commands
 
-import io.github.bionictigers.commands.System
 import org.firstinspires.ftc.teamcode.utils.Time
 
 interface CommandState {
@@ -70,7 +69,7 @@ class Command<T: CommandState>(val state: T) {
      * @param commands The commands that the command depends on.
      * @see Command
      */
-    fun dependsOn(vararg commands: Command<T>): Command<T> {
+    fun dependsOn(vararg commands: Command<*>): Command<T> {
         dependencies.addAll(commands)
         return this
     }
@@ -81,7 +80,7 @@ class Command<T: CommandState>(val state: T) {
      * @param commands The list of commands that the command depends on.
      * @see Command
      */
-    fun dependsOn(commands: List<Command<T>>): Command<T> {
+    fun dependsOn(commands: List<Command<*>>): Command<T> {
         dependencies.addAll(commands)
         return this
     }
