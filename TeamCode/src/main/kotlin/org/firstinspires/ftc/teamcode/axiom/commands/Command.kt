@@ -160,6 +160,7 @@ class Command<T: CommandState>(val state: T) {
 
         return result
     }
+
 }
 
 fun statelessCommand(name: String = "Unnamed Command"): Command<CommandState> {
