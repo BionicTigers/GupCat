@@ -18,8 +18,8 @@ interface OdometrySystemState : CommandState {
     val rightOffset: Double
     val backOffset: Double
 
-    var velocity: Vector2<Double>
-    var acceleration: Vector2<Double>
+    var velocity: Vector2
+    var acceleration: Vector2
 
     var pose: Pose
 }
@@ -34,8 +34,8 @@ class OdometrySystem(hardwareMap: HardwareMap) : System {
             override val leftOffset: Double = 170.2 //169.0
             override val rightOffset: Double = 170.2 //169.0
             override val backOffset: Double = 116.8 //152.4
-            override var velocity: Vector2<Double> = Vector2(0.0)
-            override var acceleration: Vector2<Double> = Vector2(0.0)
+            override var velocity: Vector2 = Vector2()
+            override var acceleration: Vector2 = Vector2()
             override var pose: Pose = Pose(0, 0, 0)
         } as OdometrySystemState)
             .setOnEnter {
@@ -99,7 +99,7 @@ class OdometrySystem(hardwareMap: HardwareMap) : System {
                 val deltaXFinal = deltaLocalX + deltaStrafeX
                 val deltaYFinal = deltaLocalY - deltaStrafeY
 
-                val globalRotation = Math.toRadians(it.pose.rotation)
+                val globalRotation = it.pose.radians
 
                 //Translate local position into global position
                 val globalX =
@@ -129,10 +129,14 @@ class OdometrySystem(hardwareMap: HardwareMap) : System {
                 true
             }
     override val afterRun: Command<*>? = null
+
+    val pose: Pose
+        get() = beforeRun.state.pose
+
     fun log(telemetry: Telemetry) {
         telemetry.addData("X", beforeRun.state.pose.x)
         telemetry.addData("Y", beforeRun.state.pose.y)
-        telemetry.addData("Rotation", beforeRun.state.pose.rotation)
+        telemetry.addData("Rotation", beforeRun.state.pose.degrees)
         telemetry.addData("Velocity", beforeRun.state.velocity)
         telemetry.addData("Acceleration", beforeRun.state.acceleration)
     }

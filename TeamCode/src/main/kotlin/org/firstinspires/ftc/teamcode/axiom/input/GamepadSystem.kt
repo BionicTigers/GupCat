@@ -5,14 +5,14 @@ import org.firstinspires.ftc.teamcode.axiom.commands.Command
 import org.firstinspires.ftc.teamcode.axiom.commands.CommandState
 import org.firstinspires.ftc.teamcode.axiom.commands.*
 
-interface GamepadUpdateState : CommandState {
+interface GamepadSystemState : CommandState {
     val gamepads: ArrayList<Gamepad>
 
     companion object {
-        fun default(gamepads: Pair<Gamepad, Gamepad>): GamepadUpdateState {
+        fun default(gamepads: Pair<Gamepad, Gamepad>): GamepadSystemState {
             val (gamepad1, gamepad2) = gamepads
 
-            return object : GamepadUpdateState, CommandState by CommandState.default("GamepadSystem") {
+            return object : GamepadSystemState, CommandState by CommandState.default("GamepadSystem") {
                 override val gamepads = arrayListOf(gamepad1, gamepad2)
             }
         }
@@ -28,7 +28,7 @@ class GamepadSystem(gamepad1FTC: FTCGamepad, gamepad2FTC: FTCGamepad) : System {
 
     val gamepads = Pair(Gamepad(gamepad1FTC, this), Gamepad(gamepad2FTC, this))
 
-    override val beforeRun = Command(GamepadUpdateState.default(gamepads))
+    override val beforeRun = Command(GamepadSystemState.default(gamepads))
     override val afterRun = null
 
     override val dependencies: List<System> = emptyList()
