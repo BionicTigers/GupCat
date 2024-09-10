@@ -1,13 +1,14 @@
 package org.firstinspires.ftc.teamcode.motion
 
 import com.qualcomm.robotcore.hardware.HardwareMap
-import io.github.bionictigers.commands.System
+import org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry
+import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.teamcode.axiom.commands.Command
 import org.firstinspires.ftc.teamcode.axiom.commands.CommandState
-import org.firstinspires.ftc.teamcode.axiom.commands.Scheduler
 import org.firstinspires.ftc.teamcode.utils.ControlHub
 import org.firstinspires.ftc.teamcode.utils.Pose
 import org.firstinspires.ftc.teamcode.utils.Vector2
+import org.firstinspires.ftc.teamcode.axiom.commands.*
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
@@ -128,6 +129,14 @@ class OdometrySystem(hardwareMap: HardwareMap) : System {
                 true
             }
     override val afterRun: Command<*>? = null
+    fun log(telemetry: Telemetry) {
+        telemetry.addData("X", beforeRun.state.pose.x)
+        telemetry.addData("Y", beforeRun.state.pose.y)
+        telemetry.addData("Rotation", beforeRun.state.pose.rotation)
+        telemetry.addData("Velocity", beforeRun.state.velocity)
+        telemetry.addData("Acceleration", beforeRun.state.acceleration)
+    }
+
 
     fun reset() {
         hub.setJunkTicks()
