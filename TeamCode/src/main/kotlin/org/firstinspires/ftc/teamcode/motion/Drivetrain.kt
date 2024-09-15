@@ -63,7 +63,8 @@ class Drivetrain(hardwareMap: HardwareMap, gamepadSystem: GamepadSystem, private
 
     override val beforeRun = Command(DrivetrainState.default(motors))
         .setAction {
-            Mecanum.fieldDriverControl(it, odometrySystem, referencePose)
+//            Mecanum.fieldDriverControl(it, odometrySystem, referencePose)
+            Mecanum.robotDriverControl(it)
 
             true
         }
@@ -82,11 +83,11 @@ class Drivetrain(hardwareMap: HardwareMap, gamepadSystem: GamepadSystem, private
     object Mecanum {
         fun calculatePowers(x: Double, y: Double, rotation: Double): List<Double> {
             val frontLeft = y + x + rotation
-            val backLeft = y - x + rotation
             val frontRight = y - x - rotation
+            val backLeft = y - x + rotation
             val backRight = y + x - rotation
 
-            val powers = listOf(frontLeft, backLeft, frontRight, backRight)
+            val powers = listOf(-frontLeft, -backLeft, frontRight, backRight)
 
             val maxPower = powers.maxOrNull() ?: 1.0
             return powers.map { it / maxPower }
@@ -104,6 +105,7 @@ class Drivetrain(hardwareMap: HardwareMap, gamepadSystem: GamepadSystem, private
 
             val (x, y) = gamepad1.leftJoystick.value
             val rotation = gamepad1.rightJoystick.value.x
+            println(rotation)
             val powers = calculatePowers(x, y, rotation)
             state.motors.setPower(powers[0], powers[1], powers[2], powers[3])
         }
@@ -119,8 +121,14 @@ class Drivetrain(hardwareMap: HardwareMap, gamepadSystem: GamepadSystem, private
 
             val heading = odometry.pose.radians - referencePose.radians
 
-            val angleX = gamepad1.leftJoystick.value.x * cos(-heading) - gamepad1.leftJoystick.value.y * sin(-heading)
-            val angleY = gamepad1.leftJoystick.value.x * sin(-heading) + gamepad1.leftJoystick.value.y * cos(-heading)
+            val angleX =
+                gamepad1.leftJoystick.value.x * cos(-heading) - gamepad1.leftJoystick.value.y * sin(
+                    -heading
+                )
+            val angleY =
+                gamepad1.leftJoystick.value.x * sin(-heading) + gamepad1.leftJoystick.value.y * cos(
+                    -heading
+                )
 
             val rotation = gamepad1.rightJoystick.value.x
 
@@ -128,6 +136,25 @@ class Drivetrain(hardwareMap: HardwareMap, gamepadSystem: GamepadSystem, private
 
             state.motors.setPower(powers[0], powers[1], powers[2], powers[3])
         }
+//
+//        fun moveToPosition(state: DrivetrainState, targetPose: Pose) {
+//            val pose = state.targetPose
+//            val position = pose.position
+//            val rotation = pose.\
+//
+//            val targetPosition = targetPose.position
+//            val targetRotation = targetPose.rotation
+//
+//            val positionError = targetPosition - position
+//            val rotationError = targetRotation - rotation
+//
+//            val x = positionError.x
+//            val y = positionError.y
+//            val rotation = rotationError
+//
+//            val powers = calculatePowers(x, y, rotation)
+//            state.motors.setPower(powers[0], powers[1], powers[2], powers[3])
+//        }
     }
 
     fun setMode(mode: ControlMode) {

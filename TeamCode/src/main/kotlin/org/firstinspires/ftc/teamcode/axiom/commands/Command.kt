@@ -58,7 +58,7 @@ class Command<T: CommandState>(val state: T) {
      * @param systems The list of systems that the command depends on.
      * @see System
      */
-    fun dependsOn(systems: List<System>): Command<T> {
+    fun dependsOnSystem(systems: List<System>): Command<T> {
         dependencies.addAll(systems.mapNotNull { it.beforeRun })
         return this
     }
