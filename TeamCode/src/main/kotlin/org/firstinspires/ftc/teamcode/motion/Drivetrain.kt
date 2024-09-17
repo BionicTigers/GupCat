@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap
 import org.firstinspires.ftc.teamcode.axiom.commands.*
 import org.firstinspires.ftc.teamcode.axiom.input.GamepadSystem
 import org.firstinspires.ftc.teamcode.utils.Pose
+import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -82,14 +83,14 @@ class Drivetrain(hardwareMap: HardwareMap, gamepadSystem: GamepadSystem, private
 
     object Mecanum {
         fun calculatePowers(x: Double, y: Double, rotation: Double): List<Double> {
-            val frontLeft = y + x + rotation
-            val frontRight = y - x - rotation
-            val backLeft = y - x + rotation
-            val backRight = y + x - rotation
+            val frontLeft = y - x + rotation
+            val frontRight = y + x - rotation
+            val backLeft = y + x + rotation
+            val backRight = y - x - rotation
 
             val powers = listOf(-frontLeft, -backLeft, frontRight, backRight)
 
-            val maxPower = powers.maxOrNull() ?: 1.0
+            val maxPower = powers.maxOrNull()?.let { abs(it) } ?: 1.0
             return powers.map { it / maxPower }
         }
 
@@ -104,8 +105,7 @@ class Drivetrain(hardwareMap: HardwareMap, gamepadSystem: GamepadSystem, private
             val (gamepad1, _) = gamepadSystem.gamepads
 
             val (x, y) = gamepad1.leftJoystick.value
-            val rotation = gamepad1.rightJoystick.value.x
-            println(rotation)
+            val rotation = -gamepad1.rightJoystick.value.x
             val powers = calculatePowers(x, y, rotation)
             state.motors.setPower(powers[0], powers[1], powers[2], powers[3])
         }

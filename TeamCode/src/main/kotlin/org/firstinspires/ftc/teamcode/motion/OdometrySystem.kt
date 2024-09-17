@@ -63,9 +63,9 @@ class OdometrySystem(hardwareMap: HardwareMap) : System {
 //        val deltaRightMM = -circumference * hub.getEncoderTicks(0) / 2000
 //        val deltaBackMM = circumference * hub.getEncoderTicks(3) / 2000
 
-                val deltaLeftMM = circumference * exHub.getEncoderTicks(3) / 2000
-                val deltaRightMM = -circumference * exHub.getEncoderTicks(0) / 2000
-                val deltaBackMM = -circumference * hub.getEncoderTicks(3) / 2000
+                val deltaLeftMM = circumference * hub.getEncoderTicks(3) / 2000
+                val deltaRightMM = -circumference * hub.getEncoderTicks(0) / 2000
+                val deltaBackMM = -circumference * exHub.getEncoderTicks(0) / 2000
 //        println("Left: $deltaLeftMM, Right: $deltaRightMM, Back: $deltaBackMM")
 
                 //Find the amount the robot has rotated
@@ -139,11 +139,14 @@ class OdometrySystem(hardwareMap: HardwareMap) : System {
         telemetry.addData("Rotation", beforeRun.state.pose.degrees)
         telemetry.addData("Velocity", beforeRun.state.velocity)
         telemetry.addData("Acceleration", beforeRun.state.acceleration)
+        telemetry.update()
     }
 
 
     fun reset() {
         hub.setJunkTicks()
+        exHub.setJunkTicks()
         beforeRun.state.pose = Pose(0, 0, 0)
+        println("clear")
     }
 }

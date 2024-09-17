@@ -10,6 +10,7 @@ class DriveOp : LinearOpMode() {
     override fun runOpMode() {
         val odometrySystem = OdometrySystem(hardwareMap)
         Scheduler.addSystem(odometrySystem)
+        odometrySystem.reset()
 
         waitForStart()
         odometrySystem.reset()
