@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.axiom.teleops
+package org.firstinspires.ftc.teamcode.teleops
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
@@ -11,7 +11,6 @@ class DriveOp : LinearOpMode() {
         val odometrySystem = OdometrySystem(hardwareMap)
         Scheduler.addSystem(odometrySystem)
         odometrySystem.reset()
-
         waitForStart()
         odometrySystem.reset()
 

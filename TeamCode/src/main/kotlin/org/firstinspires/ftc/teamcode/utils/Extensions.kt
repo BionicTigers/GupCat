@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.utils
 
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
+import com.qualcomm.robotcore.hardware.HardwareMap
 import org.firstinspires.ftc.teamcode.axiom.commands.Scheduler
 import org.firstinspires.ftc.teamcode.axiom.commands.statelessCommand
 
@@ -39,3 +40,4 @@ fun DcMotorEx.assignTracker(setup: Boolean = true) {
 fun DcMotorEx.getTracker(): DcMotorTracker {
     return dcMotorTrackers[this] ?: throw IllegalArgumentException("This motor does not have a tracker.")
 }
+

@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode
+package org.firstinspires.ftc.teamcode.teleops
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
@@ -20,6 +20,7 @@ class MasterRookie : LinearOpMode() {
         waitForStart()
 
         while (opModeIsActive()) {
+            odometrySystem.log(telemetry)
             Scheduler.update()
         }
     }

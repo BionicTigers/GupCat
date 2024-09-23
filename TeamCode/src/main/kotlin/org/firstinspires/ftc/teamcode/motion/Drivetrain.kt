@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.motion
 
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
+import com.qualcomm.robotcore.hardware.HardwareDevice
 import com.qualcomm.robotcore.hardware.HardwareMap
 import org.firstinspires.ftc.teamcode.axiom.commands.*
 import org.firstinspires.ftc.teamcode.axiom.input.GamepadSystem
@@ -9,6 +10,10 @@ import org.firstinspires.ftc.teamcode.utils.Pose
 import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
+
+inline fun <reified T : HardwareDevice> HardwareMap.getByName(name: String): T {
+    return this.get(T::class.java, name)
+}
 
 data class Motors(
     val frontLeft: DcMotorEx,
@@ -54,18 +59,18 @@ class Drivetrain(hardwareMap: HardwareMap, gamepadSystem: GamepadSystem, private
     }
 
     private val motors = Motors(
-        hardwareMap.get(DcMotorEx::class.java, "frontLeft"),
-        hardwareMap.get(DcMotorEx::class.java, "backLeft"),
-        hardwareMap.get(DcMotorEx::class.java, "frontRight"),
-        hardwareMap.get(DcMotorEx::class.java, "backRight")
+        hardwareMap.getByName("frontLeft"),
+        hardwareMap.getByName("backLeft"),
+        hardwareMap.getByName("frontRight"),
+        hardwareMap.getByName("backRight")
     )
 
     override val dependencies: List<System> = listOf(odometrySystem, gamepadSystem)
 
     override val beforeRun = Command(DrivetrainState.default(motors))
         .setAction {
-//            Mecanum.fieldDriverControl(it, odometrySystem, referencePose)
-            Mecanum.robotDriverControl(it)
+            Mecanum.fieldDriverControl(it, odometrySystem, referencePose)
+//            Mecanum.robotDriverControl(it)
 
             true
         }

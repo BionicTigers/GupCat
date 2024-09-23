@@ -31,20 +31,20 @@ class OdometrySystem(hardwareMap: HardwareMap) : System {
     override val dependencies: List<System> = emptyList()
     override val beforeRun =
         Command(object : OdometrySystemState, CommandState by CommandState.default("Odometry") {
-            override val leftOffset: Double = 170.2 //169.0
-            override val rightOffset: Double = 170.2 //169.0
-            override val backOffset: Double = 116.8 //152.4
+            override val leftOffset: Double = 152.4 //169.0
+            override val rightOffset: Double = 152.4 //169.0
+            override val backOffset: Double = 152.4 //152.4
             override var velocity: Vector2 = Vector2()
             override var acceleration: Vector2 = Vector2()
             override var pose: Pose = Pose(0, 0, 0)
         } as OdometrySystemState)
             .setOnEnter {
-                val hub = ControlHub(hardwareMap, "Control Hub")
                 hub.setJunkTicks()
+                exHub.setJunkTicks()
             }
             .setAction {
-                val odoDiameter: Double = 48.0 //MM
-                val gearRatio: Double = 1.333 //1.333
+                val odoDiameter = 48.0 //MM
+                val gearRatio = 1 //1.333
                 val circumference: Double = odoDiameter * gearRatio * PI
 
                 //Make new variables for local values
@@ -64,8 +64,8 @@ class OdometrySystem(hardwareMap: HardwareMap) : System {
 //        val deltaBackMM = circumference * hub.getEncoderTicks(3) / 2000
 
                 val deltaLeftMM = circumference * hub.getEncoderTicks(3) / 2000
-                val deltaRightMM = -circumference * hub.getEncoderTicks(0) / 2000
-                val deltaBackMM = -circumference * exHub.getEncoderTicks(0) / 2000
+                val deltaRightMM = -circumference * exHub.getEncoderTicks(0) / 2000
+                val deltaBackMM = -circumference * hub.getEncoderTicks(0) / 2000
 //        println("Left: $deltaLeftMM, Right: $deltaRightMM, Back: $deltaBackMM")
 
                 //Find the amount the robot has rotated
@@ -140,6 +140,8 @@ class OdometrySystem(hardwareMap: HardwareMap) : System {
         telemetry.addData("Velocity", beforeRun.state.velocity)
         telemetry.addData("Acceleration", beforeRun.state.acceleration)
         telemetry.update()
+        println("meow")
+
     }
 
 

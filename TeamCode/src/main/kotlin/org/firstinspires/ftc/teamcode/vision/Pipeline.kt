@@ -24,8 +24,8 @@ private data object Values {
         val width = Distance.inch(1.5)
         val height = Distance.inch(1.5)
 
-        val yellow = ColorRange(Color(0, 0, 0), Color(0, 0, 0)) //TODO: Correct Color Values
-        val red = ColorRange(Color(0, 0, 0), Color(0, 0, 0))
+        val yellow = ColorRange(Color(117, 109, 22), Color(255, 244, 125))
+        val red = ColorRange(Color(100, 100, 0), Color(255, 255, 50))
         val blue = ColorRange(Color(0, 0, 0), Color(0, 0, 0))
     }
 }
@@ -50,6 +50,8 @@ class Pipeline(private val camera: Camera) : OpenCvPipeline() {
 
         val contours = mutableListOf<MatOfPoint>()
         Imgproc.findContours(mask, contours, Mat(), Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE)
+
+        mask.release()
 
         return contours
     }
@@ -137,8 +139,6 @@ class Pipeline(private val camera: Camera) : OpenCvPipeline() {
         Imgproc.drawContours(cropped, yellowContours, -1, Scalar(255.0, 255.0, 0.0), 2)
         Imgproc.drawContours(cropped, redContours, -1, Scalar(255.0, 0.0, 0.0), 2)
         Imgproc.drawContours(cropped, blueContours, -1, Scalar(0.0, 0.0, 255.0), 2)
-
-
 
         return cropped
     }

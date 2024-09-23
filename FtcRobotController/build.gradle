@@ -8,15 +8,15 @@ apply plugin: 'com.android.library'
 android {
 
     defaultConfig {
-        minSdkVersion 24
+        minSdk 24
         targetSdk 34
     }
     compileSdk 34
 
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
     namespace = 'com.qualcomm.ftcrobotcontroller'
 }
