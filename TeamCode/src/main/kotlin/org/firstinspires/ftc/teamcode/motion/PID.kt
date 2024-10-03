@@ -7,6 +7,14 @@ import com.qualcomm.robotcore.util.ElapsedTime
  * Takes in either PIDTerms (Used for realtime editing) or kP, tI, tD
  * Takes in pvMin and pvMax which is the minimum and maximum that the process value can reach
  * Also takes in cvMin and cvMax which is the maximum output, usually -1 to 1
+ *
+ * @param kP Proportional constant
+ * @param tI Integral time
+ * @param tD Derivative time
+ * @param pvMin Minimum process value
+ * @param pvMax Maximum process value
+ * @param cvMin Minimum control variable
+ * @param cvMax Maximum control variable
  */
 class PID(
     val kP: Double,

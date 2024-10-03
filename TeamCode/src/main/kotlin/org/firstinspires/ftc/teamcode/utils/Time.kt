@@ -3,16 +3,16 @@ package org.firstinspires.ftc.teamcode.utils
 data class Time internal constructor(private val time: Double = 0.0) {
 
     companion object {
-        fun fromSeconds(seconds: Double): Time {
-            return Time(seconds)
+        fun fromSeconds(seconds: Number): Time {
+            return Time(seconds.toDouble())
         }
 
-        fun fromMilliseconds(milliseconds: Double): Time {
-            return Time(milliseconds / 1000.0)
+        fun fromMilliseconds(milliseconds: Number): Time {
+            return Time(milliseconds.toDouble() / 1000.0)
         }
 
-        fun fromNanoseconds(minutes: Double): Time {
-            return Time(minutes * 60.0)
+        fun fromNanoseconds(minutes: Number): Time {
+            return Time(minutes.toDouble() * 60.0)
         }
     }
 

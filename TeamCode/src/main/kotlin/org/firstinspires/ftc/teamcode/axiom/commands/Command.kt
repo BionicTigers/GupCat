@@ -4,19 +4,19 @@ import org.firstinspires.ftc.teamcode.utils.Time
 
 interface CommandState {
     val name: String
-    var enteredAt: Long
-    var timeInScheduler: Long
-    var lastExecutedAt: Long
+    var enteredAt: Time
+    var timeInScheduler: Time
+    var lastExecutedAt: Time
     var deltaTime: Time
 
     companion object {
         fun default(name: String = "Unnamed Command"): CommandState {
             return object : CommandState {
-                override val name: String = name
-                override var enteredAt: Long = 0
-                override var timeInScheduler: Long = 0
-                override var lastExecutedAt: Long = 0
-                override var deltaTime: Time = Time.fromSeconds(0.0)
+                override val name = name
+                override var enteredAt = Time()
+                override var timeInScheduler = Time()
+                override var lastExecutedAt = Time()
+                override var deltaTime = Time.fromSeconds(0.0)
             }
         }
     }
@@ -132,12 +132,12 @@ class Command<T: CommandState>(val state: T) {
      * @return True if the command was executed, false otherwise.
      */
     internal fun execute(): Boolean {
-        val currentTime = java.lang.System.currentTimeMillis()
+        val currentTime = Time.fromMilliseconds(java.lang.System.currentTimeMillis())
 
-        if (state.enteredAt == 0L)
-            state.enteredAt = java.lang.System.currentTimeMillis()
+        if (state.enteredAt == Time())
+            state.enteredAt = currentTime
 
-        state.deltaTime = Time.fromSeconds((currentTime - state.lastExecutedAt) / 1000.0)
+        state.deltaTime = currentTime - state.lastExecutedAt
         state.timeInScheduler = currentTime - state.enteredAt
         state.lastExecutedAt = state.timeInScheduler
 

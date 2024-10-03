@@ -28,6 +28,16 @@ data class MotionResult(
     }
 }
 
+fun generateMotionProfile(
+    start: Number,
+    final: Number,
+    jerk: Number,
+    maxAcceleration: Number,
+    maxVelocity: Number,
+    startingVelocity: Number? = null,
+    points: Int = 600
+) = generateMotionProfile(start.toDouble(), final.toDouble(), jerk.toDouble(), maxAcceleration.toDouble(), maxVelocity.toDouble(), startingVelocity?.toDouble(), points)
+
 /**
  * Generate a motion profile based off certain parameters
  *
@@ -35,7 +45,7 @@ data class MotionResult(
  * @param maxAcceleration mm/s^2
  * @param maxVelocity mm/s
  */
-fun generateMotionProfile(
+private fun generateMotionProfile(
     start: Double,
     final: Double,
     jerk: Double,

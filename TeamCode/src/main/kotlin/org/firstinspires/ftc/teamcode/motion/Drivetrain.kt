@@ -7,13 +7,10 @@ import com.qualcomm.robotcore.hardware.HardwareMap
 import org.firstinspires.ftc.teamcode.axiom.commands.*
 import org.firstinspires.ftc.teamcode.axiom.input.GamepadSystem
 import org.firstinspires.ftc.teamcode.utils.Pose
+import org.firstinspires.ftc.teamcode.utils.getByName
 import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
-
-inline fun <reified T : HardwareDevice> HardwareMap.getByName(name: String): T {
-    return this.get(T::class.java, name)
-}
 
 data class Motors(
     val frontLeft: DcMotorEx,
