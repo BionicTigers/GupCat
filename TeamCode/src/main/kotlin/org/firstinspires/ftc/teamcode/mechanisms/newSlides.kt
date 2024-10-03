@@ -8,10 +8,13 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.DigitalChannel
 import com.qualcomm.robotcore.hardware.HardwareMap
 import com.qualcomm.robotcore.util.ElapsedTime
+import org.firstinspires.ftc.teamcode.motion.MotionResult
+import org.firstinspires.ftc.teamcode.motion.PID
+import org.firstinspires.ftc.teamcode.motion.PIDTerms
 import org.firstinspires.ftc.teamcode.utils.ControlHub
-import org.firstinspires.ftc.teamcode.utils.MotionResult
-import org.firstinspires.ftc.teamcode.utils.PID
-import org.firstinspires.ftc.teamcode.utils.PIDTerms
+//import org.firstinspires.ftc.teamcode.utils.MotionResult
+//import org.firstinspires.ftc.teamcode.utils.PID
+//import org.firstinspires.ftc.teamcode.utils.PIDTerms
 import kotlin.math.floor
 
 /**
