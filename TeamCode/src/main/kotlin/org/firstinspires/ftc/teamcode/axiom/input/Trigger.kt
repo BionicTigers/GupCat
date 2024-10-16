@@ -27,6 +27,11 @@ class Trigger(value: Double) : BaseButton<Double>(value) {
         return this
     }
 
+    fun onHold(lambda: (Double) -> Unit): Trigger {
+        onHold.add(lambda)
+        return this
+    }
+
     override fun update(value: Double): List<(Double) -> Unit> {
         state = when {
             value > 0.5 && this.value <= 0.5 -> TriggerState.DOWN

@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.utils
 
-import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.HardwareDevice
 import com.qualcomm.robotcore.hardware.HardwareMap
@@ -17,15 +16,22 @@ class DcMotorTracker(private val motor: DcMotorEx) {
         private set
     var velocity = 0.0
         private set
+    private var accumulativeTime = Time()
 
     init {
         val command = statelessCommand("DcMotor Tracker")
         .setAction {
-                velocity = (motor.currentPosition - previousPosition) / it.deltaTime.seconds()
-                acceleration = (velocity - previousVelocity) / it.deltaTime.seconds()
-                previousPosition = motor.currentPosition
-                true
+            accumulativeTime += it.deltaTime
+            if (motor.currentPosition - previousPosition == 0 || accumulativeTime <= Time.fromMilliseconds(22)) {
+                return@setAction true
             }
+            velocity = (motor.currentPosition - previousPosition) / accumulativeTime.seconds()
+            acceleration = (velocity - previousVelocity) / accumulativeTime.seconds()
+            previousPosition = motor.currentPosition
+            accumulativeTime = Time()
+            true
+        }
+
         Scheduler.add(command)
     }
 }

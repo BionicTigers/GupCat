@@ -65,7 +65,7 @@ class Gamepad(private val ftcGamepad: FTCGamepad, system: GamepadSystem) {
             val rightTriggerValue = ftcGamepad.right_trigger.toDouble()
             it.rightTrigger.update(rightTriggerValue).forEach { it(rightTriggerValue) }
 
-            return@setAction true
+            return@setAction false
         }
 
     val leftJoystick get() = command.state.leftJoystick

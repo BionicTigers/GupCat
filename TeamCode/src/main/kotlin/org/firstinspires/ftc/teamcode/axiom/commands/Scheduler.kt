@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.axiom.commands
 
+import org.firstinspires.ftc.teamcode.utils.Time
 import java.util.Stack
 
 object Scheduler {
@@ -10,6 +11,8 @@ object Scheduler {
     private val removeQueue: ArrayList<Command<*>> = ArrayList()
 
     private var changed = false
+
+    var loopDeltaTime = Time()
 
     /**
      * Adds commands to the scheduler.
@@ -104,6 +107,8 @@ object Scheduler {
      * @see Command
      */
     fun update() {
+        val startTime = java.lang.System.currentTimeMillis()
+
         addQueue.forEach(this::internalAdd)
         addQueue.clear()
 
@@ -116,6 +121,8 @@ object Scheduler {
 
         removeQueue.forEach(this::internalRemove)
         removeQueue.clear()
+
+        loopDeltaTime = Time.fromMilliseconds(java.lang.System.currentTimeMillis() - startTime)
     }
 
     fun clear() {

@@ -139,7 +139,7 @@ class Command<T: CommandState>(val state: T) {
 
         state.deltaTime = currentTime - state.lastExecutedAt
         state.timeInScheduler = currentTime - state.enteredAt
-        state.lastExecutedAt = state.timeInScheduler
+        state.lastExecutedAt = currentTime
 
         var result = false
 

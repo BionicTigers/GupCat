@@ -48,8 +48,11 @@ interface DrivetrainState : CommandState {
     }
 }
 
-
-class Drivetrain(hardwareMap: HardwareMap, gamepadSystem: GamepadSystem, private val odometrySystem: OdometrySystem) : System {
+class Drivetrain(
+    hardwareMap: HardwareMap,
+    gamepadSystem: GamepadSystem,
+    odometrySystem: OdometrySystem,
+) : System {
     enum class ControlMode {
         AUTONOMOUS,
         DRIVER_CONTROL
@@ -66,8 +69,10 @@ class Drivetrain(hardwareMap: HardwareMap, gamepadSystem: GamepadSystem, private
 
     override val beforeRun = Command(DrivetrainState.default(motors))
         .setAction {
-            Mecanum.fieldDriverControl(it, odometrySystem, referencePose)
-//            Mecanum.robotDriverControl(it)
+            if (it.mode == ControlMode.DRIVER_CONTROL)
+                Mecanum.fieldDriverControl(it, odometrySystem, referencePose)
+            else
+                moveToPose(it.targetPose)
 
             true
         }
@@ -138,25 +143,21 @@ class Drivetrain(hardwareMap: HardwareMap, gamepadSystem: GamepadSystem, private
 
             state.motors.setPower(powers[0], powers[1], powers[2], powers[3])
         }
-//
-//        fun moveToPosition(state: DrivetrainState, targetPose: Pose) {
+
+        fun moveToPosition(state: DrivetrainState, targetPose: Pose) {
 //            val pose = state.targetPose
-//            val position = pose.position
-//            val rotation = pose.\
+//            val targetPos = pose.position
+//            val targetRot = pose.radians
 //
 //            val targetPosition = targetPose.position
-//            val targetRotation = targetPose.rotation
-//
-//            val positionError = targetPosition - position
-//            val rotationError = targetRotation - rotation
+//            val targetRotation = targetPose.radians
 //
 //            val x = positionError.x
 //            val y = positionError.y
-//            val rotation = rotationError
 //
 //            val powers = calculatePowers(x, y, rotation)
 //            state.motors.setPower(powers[0], powers[1], powers[2], powers[3])
-//        }
+        }
     }
 
     fun setMode(mode: ControlMode) {

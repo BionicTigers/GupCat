@@ -22,6 +22,11 @@ class ControlHub(hardware: HardwareMap, hubName: String) {
         return hubModule.getInputVoltage(VoltageUnit.VOLTS)
     }
 
+    fun getEncoder(port: Int): Encoder {
+        assert(port in 0..3) { "Port must be between 0 and 3" }
+        return Encoder(port, this)
+    }
+
     fun setJunkTicks(motor: Int? = null, junkTick: Int? = null) {
         if (motor != null)
             junkTicks[motor] = junkTick ?: bulkDataCache[motor]
@@ -50,4 +55,14 @@ class ControlHub(hardware: HardwareMap, hubName: String) {
     fun getEncoderTicks(motor: Int): Int {
         return bulkDataCache[motor] - junkTicks[motor]
     }
+
+    fun getAndUpdateEncoderTicks(motor: Int): Int {
+        refreshBulkData()
+        return getEncoderTicks(motor)
+    }
+}
+
+class Encoder(private val port: Int, private val controlHub: ControlHub) {
+    val ticks: Int
+        get() = controlHub.getAndUpdateEncoderTicks(port)
 }
