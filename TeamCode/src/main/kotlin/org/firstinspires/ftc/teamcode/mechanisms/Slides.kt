@@ -51,7 +51,6 @@ class Slides(hardwareMap: HardwareMap) : System {
             it.motor.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
 //            it.motor.direction = DcMotorSimple.Direction.REVERSE
             it.motor.power = 0.0
-
             it.pid.reset()
             it.motor.assignTracker()
         }
