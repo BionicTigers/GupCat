@@ -13,6 +13,7 @@ import org.firstinspires.ftc.teamcode.motion.PIDTerms
 import org.firstinspires.ftc.teamcode.utils.ControlHub
 import org.firstinspires.ftc.teamcode.utils.Encoder
 import org.firstinspires.ftc.teamcode.utils.getByName
+import org.firstinspires.ftc.teamcode.utils.interpolatedMapOf
 
 interface PivotState : CommandState {
     val encoder: Encoder
@@ -25,7 +26,7 @@ interface PivotState : CommandState {
             return object : PivotState, CommandState by CommandState.default("Pivot") {
                 override val encoder = encoder
                 override var targetPosition = 0
-                override val pid = PID(PIDTerms(4.0, 0.0), 0.0, 1000.0, -1.0, 1.0)
+                override val pid = PID(PIDTerms(2.0, 0.0), 0.0, 1000.0, -1.0, 1.0)
                 override val motor = motor
             }
         }
@@ -34,6 +35,11 @@ interface PivotState : CommandState {
 
 class Pivot(hardwareMap: HardwareMap) : System {
     val exHub = ControlHub(hardwareMap, "Expansion Hub 2")
+
+    val interpolatedMap = interpolatedMapOf(
+        0.0 to 4.0,
+        1000.0 to 1.0
+    )
 
     init {
         exHub.refreshBulkData()
@@ -52,6 +58,7 @@ class Pivot(hardwareMap: HardwareMap) : System {
         .setAction {
             exHub.refreshBulkData()
             println("${it.targetPosition}, ${exHub.getEncoderTicks(3).toDouble()}")
+            it.pid.p = interpolatedMap[it.targetPosition.toDouble()]
             val power = it.pid.calculate(it.targetPosition.toDouble(), exHub.getEncoderTicks(3).toDouble())
             it.motor.power = power
 
@@ -62,17 +69,17 @@ class Pivot(hardwareMap: HardwareMap) : System {
     //TODO: Swap to an angle
     var pivotTicks: Int
         set(value) {
-            beforeRun.state.targetPosition = value
+            beforeRun.state.targetPosition = value.coerceIn(-25,TODO())
         }
         get() = beforeRun.state.targetPosition
 
     fun setupDriverControl(gamepad: Gamepad) {
         gamepad.leftTrigger.onHold {
-            pivotTicks -= (500 * Scheduler.loopDeltaTime.seconds() * it).toInt()
+            pivotTicks -= (1500 * Scheduler.loopDeltaTime.seconds() * it).toInt()
         }
 
         gamepad.rightTrigger.onHold {
-            pivotTicks += (500 * Scheduler.loopDeltaTime.seconds() * it).toInt()
+            pivotTicks += (1500 * Scheduler.loopDeltaTime.seconds() * it).toInt()
         }
     }
 }

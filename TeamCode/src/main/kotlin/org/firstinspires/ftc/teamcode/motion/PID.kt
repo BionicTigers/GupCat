@@ -20,11 +20,11 @@ class PID(
     val kP: Double,
     val tI: Double,
     val tD: Double,
-    private val pvMin: Double,
-    private val pvMax: Double,
-    private val cvMin: Double,
-    private val cvMax: Double)
-{
+    var pvMin: Double,
+    var pvMax: Double,
+    var cvMin: Double,
+    var cvMax: Double
+) {
     //Time between cycles, in ms
     private val sampleTime = 20
 

@@ -14,7 +14,7 @@ class Claw(hardwareMap: HardwareMap) : System {
 
     fun setupDriverControl(gp: Gamepad) {
         gp.getBooleanButton(Gamepad.Buttons.LEFT_BUMPER).onDown { open() }
-        gp.getBooleanButton(Gamepad.Buttons.RIGHT_BUMPER).onDown { open() }
+        gp.getBooleanButton(Gamepad.Buttons.RIGHT_BUMPER).onDown { close() }
     }
 
     fun open() {
