@@ -29,7 +29,7 @@ class DcMotorTracker(private val motor: DcMotorEx) {
             acceleration = (velocity - previousVelocity) / accumulativeTime.seconds()
             previousPosition = motor.currentPosition
             accumulativeTime = Time()
-            true
+            false
         }
 
         Scheduler.add(command)

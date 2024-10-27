@@ -1,7 +1,20 @@
 package org.firstinspires.ftc.teamcode.utils
 
+import kotlin.math.absoluteValue
+import kotlin.math.roundToInt
+
 class Pose(val x: Double, val y: Double, private val rot: Double) {
     constructor(x: Number, y: Number, rot: Number) : this(x.toDouble(), y.toDouble(), rot.toDouble())
+
+    operator fun compareTo(other: Pose): Int {
+        return if (x == other.x && y == other.y && rot == other.rot) {
+            0
+        } else if (x < other.x || y < other.y || rot < other.rot) {
+            1
+        } else {
+            -1
+        }
+    }
 
     val position: Vector2
         get() = Vector2(x, y)
@@ -11,6 +24,9 @@ class Pose(val x: Double, val y: Double, private val rot: Double) {
 
     val degrees: Double
         get() = rot
+
+    val absoluteValue: Pose
+        get() = Pose(x.absoluteValue, y.absoluteValue, rot.absoluteValue)
 
     override fun toString(): String {
         return "Pose(x=$x, y=$y, rot=$rot)"

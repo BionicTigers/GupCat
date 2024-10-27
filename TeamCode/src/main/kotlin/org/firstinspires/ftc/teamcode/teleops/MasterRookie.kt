@@ -20,6 +20,7 @@ class MasterRookie : LinearOpMode() {
         waitForStart()
 
         while (opModeIsActive()) {
+//            print("hi")
             odometrySystem.log(telemetry)
             Scheduler.update()
         }

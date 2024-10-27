@@ -67,7 +67,7 @@ class InputGroup {
                 else
                     onFalse.forEach { it() }
 
-                true
+                false
             }
     }
 }

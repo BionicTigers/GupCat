@@ -88,7 +88,7 @@ class Command<T: CommandState>(val state: T) {
     /**
      * Assigns a function to be invoked during command execution.
      *
-     * @param lambda The function to be invoked. The value returned in the lambda determines if the command stays in the scheduler.
+     * @param lambda The function to be invoked. The value returned in the lambda determines if the command stays in the scheduler. True means it leaves the scheduler.
      */
     fun setAction(lambda: (T) -> Boolean): Command<T> {
         action = lambda
@@ -152,14 +152,14 @@ class Command<T: CommandState>(val state: T) {
             result = action(state)
         }
 
-        if (result) { // why isnt this !result
+        if (result) {
             onExit(state)
             running = false
+            Scheduler.remove(this)
         }
 
         return result
     }
-
 }
 
 fun statelessCommand(name: String = "Unnamed Command"): Command<CommandState> {

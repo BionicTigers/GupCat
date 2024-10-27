@@ -55,9 +55,16 @@ class Gamepad(private val ftcGamepad: FTCGamepad, system: GamepadSystem) {
 
             val leftJoystickValue = Vector2(ftcGamepad.left_stick_x.toDouble(), ftcGamepad.left_stick_y.toDouble())
             it.leftJoystick.update(leftJoystickValue).forEach { it(leftJoystickValue) }
+            println("ftcGamepad.left_stick_x ${ftcGamepad.left_stick_x}")
+            println("ftcGamepad.left_stick_y ${ftcGamepad.left_stick_y}")
+            println("leftJoystickValue ${leftJoystickValue}")
+
 
             val rightJoystickValue = Vector2(ftcGamepad.right_stick_x.toDouble(), ftcGamepad.right_stick_y.toDouble())
             it.rightJoystick.update(rightJoystickValue).forEach { it(rightJoystickValue) }
+            println("ftcGamepad.right_stick_x ${ftcGamepad.right_stick_x}")
+            println("ftcGamepad.right_stick_y ${ftcGamepad.right_stick_y}")
+            println("leftJoystickValue ${leftJoystickValue}")
 
             val leftTriggerValue = ftcGamepad.left_trigger.toDouble()
             it.leftTrigger.update(leftTriggerValue).forEach { it(leftTriggerValue) }

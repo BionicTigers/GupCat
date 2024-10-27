@@ -31,9 +31,9 @@ class OdometrySystem(hardwareMap: HardwareMap) : System {
     override val dependencies: List<System> = emptyList()
     override val beforeRun =
         Command(object : OdometrySystemState, CommandState by CommandState.default("Odometry") {
-            override val leftOffset: Double = 152.4 //169.0
-            override val rightOffset: Double = 152.4 //169.0
-            override val backOffset: Double = 152.4 //152.4
+            override val leftOffset: Double = 169.8625 //169.
+            override val rightOffset: Double = 169.8625 //152.4 //169.0
+            override val backOffset: Double = 95.25 //152.4 //152.4
             override var velocity: Vector2 = Vector2()
             override var acceleration: Vector2 = Vector2()
             override var pose: Pose = Pose(0, 0, 0)
@@ -44,7 +44,7 @@ class OdometrySystem(hardwareMap: HardwareMap) : System {
             }
             .setAction {
                 val odoDiameter = 48.0 //MM
-                val gearRatio = 1 //1.333
+                val gearRatio = 3.76
                 val circumference: Double = odoDiameter * gearRatio * PI
 
                 //Make new variables for local values
@@ -68,7 +68,7 @@ class OdometrySystem(hardwareMap: HardwareMap) : System {
                 val deltaBackMM = -circumference * hub.getEncoderTicks(0) / 2000
 //        println("Left: $deltaLeftMM, Right: $deltaRightMM, Back: $deltaBackMM")
 
-                //Find the amount the robot has rotated
+                //Find the amount the robot has rotate
                 val localRotation = (deltaLeftMM - deltaRightMM) / (it.leftOffset + it.rightOffset)
 
                 //Calculates the radius of the arc of the robot's travel for forward/backward arcs
@@ -126,7 +126,7 @@ class OdometrySystem(hardwareMap: HardwareMap) : System {
                 //Reset junk ticks for next cycle
                 hub.setJunkTicks()
                 exHub.setJunkTicks()
-                true
+                false
             }
     override val afterRun: Command<*>? = null
 
@@ -140,8 +140,6 @@ class OdometrySystem(hardwareMap: HardwareMap) : System {
         telemetry.addData("Velocity", beforeRun.state.velocity)
         telemetry.addData("Acceleration", beforeRun.state.acceleration)
         telemetry.update()
-        println("meow")
-
     }
 
 

@@ -7,7 +7,7 @@ import org.firstinspires.ftc.teamcode.axiom.input.GamepadSystem
 import org.firstinspires.ftc.teamcode.mechanisms.Slides
 
 @TeleOp(name = "Slide Test")
-class Slide : LinearOpMode() {
+class SlideOp : LinearOpMode() {
     override fun runOpMode() {
         val slides = Slides(hardwareMap)
         val gamepadSystem = GamepadSystem(gamepad1, gamepad2)

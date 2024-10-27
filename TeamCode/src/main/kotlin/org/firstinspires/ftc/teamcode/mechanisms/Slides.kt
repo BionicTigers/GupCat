@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.mechanisms
 
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
-import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.HardwareMap
 import org.firstinspires.ftc.teamcode.axiom.commands.Command
 import org.firstinspires.ftc.teamcode.axiom.commands.CommandState
@@ -16,7 +15,6 @@ import org.firstinspires.ftc.teamcode.motion.generateMotionProfile
 import org.firstinspires.ftc.teamcode.utils.Time
 import org.firstinspires.ftc.teamcode.utils.assignTracker
 import org.firstinspires.ftc.teamcode.utils.getByName
-import org.firstinspires.ftc.teamcode.utils.getTracker
 import kotlin.math.sign
 
 interface SlidesState : CommandState {

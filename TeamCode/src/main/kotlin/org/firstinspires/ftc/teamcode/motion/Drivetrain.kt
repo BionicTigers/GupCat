@@ -4,7 +4,9 @@ import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.HardwareDevice
 import com.qualcomm.robotcore.hardware.HardwareMap
+import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.teamcode.axiom.commands.*
+import org.firstinspires.ftc.teamcode.axiom.input.Gamepad
 import org.firstinspires.ftc.teamcode.axiom.input.GamepadSystem
 import org.firstinspires.ftc.teamcode.utils.Pose
 import org.firstinspires.ftc.teamcode.utils.Time
@@ -12,6 +14,7 @@ import org.firstinspires.ftc.teamcode.utils.getByName
 import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
+import kotlin.reflect.jvm.internal.impl.load.java.typeEnhancement.TypeEnhancementKt
 
 data class Motors(
     val frontLeft: DcMotorEx,
@@ -20,10 +23,10 @@ data class Motors(
     val backRight: DcMotorEx
 ) {
     fun setPower(frontLeft: Double, backLeft: Double, frontRight: Double, backRight: Double) {
-        this.frontLeft.power = frontLeft
-        this.backLeft.power = backLeft
-        this.frontRight.power = frontRight
-        this.backRight.power = backRight
+        this.frontLeft.power = frontLeft * .7
+        this.backLeft.power = backLeft * .9
+        this.frontRight.power = frontRight * .7
+        this.backRight.power = backRight * 1.0
     }
 
     fun setPower(power: Double) {
@@ -72,7 +75,7 @@ interface DrivetrainState : CommandState {
 class Drivetrain(
     hardwareMap: HardwareMap,
     gamepadSystem: GamepadSystem,
-    odometrySystem: OdometrySystem,
+    val odometrySystem: OdometrySystem,
 ) : System {
     enum class ControlMode {
         AUTONOMOUS,
@@ -89,13 +92,18 @@ class Drivetrain(
     override val dependencies: List<System> = listOf(odometrySystem, gamepadSystem)
 
     override val beforeRun = Command(DrivetrainState.default(motors))
+        .setOnEnter { referencePose = odometrySystem.pose }
         .setAction {
-            if (it.mode == ControlMode.DRIVER_CONTROL)
-                Mecanum.fieldDriverControl(it, odometrySystem, referencePose)
-            else
-                moveToPose(it.targetPose)
-
-            true
+            if (it.mode == ControlMode.DRIVER_CONTROL) {
+//                Mecanum.fieldDriverControl(it, odometrySystem, referencePose)
+                Mecanum.robotDriverControl(it)
+            } else {
+                if (moveFinished) {
+                    stop()
+                }
+                Mecanum.moveToPosition(it, odometrySystem)
+            }
+            false
         }
 
     override val afterRun: Command<*>? = null
@@ -117,9 +125,10 @@ class Drivetrain(
             val backRight = y - x - rotation
 
             val powers = listOf(-frontLeft, -backLeft, frontRight, backRight)
+            powers.forEach(::println)
 
-            val maxPower = powers.maxOrNull()?.let { abs(it) } ?: 1.0
-            return powers.map { it / maxPower }
+//            val maxPower = powers.maxOrNull()?.let { abs(it) } ?: 1.0
+            return powers.map { it /*/ maxPower*/ }
         }
 
         @Suppress("unused")
@@ -132,8 +141,16 @@ class Drivetrain(
 
             val (gamepad1, _) = gamepadSystem.gamepads
 
-            val (x, y) = gamepad1.leftJoystick.value
-            val rotation = gamepad1.rightJoystick.value.x
+            val (x, y) = (gamepad1.leftJoystick.value)
+            val rotation = -gamepad1.rightJoystick.value.x
+
+//            val (x, y) = gamepad1.rightJoystick.value
+//            val rotation = gamepad1.leftTrigger.value - gamepad1.rightTrigger.value
+
+            println("gp stuff ${gamepad1.leftJoystick.value}")
+            println(x)
+            println(y)
+            println(rotation)
             val powers = calculatePowers(x, y, rotation)
             state.motors.setPower(powers[0], powers[1], powers[2], powers[3])
         }
@@ -156,8 +173,10 @@ class Drivetrain(
 
             val heading = odometry.pose.radians - referencePose.radians
 
-            val (x, y) = gamepad1.leftJoystick.value
-            val rotation = gamepad1.rightJoystick.value.x
+//            val (x, y) = gamepad1.leftJoystick.value
+//            val rotation = -gamepad1.rightJoystick.value.x
+            val (x, y) = gamepad1.rightJoystick.value
+            val rotation = gamepad1.leftTrigger.value - gamepad1.rightTrigger.value
 
             val powers = fieldCalculatePowers(x, y, rotation, heading)
             state.motors.setPower(powers[0], powers[1], powers[2], powers[3])
@@ -203,9 +222,14 @@ class Drivetrain(
             val powerY = state.pidY.calculate(pose.y, state.profileY!!.getPosition(state.timeInScheduler - state.timeStarted))
             val powerRot = state.pidRot.calculate(pose.radians, state.profileRot!!.getPosition(state.timeInScheduler - state.timeStarted))
 
-            val powers = fieldCalculatePowers(powerX, powerY, powerRot, pose.radians)
+            var powers = fieldCalculatePowers(powerX, powerY, powerRot, pose.radians)
+            powers = fieldCalculatePowers(-1.0, 0.0, 0.0, pose.radians)
             state.motors.setPower(powers[0], powers[1], powers[2], powers[3])
         }
+    }
+
+    fun move() {
+        motors.setPower(1.0,1.0,1.0,1.0)
     }
 
     fun setMode(mode: ControlMode) {
@@ -218,8 +242,31 @@ class Drivetrain(
             beforeRun.state.targetPose = value
         }
 
+    var moveFinished: Boolean
+        get() {
+            val diff = (odometrySystem.pose - targetPose).absoluteValue
+            val compare = Pose(20.0, 20.0, 5.0)
+            return diff >= compare || (diff.degrees >= compare.degrees || diff.degrees <= -compare.degrees)
+        }
+        private set(value) {}
+
+    fun stop() {
+        setMode(ControlMode.DRIVER_CONTROL)
+        motors.setPower(0.0)
+    }
+
+    fun moveToPose(x: Number, y: Number, rot: Number){
+        moveToPose(Pose(x.toDouble(), y.toDouble(), rot.toDouble()))
+    }
     fun moveToPose(pose: Pose) {
         targetPose = pose
+        Mecanum.moveToPosition(beforeRun.state, odometrySystem, targetPose)
         setMode(ControlMode.AUTONOMOUS)
+    }
+
+    fun logMotorPowers(telemetry: Telemetry) {
+//        for (motor in motors)
+//            telemetry.addData(motor.deviceName, motor.power)
+
     }
 }
