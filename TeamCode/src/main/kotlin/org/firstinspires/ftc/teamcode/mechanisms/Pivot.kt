@@ -1,7 +1,9 @@
 package org.firstinspires.ftc.teamcode.mechanisms
 
+import com.acmerobotics.dashboard.FtcDashboard
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
+import com.qualcomm.robotcore.hardware.DigitalChannel
 import com.qualcomm.robotcore.hardware.HardwareMap
 import org.firstinspires.ftc.teamcode.axiom.commands.Command
 import org.firstinspires.ftc.teamcode.axiom.commands.CommandState
@@ -35,15 +37,32 @@ interface PivotState : CommandState {
 
 class Pivot(hardwareMap: HardwareMap) : System {
     val exHub = ControlHub(hardwareMap, "Expansion Hub 2")
+    val limitSwitch = hardwareMap.getByName<DigitalChannel>("pivotSwitch")
 
-    val interpolatedMap = interpolatedMapOf(
-        0.0 to 4.0,
-        1000.0 to 1.0
+    private val telemetry = FtcDashboard.getInstance().telemetry
+
+    val upPIDTerms = interpolatedMapOf(
+        0.0 to 1.75,
+        1500.0 to 1.0
+    )
+
+    val downPIDTerms = interpolatedMapOf(
+        1500.0 to 2.0,
+        500.0 to 1.0,
+        0.0 to 1.0
+    )
+
+    val offset = interpolatedMapOf(
+        0.0 to 0.0,
+        1.0 to -0.15,
+        25.0 to 0.2,
+        750.0 to 0.25,
+        1500.0 to 0.075
     )
 
     init {
         exHub.refreshBulkData()
-        exHub.setJunkTicks()
+        exHub.setJunkTicks(3, exHub.getEncoderTicks(3) - 80)
     }
 
     override val dependencies: List<System> = emptyList()
@@ -57,11 +76,25 @@ class Pivot(hardwareMap: HardwareMap) : System {
         }
         .setAction {
             exHub.refreshBulkData()
-            println("${it.targetPosition}, ${exHub.getEncoderTicks(3).toDouble()}")
-            it.pid.p = interpolatedMap[it.targetPosition.toDouble()]
-            val power = it.pid.calculate(it.targetPosition.toDouble(), exHub.getEncoderTicks(3).toDouble())
-            it.motor.power = power
 
+            if (it.targetPosition >= exHub.getEncoderTicks(3).toDouble())
+                it.pid.kP = upPIDTerms[exHub.getEncoderTicks(3).toDouble()]
+            else
+                it.pid.kP = downPIDTerms[exHub.getEncoderTicks(3).toDouble()]
+
+            val power = it.pid.calculate(it.targetPosition.toDouble(), exHub.getEncoderTicks(3).toDouble()) + offset[exHub.getEncoderTicks(3).toDouble()]
+            if (limitSwitch.state || it.targetPosition > 0)
+                it.motor.power = power
+            else
+                it.motor.power = -.1
+
+            if (!limitSwitch.state)
+                exHub.setJunkTicks()
+
+//            telemetry.addData("Pivot Process P-VAL", it.pid.kP)
+//            telemetry.addData("Pivot Process Value", exHub.getEncoderTicks(3))
+//            telemetry.addData("Pivot Set Point", it.targetPosition)
+//            telemetry.update()
             false
         }
     override val afterRun = null
@@ -69,7 +102,7 @@ class Pivot(hardwareMap: HardwareMap) : System {
     //TODO: Swap to an angle
     var pivotTicks: Int
         set(value) {
-            beforeRun.state.targetPosition = value.coerceIn(-25,TODO())
+            beforeRun.state.targetPosition = value.coerceIn(-100,1400)
         }
         get() = beforeRun.state.targetPosition
 

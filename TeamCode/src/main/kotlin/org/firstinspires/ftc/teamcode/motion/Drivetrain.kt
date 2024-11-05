@@ -125,7 +125,6 @@ class Drivetrain(
             val backRight = y - x - rotation
 
             val powers = listOf(-frontLeft, -backLeft, frontRight, backRight)
-            powers.forEach(::println)
 
 //            val maxPower = powers.maxOrNull()?.let { abs(it) } ?: 1.0
             return powers.map { it /*/ maxPower*/ }
@@ -147,10 +146,6 @@ class Drivetrain(
 //            val (x, y) = gamepad1.rightJoystick.value
 //            val rotation = gamepad1.leftTrigger.value - gamepad1.rightTrigger.value
 
-            println("gp stuff ${gamepad1.leftJoystick.value}")
-            println(x)
-            println(y)
-            println(rotation)
             val powers = calculatePowers(x, y, rotation)
             state.motors.setPower(powers[0], powers[1], powers[2], powers[3])
         }

@@ -65,4 +65,9 @@ class ControlHub(hardware: HardwareMap, hubName: String) {
 class Encoder(private val port: Int, private val controlHub: ControlHub) {
     val ticks: Int
         get() = controlHub.getAndUpdateEncoderTicks(port)
+
+    fun setJunkTicks(value: Int? = null) {
+        println(value)
+        controlHub.setJunkTicks(port, value)
+    }
 }

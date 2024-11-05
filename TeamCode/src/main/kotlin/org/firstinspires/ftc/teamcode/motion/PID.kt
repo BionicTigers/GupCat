@@ -17,9 +17,9 @@ import com.qualcomm.robotcore.util.ElapsedTime
  * @param cvMax Maximum control variable
  */
 class PID(
-    val kP: Double,
-    val tI: Double,
-    val tD: Double,
+    var kP: Double,
+    var tI: Double,
+    var tD: Double,
     var pvMin: Double,
     var pvMax: Double,
     var cvMin: Double,

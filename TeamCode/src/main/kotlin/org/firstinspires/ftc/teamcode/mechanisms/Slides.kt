@@ -2,9 +2,11 @@ package org.firstinspires.ftc.teamcode.mechanisms
 
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
+import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.HardwareMap
 import org.firstinspires.ftc.teamcode.axiom.commands.Command
 import org.firstinspires.ftc.teamcode.axiom.commands.CommandState
+import org.firstinspires.ftc.teamcode.axiom.commands.Scheduler
 import org.firstinspires.ftc.teamcode.axiom.commands.System
 import org.firstinspires.ftc.teamcode.axiom.input.Gamepad
 import org.firstinspires.ftc.teamcode.axiom.input.GamepadSystem
@@ -12,6 +14,7 @@ import org.firstinspires.ftc.teamcode.motion.MotionResult
 import org.firstinspires.ftc.teamcode.motion.PID
 import org.firstinspires.ftc.teamcode.motion.PIDTerms
 import org.firstinspires.ftc.teamcode.motion.generateMotionProfile
+import org.firstinspires.ftc.teamcode.utils.ControlHub
 import org.firstinspires.ftc.teamcode.utils.Time
 import org.firstinspires.ftc.teamcode.utils.assignTracker
 import org.firstinspires.ftc.teamcode.utils.getByName
@@ -42,18 +45,25 @@ interface SlidesState : CommandState {
 }
 
 class Slides(hardwareMap: HardwareMap) : System {
+    val exHub = ControlHub(hardwareMap, "Expansion Hub 2")
+
     override val dependencies = listOf(GamepadSystem.activeSystem!!) //TODO: make this not be so stupid (use a singleton)
     override val beforeRun = Command(SlidesState.default("Slides", hardwareMap.getByName("slides")))
         .setOnEnter {
             it.motor.mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
             it.motor.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
-//            it.motor.direction = DcMotorSimple.Direction.REVERSE
+            it.motor.direction = DcMotorSimple.Direction.REVERSE
             it.motor.power = 0.0
             it.pid.reset()
             it.motor.assignTracker()
+            exHub.refreshBulkData()
+            exHub.setJunkTicks()
         }
         .setAction {
-            val ticks = it.motor.currentPosition - it.junkTicks
+            exHub.refreshBulkData()
+            val ticks = exHub.getEncoderTicks(2)
+
+            println("$ticks, ${it.targetPosition}")
 
             if (it.changed) {
 //                it.profile = generateMotionProfile(it.motor.currentPosition, it.targetPosition, 40, 100, 400, it.motor.getTracker().velocity)
@@ -71,17 +81,17 @@ class Slides(hardwareMap: HardwareMap) : System {
 
     fun setupDriverControl(gamepad: Gamepad) {
         gamepad.getBooleanButton(Gamepad.Buttons.DPAD_UP).onHold {
-            targetPosition += 30
+            targetPosition += (25000 * Scheduler.loopDeltaTime.seconds()).toInt()
         }
 
-        gamepad.getBooleanButton(Gamepad.Buttons.DPAD_DOWN).onDown {
-            targetPosition -= 100
+        gamepad.getBooleanButton(Gamepad.Buttons.DPAD_DOWN).onHold {
+            targetPosition -= (25000 * Scheduler.loopDeltaTime.seconds()).toInt()
         }
     }
 
     var targetPosition = 0
         set(value) {
-            field = value
+            field = value.coerceIn(-200,50000)
             beforeRun.state.changed = true
             beforeRun.state.targetPosition = value
         }
