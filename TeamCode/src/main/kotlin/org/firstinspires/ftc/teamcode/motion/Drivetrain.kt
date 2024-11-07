@@ -23,10 +23,14 @@ data class Motors(
     val backRight: DcMotorEx
 ) {
     fun setPower(frontLeft: Double, backLeft: Double, frontRight: Double, backRight: Double) {
-        this.frontLeft.power = frontLeft * .7
-        this.backLeft.power = backLeft * .9
-        this.frontRight.power = frontRight * .7
-        this.backRight.power = backRight * 1.0
+        this.frontLeft.power = frontLeft * .8/2
+        this.backLeft.power = backLeft * .9/2
+        this.frontRight.power = frontRight * .8/2
+        this.backRight.power = backRight * 5
+//        this.frontLeft.power = frontLeft * .8
+//        this.backLeft.power = backLeft * .9
+//        this.frontRight.power = frontRight * .8
+//        this.backRight.power = backRight * 1.0
     }
 
     fun setPower(power: Double) {
@@ -58,9 +62,9 @@ interface DrivetrainState : CommandState {
                 override var targetPose = Pose(0.0, 0.0, 0.0)
                 override var mode = Drivetrain.ControlMode.DRIVER_CONTROL
 
-                override val pidX = PID(PIDTerms(1.0, 0.0), 0.0, 0.0, -1.0, 1.0)
-                override val pidY = PID(PIDTerms(1.0, 0.0), 0.0, 0.0, -1.0, 1.0)
-                override val pidRot = PID(PIDTerms(1.0, 0.0), 0.0, 0.0, -1.0, 1.0)
+                override val pidX = PID(PIDTerms(5.0, 0.2), 0.0, 3657.6, -1.0, 1.0)
+                override val pidY = PID(PIDTerms(5.0, 0.2), 0.0, 3657.6, -1.0, 1.0)
+                override val pidRot = PID(PIDTerms(8.0, 0.1), 0.0, 360.0, -1.0, 1.0)
 
                 override var profileX: MotionResult? = null
                 override var profileY: MotionResult? = null
@@ -183,29 +187,29 @@ class Drivetrain(
                 state.timeStarted = state.timeInScheduler
             }
 
-            state.profileX = generateMotionProfile(
-                odometry.pose.x,
-                state.targetPose.x,
-                20.0,
-                20.0,
-                20.0
-            )
-
-            state.profileY = generateMotionProfile(
-                odometry.pose.y,
-                state.targetPose.y,
-                20.0,
-                20.0,
-                20.0
-            )
-
-            state.profileRot = generateMotionProfile(
-                odometry.pose.radians,
-                state.targetPose.radians,
-                20.0,
-                20.0,
-                20.0
-            )
+//            state.profileX = generateMotionProfile(
+//                odometry.pose.x,
+//                state.targetPose.x,
+//                20.0,
+//                20.0,
+//                20.0
+//            )
+//
+//            state.profileY = generateMotionProfile(
+//                odometry.pose.y,
+//                state.targetPose.y,
+//                20.0,
+//                20.0,
+//                20.0
+//            )
+//
+//            state.profileRot = generateMotionProfile(
+//                odometry.pose.radians,
+//                state.targetPose.radians,
+//                20.0,
+//                20.0,
+//                20.0
+//            )
 
             state.pidX.reset()
             state.pidY.reset()
@@ -213,12 +217,16 @@ class Drivetrain(
 
             val pose = odometry.pose
 
-            val powerX = state.pidX.calculate(pose.x, state.profileX!!.getPosition(state.timeInScheduler - state.timeStarted))
-            val powerY = state.pidY.calculate(pose.y, state.profileY!!.getPosition(state.timeInScheduler - state.timeStarted))
-            val powerRot = state.pidRot.calculate(pose.radians, state.profileRot!!.getPosition(state.timeInScheduler - state.timeStarted))
+//            val powerX = state.pidX.calculate(pose.x, state.profileX!!.getPosition(state.timeInScheduler - state.timeStarted))
+//            val powerY = state.pidY.calculate(pose.y, state.profileY!!.getPosition(state.timeInScheduler - state.timeStarted))
+//            val powerRot = state.pidRot.calculate(pose.radians, state.profileRot!!.getPosition(state.timeInScheduler - state.timeStarted))
 
-            var powers = fieldCalculatePowers(powerX, powerY, powerRot, pose.radians)
-            powers = fieldCalculatePowers(-1.0, 0.0, 0.0, pose.radians)
+            val powerX = state.pidX.calculate(pose.x, state.targetPose.x)
+            val powerY = state.pidY.calculate(pose.y, state.targetPose.y)
+            val powerRot = -state.pidRot.calculate(pose.radians, state.targetPose.radians)
+
+            val powers = fieldCalculatePowers(-powerX, powerY, powerRot, pose.radians)
+//            powers = fieldCalculatePowers(1.0, 0.0, 0.0, pose.radians)
             state.motors.setPower(powers[0], powers[1], powers[2], powers[3])
         }
     }
@@ -239,9 +247,8 @@ class Drivetrain(
 
     var moveFinished: Boolean
         get() {
-            val diff = (odometrySystem.pose - targetPose).absoluteValue
-            val compare = Pose(20.0, 20.0, 5.0)
-            return diff >= compare || (diff.degrees >= compare.degrees || diff.degrees <= -compare.degrees)
+            val compare = Pose(20.0, 20.0, 10.0)
+            return odometrySystem.pose.within(targetPose, compare)
         }
         private set(value) {}
 

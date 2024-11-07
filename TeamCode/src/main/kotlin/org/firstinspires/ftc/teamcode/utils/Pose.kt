@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.utils
 
 import kotlin.math.absoluteValue
-import kotlin.math.roundToInt
 
 class Pose(val x: Double, val y: Double, private val rot: Double) {
     constructor(x: Number, y: Number, rot: Number) : this(x.toDouble(), y.toDouble(), rot.toDouble())
@@ -14,6 +13,12 @@ class Pose(val x: Double, val y: Double, private val rot: Double) {
         } else {
             -1
         }
+    }
+
+    fun within(center: Pose, allowance: Pose): Boolean {
+        return  center.x.absoluteValue + allowance.x.absoluteValue >= x.absoluteValue && center.x.absoluteValue - allowance.x.absoluteValue <= x.absoluteValue
+                && center.y.absoluteValue + allowance.y.absoluteValue >= y.absoluteValue && center.y.absoluteValue - allowance.y.absoluteValue <= y.absoluteValue
+                && center.rot.absoluteValue + allowance.rot.absoluteValue >= rot.absoluteValue && center.rot.absoluteValue - allowance.rot.absoluteValue <= rot.absoluteValue
     }
 
     val position: Vector2

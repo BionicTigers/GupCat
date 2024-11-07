@@ -44,7 +44,11 @@ class OdometrySystem(hardwareMap: HardwareMap) : System {
             }
             .setAction {
                 val odoDiameter = 48.0 //MM
-                val gearRatio = 3.76
+                val gearRatio = 1.635
+
+//                    8192/2000
+                //1.635 for dt
+
                 val circumference: Double = odoDiameter * gearRatio * PI
 
                 //Make new variables for local values
@@ -63,8 +67,8 @@ class OdometrySystem(hardwareMap: HardwareMap) : System {
 //        val deltaRightMM = -circumference * hub.getEncoderTicks(0) / 2000
 //        val deltaBackMM = circumference * hub.getEncoderTicks(3) / 2000
 
-                val deltaLeftMM = circumference * hub.getEncoderTicks(3) / 2000
-                val deltaRightMM = -circumference * exHub.getEncoderTicks(0) / 2000
+                val deltaLeftMM = -circumference * hub.getEncoderTicks(3) / 2000
+                val deltaRightMM = circumference * exHub.getEncoderTicks(0) / 2000
                 val deltaBackMM = -circumference * hub.getEncoderTicks(0) / 2000
 //        println("Left: $deltaLeftMM, Right: $deltaRightMM, Back: $deltaBackMM")
 
@@ -130,8 +134,11 @@ class OdometrySystem(hardwareMap: HardwareMap) : System {
             }
     override val afterRun: Command<*>? = null
 
-    val pose: Pose
+    var pose: Pose
         get() = beforeRun.state.pose
+        set(value) {
+            beforeRun.state.pose = value
+        }
 
     fun log(telemetry: Telemetry) {
         telemetry.addData("X", beforeRun.state.pose.x)

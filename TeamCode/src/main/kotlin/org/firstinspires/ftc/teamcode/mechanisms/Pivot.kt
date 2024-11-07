@@ -102,7 +102,7 @@ class Pivot(hardwareMap: HardwareMap) : System {
     //TODO: Swap to an angle
     var pivotTicks: Int
         set(value) {
-            beforeRun.state.targetPosition = value.coerceIn(-100,1400)
+            beforeRun.state.targetPosition = value.coerceIn(-100,1600)
         }
         get() = beforeRun.state.targetPosition
 

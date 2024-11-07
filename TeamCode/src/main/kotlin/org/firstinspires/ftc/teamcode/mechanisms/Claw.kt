@@ -18,10 +18,10 @@ class Claw(hardwareMap: HardwareMap) : System {
     }
 
     fun open() {
-        claw.position = 1.0
+        claw.position = 0.0
     }
 
     fun close() {
-        claw.position = 0.0
+        claw.position = 0.6
     }
 }
