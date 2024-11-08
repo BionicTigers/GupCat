@@ -23,10 +23,10 @@ data class Motors(
     val backRight: DcMotorEx
 ) {
     fun setPower(frontLeft: Double, backLeft: Double, frontRight: Double, backRight: Double) {
-        this.frontLeft.power = frontLeft * .8/2
-        this.backLeft.power = backLeft * .9/2
-        this.frontRight.power = frontRight * .8/2
-        this.backRight.power = backRight * 5
+        this.frontLeft.power = frontLeft
+        this.backLeft.power = backLeft * 1.1
+        this.frontRight.power = frontRight
+        this.backRight.power = backRight
 //        this.frontLeft.power = frontLeft * .8
 //        this.backLeft.power = backLeft * .9
 //        this.frontRight.power = frontRight * .8
@@ -172,10 +172,10 @@ class Drivetrain(
 
             val heading = odometry.pose.radians - referencePose.radians
 
-//            val (x, y) = gamepad1.leftJoystick.value
-//            val rotation = -gamepad1.rightJoystick.value.x
-            val (x, y) = gamepad1.rightJoystick.value
-            val rotation = gamepad1.leftTrigger.value - gamepad1.rightTrigger.value
+            val (x, y) = gamepad1.leftJoystick.value
+            val rotation = -gamepad1.rightJoystick.value.x
+//            val (x, y) = gamepad1.rightJoystick.value
+//            val rotation = gamepad1.leftTrigger.value - gamepad1.rightTrigger.value
 
             val powers = fieldCalculatePowers(x, y, rotation, heading)
             state.motors.setPower(powers[0], powers[1], powers[2], powers[3])
@@ -223,11 +223,12 @@ class Drivetrain(
 
             val powerX = state.pidX.calculate(pose.x, state.targetPose.x)
             val powerY = state.pidY.calculate(pose.y, state.targetPose.y)
-            val powerRot = -state.pidRot.calculate(pose.radians, state.targetPose.radians)
+            val powerRot = state.pidRot.calculate(pose.radians, state.targetPose.radians)
 
             val powers = fieldCalculatePowers(-powerX, powerY, powerRot, pose.radians)
+            val modifier = 0.5
 //            powers = fieldCalculatePowers(1.0, 0.0, 0.0, pose.radians)
-            state.motors.setPower(powers[0], powers[1], powers[2], powers[3])
+            state.motors.setPower(powers[0] * modifier, powers[1] * modifier, powers[2] * modifier, powers[3] * modifier)
         }
     }
 

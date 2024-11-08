@@ -26,7 +26,7 @@ class BlueRightPark : LinearOpMode() {
         val moveLeft = statelessCommand()
         val moveBack = statelessCommand()
 
-    /*    moveForward
+        moveForward
             .setOnEnter { drivetrain.moveToPose(Pose(0.0,600.0,0.0)) }
             .setAction { println(drivetrain.moveFinished); drivetrain.moveFinished }
             .setOnExit { Scheduler.add(moveLeft) }
@@ -35,14 +35,14 @@ class BlueRightPark : LinearOpMode() {
             .setOnEnter { drivetrain.moveToPose(Pose(600.0,600.0,0.0)) }
             .setAction { println(drivetrain.moveFinished); println(odometrySystem.pose); drivetrain.moveFinished }
             .setOnExit { Scheduler.add(moveBack) }
-*/
+
         moveBack
             .setOnEnter { drivetrain.moveToPose(Pose(600.0,50.0,0.0)) }
             .setAction { println(drivetrain.moveFinished); println(odometrySystem.pose); odometrySystem.log(telemetry); drivetrain.moveFinished }
 
 
 
-        Scheduler.add(moveBack)
+        Scheduler.add(moveForward)
 
         waitForStart()
         while (opModeIsActive()) {

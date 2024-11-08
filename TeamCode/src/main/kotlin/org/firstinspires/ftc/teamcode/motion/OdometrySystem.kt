@@ -31,8 +31,8 @@ class OdometrySystem(hardwareMap: HardwareMap) : System {
     override val dependencies: List<System> = emptyList()
     override val beforeRun =
         Command(object : OdometrySystemState, CommandState by CommandState.default("Odometry") {
-            override val leftOffset: Double = 169.8625 //169.
-            override val rightOffset: Double = 169.8625 //152.4 //169.0
+            override val leftOffset: Double = 167.878 //169.
+            override val rightOffset: Double = 167.878 //152.4 //169.0
             override val backOffset: Double = 95.25 //152.4 //152.4
             override var velocity: Vector2 = Vector2()
             override var acceleration: Vector2 = Vector2()
@@ -67,8 +67,8 @@ class OdometrySystem(hardwareMap: HardwareMap) : System {
 //        val deltaRightMM = -circumference * hub.getEncoderTicks(0) / 2000
 //        val deltaBackMM = circumference * hub.getEncoderTicks(3) / 2000
 
-                val deltaLeftMM = -circumference * hub.getEncoderTicks(3) / 2000
-                val deltaRightMM = circumference * exHub.getEncoderTicks(0) / 2000
+                val deltaLeftMM = circumference * exHub.getEncoderTicks(0) / 2000
+                val deltaRightMM = -circumference * hub.getEncoderTicks(3) / 2000
                 val deltaBackMM = -circumference * hub.getEncoderTicks(0) / 2000
 //        println("Left: $deltaLeftMM, Right: $deltaRightMM, Back: $deltaBackMM")
 

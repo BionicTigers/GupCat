@@ -44,7 +44,7 @@ interface SlidesState : CommandState {
     }
 }
 
-class Slides(hardwareMap: HardwareMap) : System {
+class Slides(hardwareMap: HardwareMap, val pivot: Pivot? = null) : System {
     val exHub = ControlHub(hardwareMap, "Expansion Hub 2")
 
     override val dependencies = listOf(GamepadSystem.activeSystem!!) //TODO: make this not be so stupid (use a singleton)
@@ -64,6 +64,8 @@ class Slides(hardwareMap: HardwareMap) : System {
             val ticks = exHub.getEncoderTicks(2)
 
             println("$ticks, ${it.targetPosition}")
+            val sub = 1400 - (pivot?.pivotTicks ?: 1400)
+            targetPosition = targetPosition.coerceIn(-200, 50000 - sub  * 10)
 
             if (it.changed) {
 //                it.profile = generateMotionProfile(it.motor.currentPosition, it.targetPosition, 40, 100, 400, it.motor.getTracker().velocity)
@@ -91,7 +93,8 @@ class Slides(hardwareMap: HardwareMap) : System {
 
     var targetPosition = 0
         set(value) {
-            field = value.coerceIn(-200,50000)
+            val sub = 1400 - (pivot?.pivotTicks ?: 0)
+            field = value.coerceIn(-200, 50000 - sub)
             beforeRun.state.changed = true
             beforeRun.state.targetPosition = value
         }
