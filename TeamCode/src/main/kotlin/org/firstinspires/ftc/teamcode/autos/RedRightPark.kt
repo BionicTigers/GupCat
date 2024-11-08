@@ -9,8 +9,8 @@ import org.firstinspires.ftc.teamcode.motion.Drivetrain
 import org.firstinspires.ftc.teamcode.motion.OdometrySystem
 import org.firstinspires.ftc.teamcode.utils.Pose
 
-@Autonomous(name = "BlueParkRight", group = "Autonomous")
-class BlueRightPark : LinearOpMode() {
+@Autonomous(name = "RedParkRight", group = "Autonomous")
+class RedRightPark : LinearOpMode() {
     override fun runOpMode() {
         Scheduler.clear()
         val gamepadSystem = GamepadSystem(gamepad1, gamepad2)

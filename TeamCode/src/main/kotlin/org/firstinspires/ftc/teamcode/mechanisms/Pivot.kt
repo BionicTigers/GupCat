@@ -106,6 +106,9 @@ class Pivot(hardwareMap: HardwareMap) : System {
         }
         get() = beforeRun.state.targetPosition
 
+    val currentPosition: Int
+        get() = exHub.getEncoderTicks(3)
+
     fun setupDriverControl(gamepad: Gamepad) {
         gamepad.leftTrigger.onHold {
             pivotTicks -= (1500 * Scheduler.loopDeltaTime.seconds() * it).toInt()
