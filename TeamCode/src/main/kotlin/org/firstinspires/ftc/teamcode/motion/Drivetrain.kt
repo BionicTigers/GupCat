@@ -64,7 +64,7 @@ interface DrivetrainState : CommandState {
 
                 override val pidX = PID(PIDTerms(5.0, 0.2), 0.0, 3657.6, -1.0, 1.0)
                 override val pidY = PID(PIDTerms(5.0, 0.2), 0.0, 3657.6, -1.0, 1.0)
-                override val pidRot = PID(PIDTerms(8.0, 0.1), 0.0, 360.0, -1.0, 1.0)
+                override val pidRot = PID(PIDTerms(10.0, 0.01), 0.0, 360.0, -1.0, 1.0)
 
                 override var profileX: MotionResult? = null
                 override var profileY: MotionResult? = null

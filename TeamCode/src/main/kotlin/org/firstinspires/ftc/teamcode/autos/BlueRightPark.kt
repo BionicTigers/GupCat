@@ -22,7 +22,7 @@ class BlueRightPark : LinearOpMode() {
         val moveLeft = statelessCommand()
 
         moveLeft
-            .setOnEnter { drivetrain.moveToPose(Pose(1200.0,0.0,0.0)) }
+            .setOnEnter { drivetrain.moveToPose(Pose(1200.0,50.0,0.0)) }
             .setAction { println(drivetrain.moveFinished); println(odometrySystem.pose); drivetrain.moveFinished }
 //            .setOnExit { Scheduler.add(moveBack) }
 

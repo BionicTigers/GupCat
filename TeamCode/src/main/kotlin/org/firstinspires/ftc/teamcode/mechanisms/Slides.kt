@@ -47,7 +47,7 @@ interface SlidesState : CommandState {
 
 class Slides(hardwareMap: HardwareMap, val pivot: Pivot? = null) : System {
     val exHub = ControlHub(hardwareMap, "Expansion Hub 2")
-    val limitSwitch = hardwareMap.getByName<DigitalChannel>("slidesSwitch")
+//    val limitSwitch = hardwareMap.getByName<DigitalChannel>("slidesSwitch")
 
     override val dependencies = listOf(GamepadSystem.activeSystem!!) //TODO: make this not be so stupid (use a singleton)
     override val beforeRun = Command(SlidesState.default("Slides", hardwareMap.getByName("slides")))
@@ -77,13 +77,13 @@ class Slides(hardwareMap: HardwareMap, val pivot: Pivot? = null) : System {
 
             val deltaTime = it.timeInScheduler - it.moveStartTime
             val power = it.pid.calculate(it.targetPosition.toDouble(), ticks.toDouble())
-            if (limitSwitch.state || it.targetPosition > 0)
-                it.motor.power = power + .15 * sign(power)
-            else
-                it.motor.power = 0.0
+//            if (limitSwitch.state || it.targetPosition > 0)
+//                it.motor.power = power + .15 * sign(power)
+//            else
+//                it.motor.power = 0.0
 
-            if (!limitSwitch.state)
-                exHub.setJunkTicks()
+//            if (!limitSwitch.state)
+//                exHub.setJunkTicks()
 
             false
         }
@@ -92,10 +92,12 @@ class Slides(hardwareMap: HardwareMap, val pivot: Pivot? = null) : System {
     fun setupDriverControl(gamepad: Gamepad) {
         gamepad.getBooleanButton(Gamepad.Buttons.DPAD_UP).onHold {
             targetPosition += (25000 * Scheduler.loopDeltaTime.seconds()).toInt()
+            println("up")
         }
 
         gamepad.getBooleanButton(Gamepad.Buttons.DPAD_DOWN).onHold {
             targetPosition -= (25000 * Scheduler.loopDeltaTime.seconds()).toInt()
+            println("down")
         }
     }
 
