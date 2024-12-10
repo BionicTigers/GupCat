@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.mechanisms
 import com.acmerobotics.dashboard.FtcDashboard
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
+import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.DigitalChannel
 import com.qualcomm.robotcore.hardware.HardwareMap
 import org.firstinspires.ftc.teamcode.axiom.commands.Command
@@ -22,14 +23,16 @@ interface PivotState : CommandState {
     var targetPosition: Int
     val pid: PID
     val motor: DcMotorEx
+    val motor2: DcMotorEx
 
     companion object {
-        fun default(motor: DcMotorEx, encoder: Encoder): PivotState {
+        fun default(motor: DcMotorEx, motor2: DcMotorEx, encoder: Encoder): PivotState {
             return object : PivotState, CommandState by CommandState.default("Pivot") {
                 override val encoder = encoder
                 override var targetPosition = 0
                 override val pid = PID(PIDTerms(2.0, 0.0), 0.0, 1000.0, -1.0, 1.0)
                 override val motor = motor
+                override val motor2 = motor2
             }
         }
     }
@@ -66,11 +69,12 @@ class Pivot(hardwareMap: HardwareMap) : System {
     }
 
     override val dependencies: List<System> = emptyList()
-    override val beforeRun = Command(PivotState.default(hardwareMap.getByName("pivot"), exHub.getEncoder(1)))
+    override val beforeRun = Command(PivotState.default(hardwareMap.getByName("pivot"), hardwareMap.getByName("pivot2"), exHub.getEncoder(1)))
         .setOnEnter {
             it.motor.mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
             it.motor.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
             it.motor.power = 0.0
+            it.motor2.power = 0.0
 
             it.pid.reset()
         }
@@ -83,11 +87,13 @@ class Pivot(hardwareMap: HardwareMap) : System {
                 it.pid.kP = downPIDTerms[exHub.getEncoderTicks(3).toDouble()]
 
             val power = it.pid.calculate(it.targetPosition.toDouble(), exHub.getEncoderTicks(3).toDouble()) + offset[exHub.getEncoderTicks(3).toDouble()]
-            if (limitSwitch.state || it.targetPosition > 0)
+            if (limitSwitch.state || it.targetPosition > 0) {
                 it.motor.power = power
-            else
+                it.motor2.power = power
+            } else {
+                it.motor2.power = -.1
                 it.motor.power = -.1
-
+            }
             if (!limitSwitch.state)
                 exHub.setJunkTicks()
 

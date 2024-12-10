@@ -1,22 +1,28 @@
 package org.firstinspires.ftc.teamcode.motion
 
 import com.qualcomm.robotcore.hardware.HardwareMap
-import org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry
 import org.firstinspires.ftc.robotcore.external.Telemetry
+import org.firstinspires.ftc.robotcore.external.navigation.Rotation
 import org.firstinspires.ftc.teamcode.axiom.commands.Command
 import org.firstinspires.ftc.teamcode.axiom.commands.CommandState
 import org.firstinspires.ftc.teamcode.utils.ControlHub
 import org.firstinspires.ftc.teamcode.utils.Pose
 import org.firstinspires.ftc.teamcode.utils.Vector2
 import org.firstinspires.ftc.teamcode.axiom.commands.*
+import org.firstinspires.ftc.teamcode.utils.Angle
+import org.firstinspires.ftc.teamcode.utils.Distance
+import org.firstinspires.ftc.teamcode.utils.Time
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
 
 interface OdometrySystemState : CommandState {
-    val leftOffset: Double
-    val rightOffset: Double
-    val backOffset: Double
+    val leftOffset: Distance
+    val rightOffset: Distance
+    val backOffset: Distance
+
+    var gearRatio: Double
+    var odoDiameter: Double
 
     var velocity: Vector2
     var acceleration: Vector2
@@ -28,110 +34,114 @@ class OdometrySystem(hardwareMap: HardwareMap) : System {
     val hub = ControlHub(hardwareMap, "Control Hub")
     val exHub = ControlHub(hardwareMap, "Expansion Hub 2")
 
+    var dt: Time = Time.fromSeconds(1)
+
+//    val limelight3A = hardwareMap.getByName<Limelight3A>("limelight")
+
     override val dependencies: List<System> = emptyList()
     override val beforeRun =
         Command(object : OdometrySystemState, CommandState by CommandState.default("Odometry") {
-            override val leftOffset: Double = 167.878 //169.
-            override val rightOffset: Double = 167.878 //152.4 //169.0
-            override val backOffset: Double = 95.25 //152.4 //152.4
+            override val leftOffset: Distance = Distance.mm(167.878)
+            override val rightOffset: Distance = Distance.mm(167.878) //152.4 //169.0
+            override val backOffset: Distance = Distance.mm(95.25) //152.4 //152.4
             override var velocity: Vector2 = Vector2()
             override var acceleration: Vector2 = Vector2()
             override var pose: Pose = Pose(0, 0, 0)
+            override var odoDiameter = 48.0
+            override var gearRatio = 1.0
         } as OdometrySystemState)
             .setOnEnter {
                 hub.setJunkTicks()
                 exHub.setJunkTicks()
             }
             .setAction {
-                val odoDiameter = 48.0 //MM
-                val gearRatio = 1.635
+                if (dt.milliseconds() < 100) {
+                    dt += it.deltaTime
+                    return@setAction false
+                }
 
-//                    8192/2000
-                //1.635 for dt
-
-                val circumference: Double = odoDiameter * gearRatio * PI
-
-                //Make new variables for local values
-                val deltaLocalX: Double
-                val deltaLocalY: Double
-
-                val deltaStrafeX: Double
-                val deltaStrafeY: Double
+                val circumference: Double = it.odoDiameter * it.gearRatio * PI
 
                 //Find Local Updates
                 hub.refreshBulkData()
                 exHub.refreshBulkData()
 
-                //Calculate how far the odo pods have moved since the last update in MM
-//        val deltaLeftMM = circumference * exHub.getEncoderTicks(0) / 2000
-//        val deltaRightMM = -circumference * hub.getEncoderTicks(0) / 2000
-//        val deltaBackMM = circumference * hub.getEncoderTicks(3) / 2000
+                val (deltaLeft, deltaRight, deltaBack) = ticksToDistance(circumference, 2000)
 
-                val deltaLeftMM = circumference * exHub.getEncoderTicks(0) / 2000
-                val deltaRightMM = -circumference * hub.getEncoderTicks(3) / 2000
-                val deltaBackMM = -circumference * hub.getEncoderTicks(0) / 2000
-//        println("Left: $deltaLeftMM, Right: $deltaRightMM, Back: $deltaBackMM")
+                val localRotation = deltaTheta(deltaLeft, deltaRight, it.leftOffset, it.rightOffset)
 
-                //Find the amount the robot has rotate
-                val localRotation = (deltaLeftMM - deltaRightMM) / (it.leftOffset + it.rightOffset)
+                val (deltaLocalX, deltaLocalY) = forwardArc(deltaLeft, it.leftOffset, localRotation)
+                val (deltaStrafeX, deltaStrafeY) = strafeArc(deltaBack, it.backOffset, localRotation)
 
-                //Calculates the radius of the arc of the robot's travel for forward/backward arcs
-                if (deltaRightMM != deltaLeftMM && localRotation != 0.0) {
-                    val rT =
-                        (deltaLeftMM * it.rightOffset + deltaRightMM * it.leftOffset) / (deltaLeftMM - deltaRightMM)
-                    //Determine the local x and y coordinates for a forward/backward arc
-                    deltaLocalX = rT * (1 - cos(localRotation))
-                    deltaLocalY = rT * sin(localRotation)
-                } else {
-                    deltaLocalX = 0.0
-                    deltaLocalY = deltaRightMM
-                }
+                val globalRotation = it.pose.rotation
+                val (globalX, globalY) = globals(it.pose, deltaLocalX, deltaLocalY, deltaStrafeX, deltaStrafeY, globalRotation)
+                it.pose = Pose(globalX.mm, globalY.mm, globalRotation + localRotation)
 
-                //Calculates the radius of a strafing arc
-                if (localRotation != 0.0) {
-                    val rS = (deltaBackMM / localRotation) + it.backOffset
-                    //Determine the local x and y coordinates for a strafing arc
-                    deltaStrafeX = rS * sin(localRotation)
-                    deltaStrafeY = -rS * (1 - cos(localRotation))
-                } else {
-                    deltaStrafeX = deltaBackMM
-                    deltaStrafeY = 0.0
-                }
-
-
-                //Calculates the total local x and y changes since last cycle
-                val deltaXFinal = deltaLocalX + deltaStrafeX
-                val deltaYFinal = deltaLocalY - deltaStrafeY
-
-                val globalRotation = it.pose.radians
-
-                //Translate local position into global position
-                val globalX =
-                    it.pose.x + (deltaXFinal * cos(globalRotation)) + (deltaYFinal * sin(
-                        globalRotation
-                    ))
-                val globalY =
-                    it.pose.y + (deltaYFinal * cos(globalRotation)) - (deltaXFinal * sin(
-                        globalRotation
-                    ))
-
-                //Update the current pose
-                it.pose = Pose(globalX, globalY, Math.toDegrees(globalRotation + localRotation))
-
-                //Update velocity and acceleration
                 val deltaTime = it.deltaTime.seconds()
+                dt = it.deltaTime
                 val oldVelocity = it.velocity
-                it.velocity = Vector2(deltaXFinal / deltaTime, deltaYFinal / deltaTime)
+                it.velocity = Vector2((deltaLocalX + deltaStrafeX).mm / deltaTime, (deltaLocalY + deltaStrafeY).mm / deltaTime)
                 it.acceleration = Vector2(
                     (it.velocity.x - oldVelocity.x) / deltaTime,
                     (it.velocity.y - oldVelocity.y) / deltaTime
                 )
 
-                //Reset junk ticks for next cycle
                 hub.setJunkTicks()
                 exHub.setJunkTicks()
                 false
             }
+
+    private fun deltaTheta(deltaLeft: Distance, deltaRight: Distance, leftOffset: Distance, rightOffset: Distance): Angle = Angle.radians((deltaLeft.mm - deltaRight.mm) / (leftOffset.mm + rightOffset.mm))
+
+    @Suppress("SameParameterValue")
+    private fun ticksToDistance(circumference: Double, ticksPerRevolution: Int): Triple<Distance, Distance, Distance> {
+        val deltaLeftMM = Distance.mm(-circumference * exHub.getEncoderTicks(0) / ticksPerRevolution)
+        val deltaRightMM = Distance.mm(circumference * hub.getEncoderTicks(3) / ticksPerRevolution)
+        val deltaBackMM = Distance.mm(-circumference * hub.getEncoderTicks(0) / ticksPerRevolution)
+
+        return Triple(deltaLeftMM, deltaRightMM, deltaBackMM)
+    }
+
+    private fun forwardArc(deltaLeft: Distance, leftOffset: Distance, localRotation: Angle): Pair<Distance, Distance> {
+        if (localRotation.radians != 0.0) {
+            val rT = Distance.mm(deltaLeft.mm / localRotation.radians - leftOffset.mm)
+            return Pair(
+                rT * (1 - cos(localRotation.radians)), // X
+                rT * sin(localRotation.radians) // Y
+            )
+        }
+
+        return Pair(
+            Distance.mm(0.0), // X
+            deltaLeft // Y
+        )
+    }
+
+    private fun strafeArc(deltaBack: Distance, backOffset: Distance, localRotation: Angle): Pair<Distance, Distance> {
+        if (localRotation.radians != 0.0) {
+            val rS = Distance.mm(deltaBack.mm / localRotation.radians - backOffset.mm)
+            return Pair(
+                rS * sin(localRotation.radians),
+                -rS * (1 - cos(localRotation.radians))
+            )
+        }
+
+        return Pair(
+            deltaBack,
+            Distance.mm(0.0)
+        )
+    }
+
+    private fun globals(pose: Pose, deltaLocalX: Distance, deltaLocalY: Distance, deltaStrafeX: Distance, deltaStrafeY: Distance, rotation: Angle): Pair<Distance, Distance> {
+        val deltaXFinal = deltaLocalX + deltaStrafeX
+        val deltaYFinal = deltaLocalY - deltaStrafeY
+
+        return Pair(
+            Distance.mm(pose.x + (deltaXFinal.mm * cos(rotation.radians)) + (deltaYFinal.mm * sin(rotation.radians))),
+            Distance.mm(pose.y + (deltaYFinal.mm * cos(rotation.radians)) - (deltaXFinal.mm * sin(rotation.radians)))
+        )
+    }
+
     override val afterRun: Command<*>? = null
 
     var pose: Pose

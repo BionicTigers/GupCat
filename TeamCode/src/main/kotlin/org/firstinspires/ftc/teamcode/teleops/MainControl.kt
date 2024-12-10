@@ -16,8 +16,8 @@ class MainControl : LinearOpMode() {
         val gamepadSystem = GamepadSystem(gamepad1, gamepad2)
         val odometrySystem = OdometrySystem(hardwareMap)
         val drivetrain = Drivetrain(hardwareMap, gamepadSystem, odometrySystem)
-        val slides = Slides(hardwareMap)
         val pivot = Pivot(hardwareMap)
+        val slides = Slides(hardwareMap, pivot)
         val claw = Claw(hardwareMap)
 
         Scheduler.addSystem(gamepadSystem, odometrySystem, drivetrain, slides, pivot)

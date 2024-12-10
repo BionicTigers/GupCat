@@ -4,6 +4,7 @@ import kotlin.math.absoluteValue
 
 class Pose(val x: Double, val y: Double, private val rot: Double) {
     constructor(x: Number, y: Number, rot: Number) : this(x.toDouble(), y.toDouble(), rot.toDouble())
+    constructor(x: Number, y: Number, rot: Angle) : this(x.toDouble(), y.toDouble(), rot.degrees)
 
     operator fun compareTo(other: Pose): Int {
         return if (x == other.x && y == other.y && rot == other.rot) {
@@ -23,6 +24,8 @@ class Pose(val x: Double, val y: Double, private val rot: Double) {
 
     val position: Vector2
         get() = Vector2(x, y)
+
+    val rotation = Angle.degrees(rot)
 
     val radians: Double
         get() = Math.toRadians(rot)
