@@ -74,11 +74,14 @@ class Pivot(hardwareMap: HardwareMap) : System {
             it.motor.mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
             it.motor.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
             it.motor.power = 0.0
+            it.motor.direction = DcMotorSimple.Direction.REVERSE
             it.motor2.power = 0.0
+//            it.motor2.direction = DcMotorSimple.Direction.REVERSE
 
             it.pid.reset()
         }
         .setAction {
+            println(pivotTicks)
             exHub.refreshBulkData()
 
             if (it.targetPosition >= exHub.getEncoderTicks(3).toDouble())

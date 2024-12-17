@@ -33,9 +33,9 @@ class Claw(hardwareMap: HardwareMap) : System {
         claw.position = 0.6
     }
 
-    fun getDetection(): Sample {
-
-    }
+//    fun getDetection(): Sample {
+//
+//    }
 
     fun logclaw(telemetry: Telemetry) {
         telemetry.addData("position", claw.position)
