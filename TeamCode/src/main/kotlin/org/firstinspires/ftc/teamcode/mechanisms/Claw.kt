@@ -7,11 +7,17 @@ import org.firstinspires.ftc.teamcode.axiom.commands.System
 import org.firstinspires.ftc.teamcode.axiom.input.Gamepad
 import org.firstinspires.ftc.teamcode.utils.getByName
 
+//enum class Sample {
+//    YELLOW,
+//    BLUE,
+//    RED
+//}
+
+
 class Claw(hardwareMap: HardwareMap) : System {
-    enum class Sample {
-        YELLOW,
-        BLUE,
-        RED
+    enum class ClawState {
+        OPEN,
+        CLOSED
     }
 
     override val dependencies: List<System> = emptyList()
@@ -21,23 +27,39 @@ class Claw(hardwareMap: HardwareMap) : System {
     private val claw = hardwareMap.getByName<Servo>("claw")
 
     fun setupDriverControl(gp: Gamepad) {
-        gp.getBooleanButton(Gamepad.Buttons.LEFT_BUMPER).onDown { open() }
-        gp.getBooleanButton(Gamepad.Buttons.RIGHT_BUMPER).onDown { close() }
+        gp.getBooleanButton(Gamepad.Buttons.A).onDown {
+            state = if (state == ClawState.OPEN) ClawState.CLOSED else ClawState.OPEN
+        }
     }
 
-    fun open() {
-        claw.position = 0.0
+    private fun open() {
+        position = 0.0
     }
 
-    fun close() {
-        claw.position = 0.6
+    private fun close() {
+        position = 0.6
     }
+
+    var position: Double
+        get() = claw.position
+        set(value) {
+            claw.position = value.coerceIn(0.0, 1.0)
+        }
+
+    var state: ClawState
+        get() = if (position == 0.0) ClawState.OPEN else ClawState.CLOSED
+        set(value) {
+            when (value) {
+                ClawState.OPEN -> open()
+                ClawState.CLOSED -> close()
+            }
+        }
 
 //    fun getDetection(): Sample {
 //
 //    }
 
-    fun logclaw(telemetry: Telemetry) {
+    fun logClaw(telemetry: Telemetry) {
         telemetry.addData("position", claw.position)
         telemetry.update()
     }

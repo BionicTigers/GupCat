@@ -1,27 +1,24 @@
-package org.firstinspires.ftc.teamcode.teleops
+package org.firstinspires.ftc.teamcode.teleops.mechanisms
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import org.firstinspires.ftc.teamcode.axiom.commands.Scheduler
 import org.firstinspires.ftc.teamcode.axiom.input.GamepadSystem
-import org.firstinspires.ftc.teamcode.mechanisms.Slides
+import org.firstinspires.ftc.teamcode.mechanisms.Arm
 
-@TeleOp(name = "Slide Test")
-class SlideOp : LinearOpMode() {
+@TeleOp(name="ArmOp", group = "mechanisms")
+class ArmOp : LinearOpMode() {
     override fun runOpMode() {
-        val slides = Slides(hardwareMap)
+        Scheduler.clear()
         val gamepadSystem = GamepadSystem(gamepad1, gamepad2)
-        val (gp1, gp2) = gamepadSystem.gamepads
-        slides.setupDriverControl(gp1)
+        val arm = Arm(hardwareMap)
 
-        Scheduler.addSystem(slides, gamepadSystem)
+        Scheduler.addSystem(gamepadSystem)
         waitForStart()
 
         while (opModeIsActive()) {
             Scheduler.update()
         }
-
         Scheduler.clear()
     }
-
 }

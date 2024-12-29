@@ -8,9 +8,15 @@ import org.firstinspires.ftc.robotcore.external.navigation.VoltageUnit
 class ControlHub(hardware: HardwareMap, hubName: String) {
     private var bulkDataCache: IntArray
     private var junkTicks = IntArray(4)
+    private var direction = IntArray(4) { 1 }
 
     private val hubModule: LynxModule = hardware.get(LynxModule::class.java, hubName)
     private val motorController: LynxDcMotorController = hardware.get(LynxDcMotorController::class.java, hubName)
+
+    enum class Direction {
+        Forward,
+        Backward
+    }
 
     init {
         hubModule.bulkCachingMode = LynxModule.BulkCachingMode.MANUAL
@@ -31,11 +37,14 @@ class ControlHub(hardware: HardwareMap, hubName: String) {
         if (motor != null)
             junkTicks[motor] = junkTick ?: bulkDataCache[motor]
         else {
-            refreshBulkData()
             for (i in 0..3) {
                 setJunkTicks(i)
             }
         }
+    }
+
+    fun setEncoderDirection(port: Int, targetDirection: Direction) {
+        direction[port] = if (targetDirection == Direction.Forward) 1 else -1
     }
 
     private fun internalRefreshBulkData(): IntArray {
@@ -53,7 +62,7 @@ class ControlHub(hardware: HardwareMap, hubName: String) {
     }
 
     fun getEncoderTicks(motor: Int): Int {
-        return bulkDataCache[motor] - junkTicks[motor]
+        return (bulkDataCache[motor] - junkTicks[motor]) * direction[motor]
     }
 
     fun getAndUpdateEncoderTicks(motor: Int): Int {

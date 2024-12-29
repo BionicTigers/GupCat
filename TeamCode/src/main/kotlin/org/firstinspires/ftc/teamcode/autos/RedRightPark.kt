@@ -23,7 +23,7 @@ class RedRightPark : LinearOpMode() {
 
         moveLeft
             .setOnEnter { drivetrain.moveToPose(Pose(1200.0,50.0,0.0)) }
-            .setAction { println(drivetrain.moveFinished); println(odometrySystem.pose); drivetrain.moveFinished }
+            .setAction { println(drivetrain.moveFinished); println(odometrySystem.globalPose); drivetrain.moveFinished }
 //            .setOnExit {  }
 
         Scheduler.add(moveLeft)

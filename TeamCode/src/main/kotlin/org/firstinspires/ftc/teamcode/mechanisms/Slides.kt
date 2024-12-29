@@ -46,7 +46,7 @@ interface SlidesState : CommandState {
 
 class Slides(hardwareMap: HardwareMap, val pivot: Pivot? = null) : System {
     val exHub = ControlHub(hardwareMap, "Expansion Hub 2")
-    val max = 65900
+    val max = 65500
 
     override val dependencies = listOf(GamepadSystem.activeSystem!!) //TODO: make this not be so stupid (use a singleton)
     override val beforeRun = Command(SlidesState.default("Slides", hardwareMap.getByName("slides")))
@@ -64,16 +64,16 @@ class Slides(hardwareMap: HardwareMap, val pivot: Pivot? = null) : System {
             exHub.refreshBulkData()
             val ticks = exHub.getEncoderTicks(2)
 
-            println("$ticks, ${it.targetPosition}")
-            val sub = 1400 - (pivot?.pivotTicks ?: 1400)
-            targetPosition = targetPosition.coerceIn(-200, max - sub * 15)
+//            println("$ticks, ${it.targetPosition}")
+//            val sub = 1400 - (pivot?.pivotTicks ?: 1400)
+//            targetPosition = targetPosition.coerceIn(-200, max - sub * 15)
 
-            if (it.changed) {
+//            if (it.changed) {
 //                it.profile = generateMotionProfile(it.motor.currentPosition, it.targetPosition, 40, 100, 400, it.motor.getTracker().velocity)
-                it.moveStartTime = it.timeInScheduler
-            }
+//                it.moveStartTime = it.timeInScheduler
+//            }
 
-            val direction = if (it.targetPosition >= ticks.toDouble()) 1 else -1
+            val direction = if (it.targetPosition >= ticks.toDouble()) -1 else 1
             val deltaTime = it.timeInScheduler - it.moveStartTime
             if (it.targetPosition >= ticks.toDouble()) {
                 it.pid.kP = 12.0
@@ -82,9 +82,9 @@ class Slides(hardwareMap: HardwareMap, val pivot: Pivot? = null) : System {
             }
 
             val power = it.pid.calculate(it.targetPosition.toDouble(), ticks.toDouble())
-            println(power)
+//            println(power)
 
-            it.motor.power = power + .15 * power * direction
+            it.motor.power = -power //+ .15 * power * direction
 
             false
         }

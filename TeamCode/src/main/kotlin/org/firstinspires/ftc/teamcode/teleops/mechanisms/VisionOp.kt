@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.teleops
+package org.firstinspires.ftc.teamcode.teleops.mechanisms
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
@@ -6,7 +6,7 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName
 import org.firstinspires.ftc.teamcode.vision.Camera
 import org.firstinspires.ftc.teamcode.vision.OpenCV
 
-@TeleOp(name = "VisionOp")
+@TeleOp(name = "VisionOp", group = "mechanisms")
 class VisionOp : LinearOpMode() {
     override fun runOpMode() {
         val openCV = OpenCV(

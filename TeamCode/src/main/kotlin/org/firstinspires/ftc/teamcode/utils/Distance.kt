@@ -35,4 +35,8 @@ class Distance private constructor(val mm: Double) {
     operator fun unaryMinus() = Distance(-mm)
     operator fun compareTo(distance: Distance) = mm.compareTo(distance.mm)
     operator fun compareTo(scalar: Number) = mm.compareTo(scalar.toDouble())
+
+    override fun toString(): String {
+        return "$mm mm"
+    }
 }

@@ -90,6 +90,7 @@ class Pivot(hardwareMap: HardwareMap) : System {
                 it.pid.kP = downPIDTerms[exHub.getEncoderTicks(3).toDouble()]
 
             val power = it.pid.calculate(it.targetPosition.toDouble(), exHub.getEncoderTicks(3).toDouble()) + offset[exHub.getEncoderTicks(3).toDouble()]
+            println(power)
             if (limitSwitch.state || it.targetPosition > 0) {
                 it.motor.power = power
                 it.motor2.power = power
@@ -111,7 +112,7 @@ class Pivot(hardwareMap: HardwareMap) : System {
     //TODO: Swap to an angle
     var pivotTicks: Int
         set(value) {
-            beforeRun.state.targetPosition = value.coerceIn(-100,1600)
+            beforeRun.state.targetPosition = value.coerceIn(-100,1800)
         }
         get() = beforeRun.state.targetPosition
 

@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import org.firstinspires.ftc.teamcode.axiom.commands.Scheduler
 import org.firstinspires.ftc.teamcode.axiom.input.GamepadSystem
+import org.firstinspires.ftc.teamcode.mechanisms.Arm
 import org.firstinspires.ftc.teamcode.mechanisms.Claw
 import org.firstinspires.ftc.teamcode.mechanisms.Pivot
 import org.firstinspires.ftc.teamcode.mechanisms.Slides
@@ -18,15 +19,17 @@ class MainControl : LinearOpMode() {
         val drivetrain = Drivetrain(hardwareMap, gamepadSystem, odometrySystem)
         val pivot = Pivot(hardwareMap)
         val slides = Slides(hardwareMap, pivot)
+        val arm = Arm(hardwareMap)
         val claw = Claw(hardwareMap)
 
         Scheduler.addSystem(gamepadSystem, odometrySystem, drivetrain, slides, pivot)
 
         val (gp1, gp2) = gamepadSystem.gamepads
 
-        slides.setupDriverControl(gp2)
-        pivot.setupDriverControl(gp2)
-        claw.setupDriverControl(gp2)
+        slides.setupDriverControl(gp2) // dpad up and down
+        pivot.setupDriverControl(gp2) // left trigger down, right trigger up
+        arm.setupDriverControl(gp2) // left bumper up, right bumper down
+        claw.setupDriverControl(gp2) // a toggles open and close
 
         waitForStart()
 

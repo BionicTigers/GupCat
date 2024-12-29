@@ -17,7 +17,8 @@ class Arm(hardwareMap: HardwareMap) : System {
     override val beforeRun = null
     override val afterRun = null
 
-    private val arm = hardwareMap.get(Servo::class.java, "claw")
+    private val arm = hardwareMap.get(Servo::class.java, "arm")
+
     fun setupDriverControl(gp: Gamepad) {
         gp.getBooleanButton(Gamepad.Buttons.LEFT_BUMPER).onDown { up() }
         gp.getBooleanButton(Gamepad.Buttons.RIGHT_BUMPER).onDown { down() }

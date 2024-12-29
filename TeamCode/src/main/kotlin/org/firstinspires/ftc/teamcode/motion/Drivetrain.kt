@@ -2,19 +2,15 @@ package org.firstinspires.ftc.teamcode.motion
 
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
-import com.qualcomm.robotcore.hardware.HardwareDevice
 import com.qualcomm.robotcore.hardware.HardwareMap
 import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.teamcode.axiom.commands.*
-import org.firstinspires.ftc.teamcode.axiom.input.Gamepad
 import org.firstinspires.ftc.teamcode.axiom.input.GamepadSystem
 import org.firstinspires.ftc.teamcode.utils.Pose
 import org.firstinspires.ftc.teamcode.utils.Time
 import org.firstinspires.ftc.teamcode.utils.getByName
-import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
-import kotlin.reflect.jvm.internal.impl.load.java.typeEnhancement.TypeEnhancementKt
 
 data class Motors(
     val frontLeft: DcMotorEx,
@@ -23,10 +19,10 @@ data class Motors(
     val backRight: DcMotorEx
 ) {
     fun setPower(frontLeft: Double, backLeft: Double, frontRight: Double, backRight: Double) {
-        this.frontLeft.power = frontLeft
-        this.backLeft.power = backLeft * 1.1
-        this.frontRight.power = frontRight
-        this.backRight.power = backRight
+        this.frontLeft.power = frontLeft * .5
+        this.backLeft.power = backLeft * .5
+        this.frontRight.power = frontRight * .5
+        this.backRight.power = backRight * .5
 //        this.frontLeft.power = frontLeft * .8
 //        this.backLeft.power = backLeft * .9
 //        this.frontRight.power = frontRight * .8
@@ -96,11 +92,11 @@ class Drivetrain(
     override val dependencies: List<System> = listOf(odometrySystem, gamepadSystem)
 
     override val beforeRun = Command(DrivetrainState.default(motors))
-        .setOnEnter { referencePose = odometrySystem.pose }
+        .setOnEnter { referencePose = odometrySystem.globalPose }
         .setAction {
             if (it.mode == ControlMode.DRIVER_CONTROL) {
-//                Mecanum.fieldDriverControl(it, odometrySystem, referencePose)
-                Mecanum.robotDriverControl(it)
+                Mecanum.fieldDriverControl(it, odometrySystem, referencePose)
+//                Mecanum.robotDriverControl(it)
             } else {
                 if (moveFinished) {
                     stop()
@@ -119,7 +115,7 @@ class Drivetrain(
         }
     }
 
-    private var referencePose = odometrySystem.pose
+    private var referencePose = odometrySystem.globalPose
 
     object Mecanum {
         fun calculatePowers(x: Double, y: Double, rotation: Double): List<Double> {
@@ -170,7 +166,7 @@ class Drivetrain(
 
             val (gamepad1, _) = gamepadSystem.gamepads
 
-            val heading = odometry.pose.radians - referencePose.radians
+            val heading = odometry.globalPose.radians - referencePose.radians
 
             val (x, y) = gamepad1.leftJoystick.value
             val rotation = -gamepad1.rightJoystick.value.x
@@ -215,7 +211,7 @@ class Drivetrain(
             state.pidY.reset()
             state.pidRot.reset()
 
-            val pose = odometry.pose
+            val pose = odometry.globalPose
 
 //            val powerX = state.pidX.calculate(pose.x, state.profileX!!.getPosition(state.timeInScheduler - state.timeStarted))
 //            val powerY = state.pidY.calculate(pose.y, state.profileY!!.getPosition(state.timeInScheduler - state.timeStarted))
@@ -249,7 +245,7 @@ class Drivetrain(
     var moveFinished: Boolean
         get() {
             val compare = Pose(20.0, 20.0, 10.0)
-            return odometrySystem.pose.within(targetPose, compare)
+            return odometrySystem.globalPose.within(targetPose, compare)
         }
         private set(value) {}
 
