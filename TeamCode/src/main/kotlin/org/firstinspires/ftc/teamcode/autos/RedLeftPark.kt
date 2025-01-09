@@ -19,7 +19,7 @@ class RedLeftPark : LinearOpMode() {
         val odometrySystem = OdometrySystem(hardwareMap)
         val drivetrain = Drivetrain(hardwareMap, gamepadSystem, odometrySystem)
         val pivot = Pivot(hardwareMap)
-        val slides = Slides(hardwareMap)
+//        val slides = Slides(hardwareMap)
 
         Scheduler.addSystem(odometrySystem, drivetrain)
 
@@ -37,7 +37,7 @@ class RedLeftPark : LinearOpMode() {
             .setAction  { pivot.currentPosition == pivot.pivotTicks }
             .setOnExit  { Scheduler.add(liftSlides) }
         liftSlides
-            .setOnEnter { slides.targetPosition = 3000 }
+//            .setOnEnter { slides.targetPosition = 3000 }
 //            .setAction  { slides. == slides.targetPosition }
             .setOnExit  { Scheduler.add(moveToAscend) }
         moveToAscend

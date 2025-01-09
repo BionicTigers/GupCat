@@ -76,7 +76,6 @@ class Encoder(private val port: Int, private val controlHub: ControlHub) {
         get() = controlHub.getAndUpdateEncoderTicks(port)
 
     fun setJunkTicks(value: Int? = null) {
-        println(value)
         controlHub.setJunkTicks(port, value)
     }
 }

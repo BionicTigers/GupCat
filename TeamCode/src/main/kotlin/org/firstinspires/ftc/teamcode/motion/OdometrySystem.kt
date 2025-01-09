@@ -13,6 +13,7 @@ import org.firstinspires.ftc.teamcode.utils.Distance
 import org.firstinspires.ftc.teamcode.utils.Time
 import kotlin.math.PI
 import kotlin.math.cos
+import kotlin.math.max
 import kotlin.math.sin
 
 interface OdometrySystemState : CommandState {
@@ -44,16 +45,35 @@ class OdometrySystem(hardwareMap: HardwareMap) : System {
 
     var dt: Time = Time.fromSeconds(1)
 
+    companion object {
+        object Test {
+            val leftOffset: Distance = Distance.mm(204.0) - Distance.mm(5.0) //Distance.mm( 173.83125) + Distance.mm(10)
+            val rightOffset: Distance = Distance.mm(142.0) - Distance.mm(5.0) // Distance.mm(165.1) + Distance.mm(10) //152.4 //169.0
+            val backOffset: Distance = Distance.mm(82.0)  //Distance.mm(3/4 + 3/32) //152.4 //152.4 //95.25
+            val virtualOffsetY: Distance = Distance.mm(-68.92)  //Distance.mm(-68.97)
+            val virtualOffsetX: Distance = Distance.mm(31.0)  //Distance.mm(5.45)
+        }
+
+        object Main {
+            val leftOffset: Distance = Distance.mm(171)
+            val rightOffset: Distance = Distance.mm(171)
+            val backOffset: Distance = Distance.mm(70.8)
+            val virtualOffsetY: Distance = Distance.mm(0)
+            val virtualOffsetX: Distance = Distance.mm(23)
+        }
+    }
+
 //    val limelight3A = hardwareMap.getByName<Limelight3A>("limelight")
+    val robotConfig = Main
 
     override val dependencies: List<System> = emptyList()
     override val beforeRun =
         Command(object : OdometrySystemState, CommandState by CommandState.default("Odometry") {
-            override val leftOffset: Distance = Distance.mm(204.0) //- Distance.mm(5.0) //Distance.mm( 173.83125) + Distance.mm(10)
-            override val rightOffset: Distance = Distance.mm(142.0) //- Distance.mm(5.0) // Distance.mm(165.1) + Distance.mm(10) //152.4 //169.0
-            override val backOffset: Distance = Distance.mm(82.0)  //Distance.mm(3/4 + 3/32) //152.4 //152.4 //95.25
-            override val virtualOffsetY: Distance = Distance.mm(-68.92)  //Distance.mm(-68.97)
-            override val virtualOffsetX: Distance = Distance.mm(31.0)  //Distance.mm(5.45)
+            override val leftOffset: Distance = robotConfig.leftOffset
+            override val rightOffset: Distance = robotConfig.rightOffset
+            override val backOffset: Distance = robotConfig.backOffset
+            override val virtualOffsetY: Distance = robotConfig.virtualOffsetY
+            override val virtualOffsetX: Distance = robotConfig.virtualOffsetX
             override var velocity: Vector2 = Vector2()
             override var acceleration: Vector2 = Vector2()
             override var virtualPose = Pose(virtualOffsetX.mm, virtualOffsetY.mm, 0)
@@ -63,17 +83,11 @@ class OdometrySystem(hardwareMap: HardwareMap) : System {
             .setOnEnter {
                 hub.setJunkTicks()
                 exHub.setJunkTicks()
-                it.virtualPose = Pose(it.virtualOffsetX.mm, it.virtualOffsetY.mm, 0)
 
+                hub.setEncoderDirection(0, ControlHub.Direction.Backward) // (back pod)
                 hub.setEncoderDirection(3, ControlHub.Direction.Backward) // (right pod)
             }
             .setAction {
-                // Only runs odo calculations every 100 ms
-                if (dt.milliseconds() < 100) {
-                    dt += it.deltaTime
-                    return@setAction false
-                }
-
                 val circumference: Double = it.odoDiameter * it.gearRatio * PI
 
                 // Find Local Updates
@@ -178,11 +192,25 @@ class OdometrySystem(hardwareMap: HardwareMap) : System {
 
             return Pose(x, y, currentVPose.rotation)
         }
-        set(value) { // TODO: make this take global poses instead of virtual
-            beforeRun.state.virtualPose = value
+        set(value) {
+            val state = beforeRun.state
+
+            val virtualY = value.y + (state.virtualOffsetY * value.rotation.cos).mm - (state.virtualOffsetX * value.rotation.sin).mm
+            val virtualX = value.x + (state.virtualOffsetY * value.rotation.sin).mm + (state.virtualOffsetX * value.rotation.cos).mm
+            beforeRun.state.virtualPose = Pose(virtualX, virtualY, value.rotation)
         }
 
+    var maxAccelX = 0.0
+    var maxAccelY = 0.0
+    var maxVelocityX = 0.0
+    var maxVelocityY = 0.0
+
     fun log(telemetry: Telemetry) {
+        maxAccelX = max(maxAccelX, beforeRun.state.acceleration.x)
+        maxAccelY = max(maxAccelY, beforeRun.state.acceleration.y)
+        maxVelocityX = max(maxVelocityX, beforeRun.state.velocity.x)
+        maxVelocityY = max(maxVelocityY, beforeRun.state.velocity.y)
+
         telemetry.addData("XVirtual", beforeRun.state.virtualPose.x)
         telemetry.addData("X", globalPose.x)
         telemetry.addData("YVirtual", beforeRun.state.virtualPose.y)
@@ -190,10 +218,11 @@ class OdometrySystem(hardwareMap: HardwareMap) : System {
         telemetry.addData("Rotation", globalPose.degrees)
         telemetry.addData("Velocity", beforeRun.state.velocity)
         telemetry.addData("Acceleration", beforeRun.state.acceleration)
+        telemetry.addData("maxAccel", "($maxAccelX, $maxAccelY)")
+        telemetry.addData("maxVelocity", "(${maxVelocityX}, $maxVelocityY)")
         telemetry.addData("Ticks L", ticksL)
         telemetry.addData("Ticks R", ticksR)
         telemetry.addData("Ticks B", ticksB)
-        telemetry.update()
     }
 
 

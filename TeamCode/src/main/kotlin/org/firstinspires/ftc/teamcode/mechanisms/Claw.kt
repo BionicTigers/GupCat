@@ -15,11 +15,6 @@ import org.firstinspires.ftc.teamcode.utils.getByName
 
 
 class Claw(hardwareMap: HardwareMap) : System {
-    enum class ClawState {
-        OPEN,
-        CLOSED
-    }
-
     override val dependencies: List<System> = emptyList()
     override val beforeRun = null
     override val afterRun = null
@@ -28,12 +23,12 @@ class Claw(hardwareMap: HardwareMap) : System {
 
     fun setupDriverControl(gp: Gamepad) {
         gp.getBooleanButton(Gamepad.Buttons.A).onDown {
-            state = if (state == ClawState.OPEN) ClawState.CLOSED else ClawState.OPEN
+            open = !open
         }
     }
 
     private fun open() {
-        position = 0.0
+        position = 0.25
     }
 
     private fun close() {
@@ -46,13 +41,10 @@ class Claw(hardwareMap: HardwareMap) : System {
             claw.position = value.coerceIn(0.0, 1.0)
         }
 
-    var state: ClawState
-        get() = if (position == 0.0) ClawState.OPEN else ClawState.CLOSED
+    var open = false
         set(value) {
-            when (value) {
-                ClawState.OPEN -> open()
-                ClawState.CLOSED -> close()
-            }
+            if (value) open() else close()
+            field = value
         }
 
 //    fun getDetection(): Sample {

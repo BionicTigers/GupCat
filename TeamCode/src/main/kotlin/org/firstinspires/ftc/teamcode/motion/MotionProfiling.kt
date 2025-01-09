@@ -46,14 +46,26 @@ fun generateMotionProfile(
  * @param maxVelocity mm/s
  */
 private fun generateMotionProfile(
-    start: Double,
-    final: Double,
+    s: Double,
+    f: Double,
     jerk: Double,
     maxAcceleration: Double,
     maxVelocity: Double,
     startingVelocity: Double? = null,
     points: Int = 600
 ): MotionResult {
+    var start = s
+    var final = f
+
+    val inverse = final - start < 0
+
+    if (inverse) {
+        start = f
+        final = s
+    }
+
+    if (final - start == 0.0) return MotionResult(listOf(0.0), listOf(0.0), listOf(start), listOf(0.0), 1.0, start)
+
     val va = maxAcceleration.pow(2) / jerk
     val sa = 2.0 * maxAcceleration.pow(3) / jerk.pow(2)
     val sv =
@@ -93,8 +105,8 @@ private fun generateMotionProfile(
     val a5: Double
     val a6: Double
 
+    println("$final $start")
     var target = abs(final - start)
-    if (target <= 0) return MotionResult(listOf(0.0), listOf(0.0), listOf(start), listOf(0.0), 1.0, start)
 
     if (v0 != null) {
         if ((va > maxVelocity && sa < target) || (va > maxVelocity && sa > target && sv < target)) {
@@ -310,6 +322,12 @@ private fun generateMotionProfile(
 
     for (i in 0..<position.size) {
         position[i] = start + position[i] * (final - start).sign
+    }
+
+    if (inverse) {
+        acceleration.reverse()
+        velocity.reverse()
+        position.reverse()
     }
 
     return MotionResult(acceleration, velocity, position, timeList, timeslice, final)

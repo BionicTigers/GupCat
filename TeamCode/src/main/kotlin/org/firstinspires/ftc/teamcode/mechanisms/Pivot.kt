@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.DigitalChannel
 import com.qualcomm.robotcore.hardware.HardwareMap
+import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.teamcode.axiom.commands.Command
 import org.firstinspires.ftc.teamcode.axiom.commands.CommandState
 import org.firstinspires.ftc.teamcode.axiom.commands.Scheduler
@@ -81,7 +82,6 @@ class Pivot(hardwareMap: HardwareMap) : System {
             it.pid.reset()
         }
         .setAction {
-            println(pivotTicks)
             exHub.refreshBulkData()
 
             if (it.targetPosition >= exHub.getEncoderTicks(3).toDouble())
@@ -90,13 +90,12 @@ class Pivot(hardwareMap: HardwareMap) : System {
                 it.pid.kP = downPIDTerms[exHub.getEncoderTicks(3).toDouble()]
 
             val power = it.pid.calculate(it.targetPosition.toDouble(), exHub.getEncoderTicks(3).toDouble()) + offset[exHub.getEncoderTicks(3).toDouble()]
-            println(power)
             if (limitSwitch.state || it.targetPosition > 0) {
                 it.motor.power = power
                 it.motor2.power = power
             } else {
-                it.motor2.power = -.1
-                it.motor.power = -.1
+                it.motor2.power = -.02
+                it.motor.power = -.02
             }
             if (!limitSwitch.state)
                 exHub.setJunkTicks()
@@ -108,6 +107,8 @@ class Pivot(hardwareMap: HardwareMap) : System {
             false
         }
     override val afterRun = null
+
+    val max = 1800
 
     //TODO: Swap to an angle
     var pivotTicks: Int
@@ -127,5 +128,9 @@ class Pivot(hardwareMap: HardwareMap) : System {
         gamepad.rightTrigger.onHold {
             pivotTicks += (1500 * Scheduler.loopDeltaTime.seconds() * it).toInt()
         }
+    }
+
+    fun log(telemetry: Telemetry) {
+        telemetry.addData("pivotTicks", pivotTicks)
     }
 }

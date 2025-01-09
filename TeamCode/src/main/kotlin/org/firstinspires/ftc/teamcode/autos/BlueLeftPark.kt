@@ -19,7 +19,7 @@ class BlueLeftPark : LinearOpMode() {
         val odometrySystem = OdometrySystem(hardwareMap)
         val drivetrain = Drivetrain(hardwareMap, gamepadSystem, odometrySystem)
         val pivot = Pivot(hardwareMap)
-        val slides = Slides(hardwareMap)
+//        val slides = Slides(hardwareMap)
 
         Scheduler.addSystem(odometrySystem, drivetrain)
 
