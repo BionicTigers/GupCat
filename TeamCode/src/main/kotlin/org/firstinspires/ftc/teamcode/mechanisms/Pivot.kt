@@ -16,6 +16,7 @@ import org.firstinspires.ftc.teamcode.motion.PID
 import org.firstinspires.ftc.teamcode.motion.PIDTerms
 import org.firstinspires.ftc.teamcode.utils.ControlHub
 import org.firstinspires.ftc.teamcode.utils.Encoder
+import org.firstinspires.ftc.teamcode.utils.Persistents
 import org.firstinspires.ftc.teamcode.utils.getByName
 import org.firstinspires.ftc.teamcode.utils.interpolatedMapOf
 
@@ -80,6 +81,9 @@ class Pivot(hardwareMap: HardwareMap) : System {
 //            it.motor2.direction = DcMotorSimple.Direction.REVERSE
 
             it.pid.reset()
+
+            if (Persistents.pivotTicks == 0) Persistents.pivotTicks = exHub.getEncoderTicks(3)
+            exHub.setJunkTicks(3, Persistents.pivotTicks)
         }
         .setAction {
             exHub.refreshBulkData()
@@ -96,9 +100,13 @@ class Pivot(hardwareMap: HardwareMap) : System {
             } else {
                 it.motor2.power = -.02
                 it.motor.power = -.02
+
             }
-            if (!limitSwitch.state)
+            if (!limitSwitch.state) {
                 exHub.setJunkTicks()
+                Persistents.pivotTicks = exHub.rawGetEncoderTicks(3)
+            }
+
 
 //            telemetry.addData("Pivot Process P-VAL", it.pid.kP)
 //            telemetry.addData("Pivot Process Value", exHub.getEncoderTicks(3))

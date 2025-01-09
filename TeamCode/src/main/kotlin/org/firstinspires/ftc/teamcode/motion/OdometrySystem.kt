@@ -10,6 +10,7 @@ import org.firstinspires.ftc.teamcode.utils.Vector2
 import org.firstinspires.ftc.teamcode.axiom.commands.*
 import org.firstinspires.ftc.teamcode.utils.Angle
 import org.firstinspires.ftc.teamcode.utils.Distance
+import org.firstinspires.ftc.teamcode.utils.Persistents
 import org.firstinspires.ftc.teamcode.utils.Time
 import kotlin.math.PI
 import kotlin.math.cos
@@ -32,7 +33,7 @@ interface OdometrySystemState : CommandState {
     var virtualPose: Pose
 }
 
-class OdometrySystem(hardwareMap: HardwareMap) : System {
+class OdometrySystem(hardwareMap: HardwareMap, initialPose: Pose? = null) : System {
     val hub = ControlHub(hardwareMap, "Control Hub")
     val exHub = ControlHub(hardwareMap, "Expansion Hub 2")
 //    val leftOdo = hardwareMap.get(DcMotorEx::class.java, "backRight")
@@ -86,6 +87,8 @@ class OdometrySystem(hardwareMap: HardwareMap) : System {
 
                 hub.setEncoderDirection(0, ControlHub.Direction.Backward) // (back pod)
                 hub.setEncoderDirection(3, ControlHub.Direction.Backward) // (right pod)
+
+                it.virtualPose = initialPose ?: Persistents.pose
             }
             .setAction {
                 val circumference: Double = it.odoDiameter * it.gearRatio * PI
@@ -156,6 +159,7 @@ class OdometrySystem(hardwareMap: HardwareMap) : System {
 
                 // Update the current (virtual) pose
                 it.virtualPose = Pose(virtualGlobalX.mm, virtualGlobalY.mm, globalRotation + localRotation) //virtual
+                Persistents.pose = it.virtualPose
 
                 // Update velocity and acceleration
                 val deltaTime = it.deltaTime.seconds()

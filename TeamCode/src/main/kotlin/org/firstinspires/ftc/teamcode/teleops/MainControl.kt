@@ -11,6 +11,7 @@ import org.firstinspires.ftc.teamcode.mechanisms.Pivot
 import org.firstinspires.ftc.teamcode.mechanisms.Slides
 import org.firstinspires.ftc.teamcode.motion.Drivetrain
 import org.firstinspires.ftc.teamcode.motion.OdometrySystem
+import org.firstinspires.ftc.teamcode.utils.Persistents
 import org.firstinspires.ftc.teamcode.utils.Pose
 
 @TeleOp(name = "MainControl")
@@ -24,15 +25,18 @@ class MainControl : LinearOpMode() {
         val arm = Arm(hardwareMap)
         val claw = Claw(hardwareMap)
 
-        odometry.globalPose = Pose(850.9, 215.9, 0)
+//        odometry.globalPose = Pose(850.9, 215.9, 0)
 
         Scheduler.addSystem(gamepadSystem, odometry, drivetrain, slides, pivot)
 
         val (gp1, gp2) = gamepadSystem.gamepads
 
+        drivetrain.setupDriverControl(gp1) // b resets odo
+        Persistents.setupDriverControl(gp1) // y resets
+
         slides.setupDriverControl(gp2) // dpad up and down
         pivot.setupDriverControl(gp2) // left trigger down, right trigger up
-        arm.setupDriverControl(gp2) // left bumper up, right bumper down
+        arm.setupDriverControl(gp2) // b toggles 180 degrees, y goes to 90
         claw.setupDriverControl(gp2) // a toggles open and close
 
         val init = statelessCommand()

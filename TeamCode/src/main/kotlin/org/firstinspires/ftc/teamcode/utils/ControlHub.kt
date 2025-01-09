@@ -65,6 +65,10 @@ class ControlHub(hardware: HardwareMap, hubName: String) {
         return (bulkDataCache[motor] - junkTicks[motor]) * direction[motor]
     }
 
+    fun rawGetEncoderTicks(motor: Int): Int {
+        return bulkDataCache[motor]
+    }
+
     fun getAndUpdateEncoderTicks(motor: Int): Int {
         refreshBulkData()
         return getEncoderTicks(motor)

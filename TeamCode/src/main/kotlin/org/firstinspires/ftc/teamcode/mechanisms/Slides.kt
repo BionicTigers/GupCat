@@ -17,6 +17,7 @@ import org.firstinspires.ftc.teamcode.motion.PID
 import org.firstinspires.ftc.teamcode.motion.PIDTerms
 import org.firstinspires.ftc.teamcode.motion.generateMotionProfile
 import org.firstinspires.ftc.teamcode.utils.ControlHub
+import org.firstinspires.ftc.teamcode.utils.Persistents
 import org.firstinspires.ftc.teamcode.utils.Time
 import org.firstinspires.ftc.teamcode.utils.Vector2
 import org.firstinspires.ftc.teamcode.utils.assignTracker
@@ -49,7 +50,7 @@ interface SlidesState : CommandState {
     }
 }
 
-class Slides(hardwareMap: HardwareMap, val pivot: Pivot) : System {
+class Slides(hardwareMap: HardwareMap, pivot: Pivot) : System {
     private val exHub = ControlHub(hardwareMap, "Expansion Hub 2")
     private val max = 3500
     private val pivotDownMax = 2300
@@ -67,7 +68,8 @@ class Slides(hardwareMap: HardwareMap, val pivot: Pivot) : System {
             it.pid.reset()
             it.motorR.assignTracker()
             exHub.refreshBulkData()
-            exHub.setJunkTicks()
+            if (Persistents.slideTicks == 0) Persistents.slideTicks = exHub.getEncoderTicks(2)
+            exHub.setJunkTicks(2, Persistents.slideTicks)
         }
         .setAction {
             exHub.refreshBulkData()
@@ -89,13 +91,14 @@ class Slides(hardwareMap: HardwareMap, val pivot: Pivot) : System {
                 it.pid.kP = 9.0
             }
 
-
             val power: Double
-//            if (it.limitSwitch.state || it.targetPosition > 0) {
+            if (it.limitSwitch.state || it.targetPosition > 0) {
                 power = it.pid.calculate(it.targetPosition.toDouble(), ticks.toDouble())
-//            } else {
-//                power = -0.02
-//            }
+            } else {
+                power = -0.02
+                ticks = 0
+                Persistents.slideTicks = exHub.rawGetEncoderTicks(2)
+            }
 
             it.motorR.power = power //+ .15 * power * direction
             it.motorL.power = power
