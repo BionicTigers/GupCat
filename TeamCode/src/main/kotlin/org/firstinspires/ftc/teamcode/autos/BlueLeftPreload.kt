@@ -16,6 +16,7 @@ import org.firstinspires.ftc.teamcode.motion.Drivetrain
 import org.firstinspires.ftc.teamcode.motion.DrivetrainState
 import org.firstinspires.ftc.teamcode.motion.Motors
 import org.firstinspires.ftc.teamcode.motion.OdometrySystem
+import org.firstinspires.ftc.teamcode.utils.Persistents
 import org.firstinspires.ftc.teamcode.utils.Pose
 import org.firstinspires.ftc.teamcode.utils.Time
 import kotlin.math.abs
@@ -95,6 +96,8 @@ class BlueLeftPreload : LinearOpMode() {
 
         var moveClaw = false
         var driveMoveFinished = false
+
+        Persistents.reset()
 
         scoreHighBasket
             .setOnEnter {

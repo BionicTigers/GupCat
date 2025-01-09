@@ -12,6 +12,7 @@ import org.firstinspires.ftc.teamcode.mechanisms.Pivot
 import org.firstinspires.ftc.teamcode.mechanisms.Slides
 import org.firstinspires.ftc.teamcode.motion.Drivetrain
 import org.firstinspires.ftc.teamcode.motion.OdometrySystem
+import org.firstinspires.ftc.teamcode.utils.Persistents
 import org.firstinspires.ftc.teamcode.utils.Pose
 import org.firstinspires.ftc.teamcode.utils.Time
 
@@ -30,8 +31,11 @@ class SimpleMove : LinearOpMode() {
 
         Scheduler.addSystem(odometrySystem, drivetrain)
 
+
         val poseToMove = Pose(200, 500, 45)
         val otherToMove = Pose(0, 0, 0)
+
+        Persistents.reset()
 
         val otherMove = statelessCommand("move")
             .setOnEnter {

@@ -9,6 +9,7 @@ import org.firstinspires.ftc.teamcode.mechanisms.Pivot
 import org.firstinspires.ftc.teamcode.mechanisms.Slides
 import org.firstinspires.ftc.teamcode.motion.Drivetrain
 import org.firstinspires.ftc.teamcode.motion.OdometrySystem
+import org.firstinspires.ftc.teamcode.utils.Persistents
 import org.firstinspires.ftc.teamcode.utils.Pose
 
 @Autonomous(name = "RedParkLeft", group = "Autonomous")
@@ -22,6 +23,8 @@ class RedLeftPark : LinearOpMode() {
 //        val slides = Slides(hardwareMap)
 
         Scheduler.addSystem(odometrySystem, drivetrain)
+
+        Persistents.reset()
 
         val moveForward = statelessCommand()
         val liftPivot = statelessCommand()

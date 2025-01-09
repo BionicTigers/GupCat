@@ -7,6 +7,7 @@ import org.firstinspires.ftc.teamcode.axiom.commands.statelessCommand
 import org.firstinspires.ftc.teamcode.axiom.input.GamepadSystem
 import org.firstinspires.ftc.teamcode.motion.Drivetrain
 import org.firstinspires.ftc.teamcode.motion.OdometrySystem
+import org.firstinspires.ftc.teamcode.utils.Persistents
 import org.firstinspires.ftc.teamcode.utils.Pose
 
 @Autonomous(name = "BlueParkRight", group = "Autonomous")
@@ -18,6 +19,8 @@ class BlueRightPark : LinearOpMode() {
         val drivetrain = Drivetrain(hardwareMap, gamepadSystem, odometrySystem)
 
         Scheduler.addSystem(odometrySystem, drivetrain)
+
+        Persistents.reset()
 
         val moveLeft = statelessCommand()
 
