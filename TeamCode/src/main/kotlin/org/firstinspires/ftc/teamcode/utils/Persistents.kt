@@ -4,8 +4,8 @@ import org.firstinspires.ftc.teamcode.axiom.input.Gamepad
 
 object Persistents {
     var pose = Pose(0, 0, 0)
-    var slideTicks = 0
-    var pivotTicks = 0
+    var slideTicks: Int? = null
+    var pivotTicks: Int? = null
 
     fun setupDriverControl(gamepad: Gamepad) {
         gamepad.getBooleanButton(Gamepad.Buttons.Y).onDown {
@@ -14,8 +14,9 @@ object Persistents {
     }
 
     fun reset() {
+        println("reset")
         pose = Pose(0,0,0)
-        slideTicks = 0
-        pivotTicks = 0
+        slideTicks = null
+        pivotTicks = null
     }
 }

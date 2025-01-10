@@ -69,13 +69,12 @@ class Slides(hardwareMap: HardwareMap, pivot: Pivot) : System {
             it.pid.reset()
             it.motorR.assignTracker()
             exHub.refreshBulkData()
-            if (Persistents.slideTicks == 0) Persistents.slideTicks = exHub.getEncoderTicks(2)
+            if (Persistents.slideTicks == null) Persistents.slideTicks = exHub.rawGetEncoderTicks(2)
             exHub.setJunkTicks(2, Persistents.slideTicks)
         }
         .setAction {
             exHub.refreshBulkData()
             ticks = exHub.getEncoderTicks(2)
-            println(ticks)
 
             val percent = 1 - pivot.pivotTicks / pivot.max
             targetPosition = targetPosition.coerceIn(-200, max - percent * (max - pivotDownMax))
@@ -92,19 +91,25 @@ class Slides(hardwareMap: HardwareMap, pivot: Pivot) : System {
             } else {
                 it.pid.kP = 9.0
             }
-//            if (it.limitSwitch.state || it.targetPosition > 0) {
-            val power: Double = it.pid.calculate(it.targetPosition.toDouble(), ticks.toDouble())
-//            } else {
-//                power = -0.02
-//            }
 
-//            if (!it.limitSwitch.state) {
-//                ticks = 0
-//                Persistents.slideTicks = exHub.rawGetEncoderTicks(2)
-//            }
+            val power: Double
+            if (it.limitSwitch.state || it.targetPosition > 0) {
+                power = it.pid.calculate(it.targetPosition.toDouble(), ticks.toDouble())
+            } else {
+                power = -0.02
+            }
+
+            if (!it.limitSwitch.state) {
+                ticks = 0
+                Persistents.slideTicks = exHub.rawGetEncoderTicks(2)
+            }
+
+            println(it.limitSwitch.state)
 
             it.motorR.power = power //+ .15 * power * direction
             it.motorL.power = power
+
+            println(Persistents.slideTicks)
 
             false
         }
