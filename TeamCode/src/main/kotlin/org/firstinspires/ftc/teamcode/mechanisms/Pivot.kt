@@ -65,10 +65,7 @@ class Pivot(hardwareMap: HardwareMap) : System {
         1500.0 to 0.075
     )
 
-    init {
-        exHub.refreshBulkData()
-        exHub.setJunkTicks(3, exHub.getEncoderTicks(3) - 80)
-    }
+    var ticks = 0
 
     override val dependencies: List<System> = emptyList()
     override val beforeRun = Command(PivotState.default(hardwareMap.getByName("pivot"), hardwareMap.getByName("pivot2"), exHub.getEncoder(1)))
@@ -82,18 +79,19 @@ class Pivot(hardwareMap: HardwareMap) : System {
 
             it.pid.reset()
 
-            if (Persistents.pivotTicks == 0) Persistents.pivotTicks = exHub.getEncoderTicks(3)
+            if (Persistents.pivotTicks == 0) Persistents.pivotTicks = exHub.rawGetEncoderTicks(3)
             exHub.setJunkTicks(3, Persistents.pivotTicks)
         }
         .setAction {
             exHub.refreshBulkData()
+            ticks = exHub.getEncoderTicks(3)
 
-            if (it.targetPosition >= exHub.getEncoderTicks(3).toDouble())
-                it.pid.kP = upPIDTerms[exHub.getEncoderTicks(3).toDouble()]
+            if (it.targetPosition >= ticks)
+                it.pid.kP = upPIDTerms[ticks.toDouble()]
             else
-                it.pid.kP = downPIDTerms[exHub.getEncoderTicks(3).toDouble()]
+                it.pid.kP = downPIDTerms[ticks.toDouble()]
 
-            val power = it.pid.calculate(it.targetPosition.toDouble(), exHub.getEncoderTicks(3).toDouble()) + offset[exHub.getEncoderTicks(3).toDouble()]
+            val power = it.pid.calculate(it.targetPosition.toDouble(), ticks.toDouble()) + offset[ticks.toDouble()]
             if (limitSwitch.state || it.targetPosition > 0) {
                 it.motor.power = power
                 it.motor2.power = power
@@ -140,5 +138,6 @@ class Pivot(hardwareMap: HardwareMap) : System {
 
     fun log(telemetry: Telemetry) {
         telemetry.addData("pivotTicks", pivotTicks)
+        telemetry.addData("pivotActualTicks", ticks)
     }
 }

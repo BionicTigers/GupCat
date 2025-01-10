@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.motion
 
+import com.qualcomm.hardware.bosch.BNO055IMUNew
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.HardwareMap
@@ -28,10 +30,6 @@ data class Motors(
         this.backLeft.power = backLeft / ratio
         this.frontRight.power = frontRight / ratio
         this.backRight.power = backRight / ratio
-//        this.frontLeft.power = frontLeft * .8
-//        this.backLeft.power = backLeft * .9
-//        this.frontRight.power = frontRight * .8
-//        this.backRight.power = backRight * 1.0
     }
 
     fun setPower(power: Double) {
@@ -66,9 +64,9 @@ interface DrivetrainState : CommandState {
                 override var targetPose = Pose(0.0, 0.0, 0.0)
                 override var mode = Drivetrain.ControlMode.DRIVER_CONTROL
 
-                override val pidX = PID(PIDTerms(35.0, 49.0), 0.0, 3657.6, -1.0, 1.0)
-                override val pidY = PID(PIDTerms(35.0, 40.0), 0.0, 3657.6, -1.0, 1.0)
-                override val pidRot = PID(PIDTerms(10.0, 150.0), -2 * PI, 2 * PI, -1.0, 1.0)
+                override val pidX = PID(PIDTerms(30.0, 35.0), 0.0, 3657.6, -1.0, 1.0)
+                override val pidY = PID(PIDTerms(30.0, 35.0), 0.0, 3657.6, -1.0, 1.0)
+                override val pidRot = PID(PIDTerms(16.0, 90.0), -2 * PI, 2 * PI, -1.0, 1.0)
 
                 override var profileX: MotionResult? = null
                 override var profileY: MotionResult? = null
@@ -97,15 +95,18 @@ class Drivetrain(
         hardwareMap.getByName("frontRight"),
         hardwareMap.getByName("backRight")
     )
+//    val imu = hardwareMap.getByName<BNO055IMUNew>("InternalIMU")
 
     override val dependencies: List<System> = listOf(odometrySystem, gamepadSystem)
 
     override val beforeRun = Command(DrivetrainState.default(motors))
-        .setOnEnter { referencePose = odometrySystem.globalPose }
+        .setOnEnter {
+//            imu.initialize(BNO055IMUNew.Parameters(RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.UP, RevHubOrientationOnRobot.UsbFacingDirection.FORWARD)))
+            referencePose = odometrySystem.globalPose
+        }
         .setAction {
             if (it.mode == ControlMode.DRIVER_CONTROL) {
                 Mecanum.fieldDriverControl(it, odometrySystem, referencePose)
-//                Mecanum.robotDriverControl(it)
             } else {
                 if (moveFinished) {
                     stop()
@@ -113,6 +114,7 @@ class Drivetrain(
 
                 Mecanum.moveToPosition(it, odometrySystem)
             }
+
             false
         }
 
@@ -235,20 +237,6 @@ class Drivetrain(
         }
     }
 
-    fun setupDriverControl(gamepad: Gamepad) {
-        gamepad.getBooleanButton(Gamepad.Buttons.B).onDown {
-            reset()
-        }
-    }
-
-    fun move() {
-        motors.setPower(1.0,1.0,1.0,1.0)
-    }
-
-    fun setMode(mode: ControlMode) {
-        beforeRun.state.mode = mode
-    }
-
     var targetPose: Pose
         get() = beforeRun.state.targetPose
         private set(value) {
@@ -257,17 +245,30 @@ class Drivetrain(
 
     val moveFinished: Boolean
         get() {
-            val compare = Pose(20.0, 20.0, 5)
+            val compare = Pose(15.0, 15.0, 7.5)
             val diff = beforeRun.state.timeInScheduler - beforeRun.state.timeStarted
 //            println("Within: ${odometrySystem.globalPose.within(targetPose, compare)}, Timeout: ${(beforeRun.state.moveToPositionTimeout != null && diff > beforeRun.state.moveToPositionTimeout!!)}")
             return odometrySystem.globalPose.within(targetPose, compare)// && (beforeRun.state.moveToPositionTimeout != null && diff > beforeRun.state.moveToPositionTimeout!!)
         }
 
-//    var percentFinished: Double
+    fun setupDriverControl(gamepad: Gamepad) {
+        gamepad.getBooleanButton(Gamepad.Buttons.B).onDown {
+            reset()
+        }
+    }
+
+//    fun move() {
+//        motors.setPower(1.0,1.0,1.0,1.0)
+//    }
+    //    var percentFinished: Double
 //        get() {
 //            val diff = (targetPose - odometrySystem.globalPose).absoluteValue
 //            val sum =
 //        }
+
+    fun setMode(mode: ControlMode) {
+        beforeRun.state.mode = mode
+    }
 
     fun stop() {
         setMode(ControlMode.DRIVER_CONTROL)
@@ -292,6 +293,5 @@ class Drivetrain(
     fun logMotorPowers(telemetry: Telemetry) {
 //        for (motor in motors)
 //            telemetry.addData(motor.deviceName, motor.power)
-
     }
 }

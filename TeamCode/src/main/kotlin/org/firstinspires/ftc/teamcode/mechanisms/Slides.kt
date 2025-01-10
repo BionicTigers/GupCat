@@ -56,6 +56,7 @@ class Slides(hardwareMap: HardwareMap, pivot: Pivot) : System {
     private val pivotDownMax = 2300
 
 //    val velocity = Vector2((deltaLocalX + deltaStrafeX).mm / deltaTime, (deltaLocalY + deltaStrafeY).mm / deltaTime)
+    var ticks = 0
 
     override val dependencies = listOf(GamepadSystem.activeSystem!!) //TODO: make this not be so stupid (use a singleton)
     override val beforeRun = Command(SlidesState.default("Slides", hardwareMap.getByName("slidesL"), hardwareMap.getByName("slidesR"), hardwareMap.getByName("slideLimit")))
@@ -74,6 +75,7 @@ class Slides(hardwareMap: HardwareMap, pivot: Pivot) : System {
         .setAction {
             exHub.refreshBulkData()
             ticks = exHub.getEncoderTicks(2)
+            println(ticks)
 
             val percent = 1 - pivot.pivotTicks / pivot.max
             targetPosition = targetPosition.coerceIn(-200, max - percent * (max - pivotDownMax))
@@ -90,15 +92,16 @@ class Slides(hardwareMap: HardwareMap, pivot: Pivot) : System {
             } else {
                 it.pid.kP = 9.0
             }
+//            if (it.limitSwitch.state || it.targetPosition > 0) {
+            val power: Double = it.pid.calculate(it.targetPosition.toDouble(), ticks.toDouble())
+//            } else {
+//                power = -0.02
+//            }
 
-            val power: Double
-            if (it.limitSwitch.state || it.targetPosition > 0) {
-                power = it.pid.calculate(it.targetPosition.toDouble(), ticks.toDouble())
-            } else {
-                power = -0.02
-                ticks = 0
-                Persistents.slideTicks = exHub.rawGetEncoderTicks(2)
-            }
+//            if (!it.limitSwitch.state) {
+//                ticks = 0
+//                Persistents.slideTicks = exHub.rawGetEncoderTicks(2)
+//            }
 
             it.motorR.power = power //+ .15 * power * direction
             it.motorL.power = power
@@ -124,7 +127,6 @@ class Slides(hardwareMap: HardwareMap, pivot: Pivot) : System {
             beforeRun.state.changed = true
             beforeRun.state.targetPosition = value
         }
-    var ticks = 0
 
     fun log(telemetry: Telemetry) {
         telemetry.addData("SlidesCurrent", ticks)

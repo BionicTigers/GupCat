@@ -17,6 +17,8 @@ import org.firstinspires.ftc.teamcode.utils.Pose
 @TeleOp(name = "MainControl")
 class MainControl : LinearOpMode() {
     override fun runOpMode() {
+        Scheduler.clear()
+
         val gamepadSystem = GamepadSystem(gamepad1, gamepad2)
         val odometry = OdometrySystem(hardwareMap)
         val drivetrain = Drivetrain(hardwareMap, gamepadSystem, odometry)
