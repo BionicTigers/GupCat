@@ -28,7 +28,7 @@ interface HighBasketScore : CommandState {
     companion object {
         fun default(): HighBasketScore {
             return object : HighBasketScore, CommandState by CommandState.default("High Basket") {
-                override val pivotTimer = Timer(Time.fromSeconds(.6))
+                override val pivotTimer = Timer(Time.fromSeconds(.45))
                 override val dropTimer = Timer(Time.fromSeconds(.5))
             }
         }
@@ -41,7 +41,7 @@ interface Retract : CommandState {
     companion object {
         fun default(): Retract {
             return object : Retract, CommandState by CommandState.default("Retract") {
-                override val slideEndTimer = Timer(Time.fromSeconds(.2))
+                override val slideEndTimer = Timer(Time.fromSeconds(.18))
             }
         }
     }
@@ -66,8 +66,8 @@ interface LeftPickupTime : PickupTime {
     companion object {
         fun default(): LeftPickupTime {
             return object : LeftPickupTime, CommandState by PickupTime.default() {
-                override val driveTimer = Timer(Time.fromSeconds(.8))
-                override val liftTime = Timer(Time.fromSeconds(.7))
+                override val driveTimer = Timer(Time.fromSeconds(.7))
+                override val liftTime = Timer(Time.fromSeconds(.6))
                 override val hoverTimer = Timer(Time.fromSeconds(.15))
             }
         }
@@ -90,15 +90,15 @@ class BlueLeftPreload : LinearOpMode() {
 
         Scheduler.addSystem(odometrySystem, drivetrain, pivot, slides)
 
-        val highBasketPosition = Pose(410.8, 500.8, 45)
+        val highBasketPosition = Pose(370.8, 470.8, 45)
         val highBasketHeight = 3500
         val highBasketPivot = 1800
 
         val groundRightPosition = Pose(600, 860, 0)
         val groundMiddlePosition = Pose(359, 860, 0)
 
-        val groundLeftPosition = Pose(450, 500, -25)
-        val leftSlidesHeight = 2275
+        val groundLeftPosition = Pose(450, 500, -23)
+        val leftSlidesHeight = 2140
 
         val moveForward = statelessCommand("moveForward")
         val scoreHighBasket = Command(HighBasketScore.default())
@@ -248,7 +248,7 @@ class BlueLeftPreload : LinearOpMode() {
                 }
 
                 if (bringIn) {
-                    slides.targetPosition = 0
+                    slides.targetPosition = 400
                 }
 
                 println("$driveMoveFinished, $leftSlidesHeight - ${slides.ticks}, ${it.hoverTimer.update(it).isFinished}, ${it.liftTime.update(it).isFinished}, $bringIn")

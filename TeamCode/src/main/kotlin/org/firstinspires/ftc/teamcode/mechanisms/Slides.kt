@@ -22,6 +22,7 @@ import org.firstinspires.ftc.teamcode.utils.Time
 import org.firstinspires.ftc.teamcode.utils.Vector2
 import org.firstinspires.ftc.teamcode.utils.assignTracker
 import org.firstinspires.ftc.teamcode.utils.getByName
+import kotlin.math.min
 import kotlin.math.sign
 
 interface SlidesState : CommandState {
@@ -76,7 +77,7 @@ class Slides(hardwareMap: HardwareMap, pivot: Pivot) : System {
             exHub.refreshBulkData()
             ticks = exHub.getEncoderTicks(2)
 
-            val percent = 1 - pivot.pivotTicks / pivot.max
+            val percent = 1 - min(pivot.pivotTicks, max) / pivot.max
             targetPosition = targetPosition.coerceIn(-200, max - percent * (max - pivotDownMax))
 
 //            if (it.changed) {
@@ -102,6 +103,7 @@ class Slides(hardwareMap: HardwareMap, pivot: Pivot) : System {
             if (!it.limitSwitch.state) {
                 ticks = 0
                 Persistents.slideTicks = exHub.rawGetEncoderTicks(2)
+                exHub.setJunkTicks(2, Persistents.slideTicks)
             }
 
             println(it.limitSwitch.state)

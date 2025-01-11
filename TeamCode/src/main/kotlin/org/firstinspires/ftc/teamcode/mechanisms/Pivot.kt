@@ -32,7 +32,7 @@ interface PivotState : CommandState {
             return object : PivotState, CommandState by CommandState.default("Pivot") {
                 override val encoder = encoder
                 override var targetPosition = 0
-                override val pid = PID(PIDTerms(2.0, 0.0), 0.0, 1000.0, -1.0, 1.0)
+                override val pid = PID(PIDTerms(2.0, 0.0), 0.0, 1800.0, -1.0, 1.0)
                 override val motor = motor
                 override val motor2 = motor2
             }
@@ -46,16 +46,16 @@ class Pivot(hardwareMap: HardwareMap) : System {
 
     private val telemetry = FtcDashboard.getInstance().telemetry
 
-    val upPIDTerms = interpolatedMapOf(
-        0.0 to 1.75,
-        1500.0 to 1.0
-    )
-
-    val downPIDTerms = interpolatedMapOf(
-        1500.0 to 2.0,
-        500.0 to 1.0,
-        0.0 to 1.0
-    )
+//    val upPIDTerms = interpolatedMapOf(
+//        0.0 to 4.75,
+//        1500.0 to 1.0
+//    )
+//
+//    val downPIDTerms = interpolatedMapOf(
+//        1500.0 to 4.0,
+//        500.0 to 3.0,
+//        0.0 to 1.0
+//    )
 
     val offset = interpolatedMapOf(
         0.0 to 0.0,
@@ -87,10 +87,10 @@ class Pivot(hardwareMap: HardwareMap) : System {
             exHub.refreshBulkData()
             ticks = exHub.getEncoderTicks(3)
 
-            if (it.targetPosition >= ticks)
-                it.pid.kP = upPIDTerms[ticks.toDouble()]
-            else
-                it.pid.kP = downPIDTerms[ticks.toDouble()]
+//            if (it.targetPosition >= ticks)
+//                it.pid.kP = upPIDTerms[ticks.toDouble()]
+//            else
+//                it.pid.kP = downPIDTerms[ticks.toDouble()]
 
             val power = it.pid.calculate(it.targetPosition.toDouble(), ticks.toDouble()) + offset[ticks.toDouble()]
             if (limitSwitch.state || it.targetPosition > 0) {
@@ -122,7 +122,7 @@ class Pivot(hardwareMap: HardwareMap) : System {
     //TODO: Swap to an angle
     var pivotTicks: Int
         set(value) {
-            beforeRun.state.targetPosition = value.coerceIn(-100,1800)
+            beforeRun.state.targetPosition = value.coerceIn(-100,max)
         }
         get() = beforeRun.state.targetPosition
 
