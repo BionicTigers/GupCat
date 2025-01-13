@@ -79,7 +79,7 @@ class BlueLeftPreload : LinearOpMode() {
     override fun runOpMode() {
         Persistents.reset()
         Scheduler.clear()
-
+        println("alex is a idiot")
         val gamepadSystem = GamepadSystem(gamepad1, gamepad2)
         val odometrySystem = OdometrySystem(hardwareMap, Pose(850.9, 215.9, 0))
         val drivetrain = Drivetrain(hardwareMap, gamepadSystem, odometrySystem)
