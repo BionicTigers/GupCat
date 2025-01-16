@@ -34,7 +34,7 @@ class MainControl : LinearOpMode() {
         val (gp1, gp2) = gamepadSystem.gamepads
 
         drivetrain.setupDriverControl(gp1) // b resets odo
-        Persistents.setupDriverControl(gp1) // y resets
+//        Persistents.setupDriverControl(gp1) // y resets
 
         slides.setupDriverControl(gp2) // dpad up and down
         pivot.setupDriverControl(gp2) // left trigger down, right trigger up
@@ -55,6 +55,7 @@ class MainControl : LinearOpMode() {
         waitForStart()
 
         while (opModeIsActive()) {
+//            Persistents.log(telemetry)
             Scheduler.update()
             odometry.log(telemetry)
             pivot.log(telemetry)

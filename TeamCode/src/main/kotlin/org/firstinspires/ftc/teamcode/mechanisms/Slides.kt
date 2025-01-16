@@ -106,12 +106,12 @@ class Slides(hardwareMap: HardwareMap, pivot: Pivot) : System {
                 exHub.setJunkTicks(2, Persistents.slideTicks)
             }
 
-            println(it.limitSwitch.state)
+//            println(it.limitSwitch.state)
 
             it.motorR.power = power //+ .15 * power * direction
             it.motorL.power = power
 
-            println(Persistents.slideTicks)
+//            println(Persistents.slideTicks)
 
             false
         }

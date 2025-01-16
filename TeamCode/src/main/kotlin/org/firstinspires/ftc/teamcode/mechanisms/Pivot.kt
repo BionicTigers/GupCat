@@ -79,7 +79,7 @@ class Pivot(hardwareMap: HardwareMap) : System {
 
             it.pid.reset()
 
-            println(Persistents.pivotTicks)
+//            println(Persistents.pivotTicks)
             if (Persistents.pivotTicks == null) Persistents.pivotTicks = exHub.rawGetEncoderTicks(3)
             exHub.setJunkTicks(3, Persistents.pivotTicks)
         }
@@ -107,7 +107,7 @@ class Pivot(hardwareMap: HardwareMap) : System {
                 Persistents.pivotTicks = exHub.rawGetEncoderTicks(3)
             }
 
-            println(Persistents.pivotTicks)
+//            println(Persistents.pivotTicks)
 
 //            telemetry.addData("Pivot Process P-VAL", it.pid.kP)
 //            telemetry.addData("Pivot Process Value", exHub.getEncoderTicks(3))

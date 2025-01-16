@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.utils
 
+import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.teamcode.axiom.input.Gamepad
 
 object Persistents {
@@ -7,11 +8,12 @@ object Persistents {
     var slideTicks: Int? = null
     var pivotTicks: Int? = null
 
-    fun setupDriverControl(gamepad: Gamepad) {
-        gamepad.getBooleanButton(Gamepad.Buttons.Y).onDown {
-            reset()
-        }
-    }
+//    fun setupDriverControl(gamepad: Gamepad) {
+//        gamepad.getBooleanButton(Gamepad.Buttons.Y).onDown {
+//            println("y press")
+//            reset()
+//        }
+//    }
 
     fun reset() {
         println("reset")
@@ -19,4 +21,10 @@ object Persistents {
         slideTicks = null
         pivotTicks = null
     }
+
+     fun log(telemetry: Telemetry) {
+         telemetry.addData("Persistents pose", pose)
+         telemetry.addData("Persistents slideTicks", slideTicks)
+         telemetry.addData("Persistents pivotTicks", pivotTicks)
+     }
 }
