@@ -109,14 +109,14 @@ class OdometrySystem(hardwareMap: HardwareMap, initialPose: Pose? = null) : Syst
                     //println("Left: $deltaLeftMM, Right: $deltaRightMM, Back: $deltaBackMM")
 
                 // CALCULATE THETA
-                val localRotation = Angle.radians((deltaLeftMM.mm - deltaRightMM.mm) / (it.leftOffset.mm + it.rightOffset.mm))
+                val localRotation = Angle.radians((deltaRightMM.mm - deltaLeftMM.mm) / (it.leftOffset.mm + it.rightOffset.mm))
 
                 // CALCULATE FORWARD ARC
                 val rT = Distance.mm((deltaLeftMM.mm / localRotation.radians) - it.leftOffset.mm)
 
                 val deltaLocalX =
                     if (localRotation.radians != 0.0) {
-                        rT * (1 - cos(localRotation.radians))
+                        rT * (cos(localRotation.radians) - 1)
                     } else {
                         Distance.mm(0.0)
                     }
@@ -140,7 +140,7 @@ class OdometrySystem(hardwareMap: HardwareMap, initialPose: Pose? = null) : Syst
 
                 val deltaStrafeY =
                     if (localRotation.radians != 0.0) {
-                        -rS * (1 - cos(localRotation.radians))
+                        rS * (1 - cos(localRotation.radians))
                     } else {
                         Distance.mm(0.0)
                     }
@@ -152,8 +152,8 @@ class OdometrySystem(hardwareMap: HardwareMap, initialPose: Pose? = null) : Syst
                 val deltaXFinal = deltaLocalX + deltaStrafeX // final virtual delta x
                 val deltaYFinal = deltaLocalY - deltaStrafeY // final virtual delta y
 
-                val virtualGlobalX = Distance.mm(it.virtualPose.x + (deltaXFinal.mm * cos(globalRotation.radians)) + (deltaYFinal.mm * sin(globalRotation.radians)))
-                val virtualGlobalY = Distance.mm(it.virtualPose.y + (deltaYFinal.mm * cos(globalRotation.radians)) - (deltaXFinal.mm * sin(globalRotation.radians)))
+                val virtualGlobalX = Distance.mm(it.virtualPose.x + (deltaXFinal.mm * cos(globalRotation.radians)) - (deltaYFinal.mm * sin(globalRotation.radians)))
+                val virtualGlobalY = Distance.mm(it.virtualPose.y + (deltaYFinal.mm * cos(globalRotation.radians)) + (deltaXFinal.mm * sin(globalRotation.radians)))
                 //val globalY = globalVirtualY - (it.virtualOffsetY * cos(it.pose.radians)) + (it.virtualOffsetX * cos(it.pose.radians))
                 //val globalX = globalVirtualX - (it.virtualOffsetY * sin(it.pose.radians)) - (it.virtualOffsetX * sin(it.pose.radians))
 
