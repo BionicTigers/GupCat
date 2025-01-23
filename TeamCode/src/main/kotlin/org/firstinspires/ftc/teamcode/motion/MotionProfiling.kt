@@ -329,6 +329,7 @@ private fun generateMotionProfile(
         velocity.reverse()
         position.reverse()
     }
+    println("p0: $p0, p7: ${position.last()}")
 
     return MotionResult(acceleration, velocity, position, timeList, timeslice, final)
 }

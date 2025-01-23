@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.utils
 
 class Vector3(val x: Double, val y: Double, val z: Double) {
     constructor(x: Number, y: Number, z: Number) : this(x.toDouble(), y.toDouble(), z.toDouble())
+    constructor(): this(0.0, 0.0, 0.0)
 
     operator fun plus(other: Vector3): Vector3 {
         return Vector3(x + other.x, y + other.y, z + other.z)

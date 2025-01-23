@@ -7,8 +7,8 @@ import kotlin.math.tan
 
 class Angle private constructor(val radians: Double) {
     companion object {
-        fun radians(radians: Double) = Angle(radians)
-        fun degrees(degrees: Double) = Angle(degrees / 180 * PI)
+        fun radians(radians: Number) = Angle(radians.toDouble())
+        fun degrees(degrees: Number) = Angle(degrees.toDouble() / 180 * PI)
     }
 
     val degrees: Double
@@ -30,6 +30,10 @@ class Angle private constructor(val radians: Double) {
         return radians(radians / otherRotation.radians)
     }
 
+    operator fun div(scalar: Number): Angle {
+        return radians(radians / scalar.toDouble())
+    }
+
     operator fun unaryMinus(): Angle {
         return radians(-radians)
     }
@@ -40,6 +44,10 @@ class Angle private constructor(val radians: Double) {
 
     operator fun compareTo(otherRotation: Angle): Int {
         return radians.compareTo(otherRotation.radians)
+    }
+
+    override fun toString(): String {
+        return "Degrees: $degrees, Radians: $radians"
     }
 
     val sin = sin(radians)

@@ -32,8 +32,8 @@ class SimpleMove : LinearOpMode() {
         Scheduler.addSystem(odometrySystem, drivetrain)
 
 
-        val poseToMove = Pose(200, 500, 45)
-        val otherToMove = Pose(0, 0, 0)
+        val poseToMove = Pose(0, 600, 20)
+        val otherToMove = Pose(0, 0, 20)
 
         Persistents.reset()
 
@@ -56,7 +56,7 @@ class SimpleMove : LinearOpMode() {
         Scheduler.add(
             statelessCommand("move")
                 .setOnEnter {
-//                    drivetrain.moveToPose(poseToMove, Time.fromSeconds(4))
+                    drivetrain.moveToPose(poseToMove, Time.fromSeconds(4))
                 }
                 .setAction {
                     timer.update(it).finished {
@@ -72,7 +72,7 @@ class SimpleMove : LinearOpMode() {
                     it.timeInScheduler > Time.fromSeconds(10)
                 }
                 .setOnExit {
-//                    Scheduler.add(otherMove)
+                    Scheduler.add(otherMove)
                 }
         )
 

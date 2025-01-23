@@ -26,6 +26,9 @@ data class Vector2(val x: Double, val y: Double) {
     operator fun <V : Number> minus(num: V): Vector2 {
         return Vector2(this.x - num.toDouble(), this.y - num.toDouble())
     }
+    operator fun minus(otherVector2: Vector2): Vector2 {
+        return Vector2(this.x - otherVector2.x, this.y - otherVector2.y)
+    }
 
     operator fun <V : Number> times(num: V): Vector2 {
         return Vector2(this.x * num.toDouble(), this.y * num.toDouble())

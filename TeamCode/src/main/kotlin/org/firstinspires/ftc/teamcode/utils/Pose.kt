@@ -1,8 +1,10 @@
 package org.firstinspires.ftc.teamcode.utils
 
+import kotlin.math.PI
 import kotlin.math.absoluteValue
 
 class Pose(val x: Double, val y: Double, private val rot: Double) {
+    constructor(): this(0.0, 0.0, 0.0)
     constructor(x: Number, y: Number, rot: Number) : this(x.toDouble(), y.toDouble(), rot.toDouble())
     constructor(x: Number, y: Number, rot: Angle) : this(x.toDouble(), y.toDouble(), rot.degrees)
 
@@ -28,10 +30,10 @@ class Pose(val x: Double, val y: Double, private val rot: Double) {
     val rotation = Angle.degrees(rot)
 
     val radians: Double
-        get() = Math.toRadians(rot)
+        get() = Math.toRadians(rot) % 2 * PI
 
     val degrees: Double
-        get() = rot
+        get() = rot % 360.0
 
     val absoluteValue: Pose
         get() = Pose(x.absoluteValue, y.absoluteValue, rot.absoluteValue)

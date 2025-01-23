@@ -13,6 +13,7 @@ import org.firstinspires.ftc.teamcode.utils.Distance
 import org.firstinspires.ftc.teamcode.utils.Persistents
 import org.firstinspires.ftc.teamcode.utils.Time
 import kotlin.math.PI
+import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.sin
@@ -27,8 +28,10 @@ interface OdometrySystemState : CommandState {
     var gearRatio: Double
     var odoDiameter: Double
 
-    var velocity: Vector2
-    var acceleration: Vector2
+    var localVelocity: Vector2
+    var localAcceleration: Vector2
+    var globalVelocity: Pair<Vector2, Angle>
+    var globalAcceleration: Pair<Vector2, Angle>
 
     var virtualPose: Pose
 }
@@ -36,9 +39,6 @@ interface OdometrySystemState : CommandState {
 class OdometrySystem(hardwareMap: HardwareMap, initialPose: Pose? = null) : System {
     val hub = ControlHub(hardwareMap, "Control Hub")
     val exHub = ControlHub(hardwareMap, "Expansion Hub 2")
-//    val leftOdo = hardwareMap.get(DcMotorEx::class.java, "backRight")
-//    val rightOdo = hardwareMap.get(DcMotorEx::class.java, "hub3")
-//    val backOdo = hardwareMap.get(DcMotorEx::class.java, "hub0")
 
     private var ticksL: Int = 0
     private var ticksR: Int = 0
@@ -46,13 +46,14 @@ class OdometrySystem(hardwareMap: HardwareMap, initialPose: Pose? = null) : Syst
 
     var dt: Time = Time.fromSeconds(1)
 
+    @Suppress("unused")
     companion object {
         object Test {
-            val leftOffset: Distance = Distance.mm(204.0) - Distance.mm(5.0) //Distance.mm( 173.83125) + Distance.mm(10)
+            val leftOffset: Distance = Distance.mm(204.0) - Distance.mm(5.0) // Distance.mm( 173.83125) + Distance.mm(10)
             val rightOffset: Distance = Distance.mm(142.0) - Distance.mm(5.0) // Distance.mm(165.1) + Distance.mm(10) //152.4 //169.0
-            val backOffset: Distance = Distance.mm(82.0)  //Distance.mm(3/4 + 3/32) //152.4 //152.4 //95.25
-            val virtualOffsetY: Distance = Distance.mm(-68.92)  //Distance.mm(-68.97)
-            val virtualOffsetX: Distance = Distance.mm(31.0)  //Distance.mm(5.45)
+            val backOffset: Distance = Distance.mm(82.0)  // Distance.mm(3/4 + 3/32) //152.4 //152.4 //95.25
+            val virtualOffsetY: Distance = Distance.mm(-68.92)  // Distance.mm(-68.97)
+            val virtualOffsetX: Distance = Distance.mm(31.0)  // Distance.mm(5.45)
         }
 
         object Main {
@@ -75,8 +76,10 @@ class OdometrySystem(hardwareMap: HardwareMap, initialPose: Pose? = null) : Syst
             override val backOffset: Distance = robotConfig.backOffset
             override val virtualOffsetY: Distance = robotConfig.virtualOffsetY
             override val virtualOffsetX: Distance = robotConfig.virtualOffsetX
-            override var velocity: Vector2 = Vector2()
-            override var acceleration: Vector2 = Vector2()
+            override var localVelocity: Vector2 = Vector2()
+            override var localAcceleration: Vector2 = Vector2()
+            override var globalVelocity: Pair<Vector2, Angle> = Pair(Vector2(), Angle.degrees(0.0))
+            override var globalAcceleration: Pair<Vector2, Angle> = Pair(Vector2(), Angle.degrees(0.0))
             override var virtualPose = Pose(virtualOffsetX.mm, virtualOffsetY.mm, 0)
             override var odoDiameter = 47.3 //48
             override var gearRatio = 1.0
@@ -106,7 +109,6 @@ class OdometrySystem(hardwareMap: HardwareMap, initialPose: Pose? = null) : Syst
                 val deltaLeftMM = Distance.mm(circumference * exHub.getEncoderTicks(0) / 2000)
                 val deltaRightMM = Distance.mm(circumference * hub.getEncoderTicks(3) / 2000)
                 val deltaBackMM = Distance.mm(circumference * hub.getEncoderTicks(0) / 2000)
-                    //println("Left: $deltaLeftMM, Right: $deltaRightMM, Back: $deltaBackMM")
 
                 // CALCULATE THETA
                 val localRotation = Angle.radians((deltaRightMM.mm - deltaLeftMM.mm) / (it.leftOffset.mm + it.rightOffset.mm))
@@ -164,24 +166,19 @@ class OdometrySystem(hardwareMap: HardwareMap, initialPose: Pose? = null) : Syst
                 // Update velocity and acceleration
                 val deltaTime = it.deltaTime.seconds()
                 dt = it.deltaTime
-                val oldVelocity = it.velocity
-                it.velocity = Vector2((deltaLocalX + deltaStrafeX).mm / deltaTime, (deltaLocalY + deltaStrafeY).mm / deltaTime)
-                it.acceleration = Vector2(
-                    (it.velocity.x - oldVelocity.x) / deltaTime,
-                    (it.velocity.y - oldVelocity.y) / deltaTime
-                )
+
+                val oldVelocity = it.localVelocity
+                it.localVelocity = Vector2((deltaLocalX + deltaStrafeX).mm / deltaTime, (deltaLocalY + deltaStrafeY).mm / deltaTime)
+                it.localAcceleration = Vector2((it.localVelocity.x - oldVelocity.x) / deltaTime, (it.localVelocity.y - oldVelocity.y) / deltaTime)
+
+//                val oldGlobalVel = it.globalVelocity
+//                it.globalVelocity = Pair(Vector2(virtualGlobalDeltaX, virtualGlobalDeltaY) / deltaTime, Angle.degrees(localRotation.degrees / deltaTime))
+//                it.globalAcceleration = Pair(oldGlobalVel.first - it.globalVelocity.first, oldGlobalVel.second - it.globalVelocity.second)
 
                 hub.setJunkTicks()
                 exHub.setJunkTicks()
                 false
             }
-//
-//    private fun globals(x: Distance, y: Distance, rotation: Angle, svy: Distance, svx: Distance): Pair<Distance, Distance> {
-//        return Pair(
-//            y - (svy * rotation.cos) + (svx * rotation.sin),
-//            x - (svy * rotation.sin) - (svx * rotation.cos)
-//        )
-//    }
 
     override val afterRun: Command<*>? = null
 
@@ -191,8 +188,8 @@ class OdometrySystem(hardwareMap: HardwareMap, initialPose: Pose? = null) : Syst
             val currentVPose = state.virtualPose
 
             // CONVERT VIRTUAL INTO GLOBAL
-            val y = currentVPose.y - (state.virtualOffsetY * currentVPose.rotation.cos).mm + (state.virtualOffsetX * currentVPose.rotation.sin).mm
-            val x = currentVPose.x - (state.virtualOffsetY * currentVPose.rotation.sin).mm - (state.virtualOffsetX * currentVPose.rotation.cos).mm
+            val y = currentVPose.y - (state.virtualOffsetY * currentVPose.rotation.cos).mm - (state.virtualOffsetX * currentVPose.rotation.sin).mm
+            val x = currentVPose.x + (state.virtualOffsetY * currentVPose.rotation.sin).mm - (state.virtualOffsetX * currentVPose.rotation.cos).mm
 
             return Pose(x, y, currentVPose.rotation)
         }
@@ -204,31 +201,76 @@ class OdometrySystem(hardwareMap: HardwareMap, initialPose: Pose? = null) : Syst
             beforeRun.state.virtualPose = Pose(virtualX, virtualY, value.rotation)
         }
 
-    var maxAccelX = 0.0
-    var maxAccelY = 0.0
-    var maxVelocityX = 0.0
-    var maxVelocityY = 0.0
+//    var globalVelocity: Pair<Vector2, Angle> = beforeRun.state.globalVelocity
 
+    var localMaxAccelX = 0.0
+    var localMaxAccelY = 0.0
+    var localMaxVelocityX = 0.0
+    var localMaxVelocityY = 0.0
+
+//    var angularMaxVelocity = Angle.degrees(0)
+//    var angularMaxAccel = Angle.degrees(0)
+
+    @Suppress("unused")
     fun log(telemetry: Telemetry) {
-        maxAccelX = max(maxAccelX, beforeRun.state.acceleration.x)
-        maxAccelY = max(maxAccelY, beforeRun.state.acceleration.y)
-        maxVelocityX = max(maxVelocityX, beforeRun.state.velocity.x)
-        maxVelocityY = max(maxVelocityY, beforeRun.state.velocity.y)
+        val (linearVelocity, angularVelocity) = beforeRun.state.globalVelocity
+        localMaxAccelX = max(localMaxAccelX, beforeRun.state.localAcceleration.x)
+        localMaxAccelY = max(localMaxAccelY, beforeRun.state.localAcceleration.y)
+        localMaxVelocityX = max(localMaxVelocityX, beforeRun.state.localVelocity.x)
+        localMaxVelocityY = max(localMaxVelocityY, beforeRun.state.localVelocity.y)
+//        angularMaxAccel = Angle.degrees(max(angularMaxAccel.degrees, abs(beforeRun.state.globalAcceleration.second.degrees)))
+//        angularMaxVelocity = Angle.degrees(max(angularMaxVelocity.degrees, abs(beforeRun.state.globalVelocity.second.degrees)))
 
         telemetry.addData("XVirtual", beforeRun.state.virtualPose.x)
         telemetry.addData("X", globalPose.x)
         telemetry.addData("YVirtual", beforeRun.state.virtualPose.y)
         telemetry.addData("Y", globalPose.y)
         telemetry.addData("Rotation", globalPose.degrees)
-        telemetry.addData("Velocity", beforeRun.state.velocity)
-        telemetry.addData("Acceleration", beforeRun.state.acceleration)
-        telemetry.addData("maxAccel", "($maxAccelX, $maxAccelY)")
-        telemetry.addData("maxVelocity", "(${maxVelocityX}, $maxVelocityY)")
+
+        telemetry.addData("Velocity", beforeRun.state.localVelocity)
+        telemetry.addData("Acceleration", beforeRun.state.localAcceleration)
+        telemetry.addData("maxAccel", "($localMaxAccelX, $localMaxAccelY)")
+        telemetry.addData("maxVelocity", "(${localMaxVelocityX}, $localMaxVelocityY)")
+//        telemetry.addData("angularVelocity", angularMaxVelocity.degrees)
+//        telemetry.addData("angularAcceleration", angularMaxAccel.degrees)
+
         telemetry.addData("Ticks L", ticksL)
         telemetry.addData("Ticks R", ticksR)
         telemetry.addData("Ticks B", ticksB)
     }
 
+    @Suppress("unused")
+    fun logPosition(telemetry: Telemetry) {
+        telemetry.addData("XVirtual", beforeRun.state.virtualPose.x)
+        telemetry.addData("X", globalPose.x)
+        telemetry.addData("YVirtual", beforeRun.state.virtualPose.y)
+        telemetry.addData("Y", globalPose.y)
+        telemetry.addData("Rotation", globalPose.degrees)
+    }
+
+    @Suppress("unused")
+    fun logMaximums(telemetry: Telemetry) {
+        localMaxAccelX = max(localMaxAccelX, beforeRun.state.localAcceleration.x)
+        localMaxAccelY = max(localMaxAccelY, beforeRun.state.localAcceleration.y)
+        localMaxVelocityX = max(localMaxVelocityX, beforeRun.state.localVelocity.x)
+        localMaxVelocityY = max(localMaxVelocityY, beforeRun.state.localVelocity.y)
+//        angularMaxAccel = Angle.degrees(max(angularMaxAccel.degrees, abs(beforeRun.state.globalAcceleration.second.degrees)))
+//        angularMaxVelocity = Angle.degrees(max(angularMaxVelocity.degrees, abs(beforeRun.state.globalVelocity.second.degrees)))
+
+        telemetry.addData("Velocity", beforeRun.state.localVelocity)
+        telemetry.addData("Acceleration", beforeRun.state.localAcceleration)
+        telemetry.addData("maxAccel", "($localMaxAccelX, $localMaxAccelY)")
+        telemetry.addData("maxVelocity", "(${localMaxVelocityX}, $localMaxVelocityY)")
+//        telemetry.addData("angularVelocity", angularMaxVelocity.degrees)
+//        telemetry.addData("angularAcceleration", angularMaxAccel.degrees)
+    }
+
+    @Suppress("unused")
+    fun logTicks(telemetry: Telemetry) {
+        telemetry.addData("Ticks L", ticksL)
+        telemetry.addData("Ticks R", ticksR)
+        telemetry.addData("Ticks B", ticksB)
+    }
 
     fun reset() {
         hub.setJunkTicks()

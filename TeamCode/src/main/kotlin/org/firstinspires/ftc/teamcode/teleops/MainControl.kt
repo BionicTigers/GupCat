@@ -11,8 +11,6 @@ import org.firstinspires.ftc.teamcode.mechanisms.Pivot
 import org.firstinspires.ftc.teamcode.mechanisms.Slides
 import org.firstinspires.ftc.teamcode.motion.Drivetrain
 import org.firstinspires.ftc.teamcode.motion.OdometrySystem
-import org.firstinspires.ftc.teamcode.utils.Persistents
-import org.firstinspires.ftc.teamcode.utils.Pose
 
 @TeleOp(name = "MainControl")
 class MainControl : LinearOpMode() {
@@ -57,10 +55,11 @@ class MainControl : LinearOpMode() {
         while (opModeIsActive()) {
 //            Persistents.log(telemetry)
             Scheduler.update()
-            odometry.log(telemetry)
-            pivot.log(telemetry)
-            arm.log(telemetry)
-            slides.log(telemetry)
+            odometry.logPosition(telemetry)
+//            pivot.log(telemetry)
+//            arm.log(telemetry)
+//            slides.log(telemetry)
+            drivetrain.logMotorPowers(telemetry)
             telemetry.update()
         }
 
