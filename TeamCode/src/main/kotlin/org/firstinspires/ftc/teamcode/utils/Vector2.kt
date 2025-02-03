@@ -19,15 +19,19 @@ data class Vector2(val x: Double, val y: Double) {
         return this/this.magnitude()
     }
 
-    operator fun <V : Number> div(num: V): Vector2 {
+    operator fun div(num: Number): Vector2 {
         return Vector2(this.x / num.toDouble(), this.y / num.toDouble())
     }
 
-    operator fun <V : Number> minus(num: V): Vector2 {
+    operator fun minus(num: Number): Vector2 {
         return Vector2(this.x - num.toDouble(), this.y - num.toDouble())
     }
 
-    operator fun <V : Number> times(num: V): Vector2 {
+    operator fun minus(other: Vector2): Vector2 {
+        return Vector2(this.x - other.x, this.y - other.y)
+    }
+
+    operator fun times(num: Number): Vector2 {
         return Vector2(this.x * num.toDouble(), this.y * num.toDouble())
     }
 }

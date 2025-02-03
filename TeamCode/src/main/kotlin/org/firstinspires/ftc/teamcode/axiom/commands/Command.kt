@@ -8,6 +8,7 @@ interface CommandState {
     var timeInScheduler: Time
     var lastExecutedAt: Time
     var deltaTime: Time
+    var executionTime: Time
 
     companion object {
         fun default(name: String = "Unnamed Command"): CommandState {
@@ -16,7 +17,8 @@ interface CommandState {
                 override var enteredAt = Time()
                 override var timeInScheduler = Time()
                 override var lastExecutedAt = Time()
-                override var deltaTime = Time.fromSeconds(0.0)
+                override var deltaTime = Time()
+                override var executionTime: Time = Time()
             }
         }
     }
@@ -157,6 +159,10 @@ class Command<T: CommandState>(val state: T) {
             running = false
             Scheduler.remove(this)
         }
+
+        val endTime = Time.fromMilliseconds(java.lang.System.currentTimeMillis())
+
+        state.executionTime = endTime - currentTime
 
         return result
     }

@@ -32,7 +32,7 @@ interface PivotState : CommandState {
             return object : PivotState, CommandState by CommandState.default("Pivot") {
                 override val encoder = encoder
                 override var targetPosition = 0
-                override val pid = PID(PIDTerms(2.0, 0.0), 0.0, 1800.0, -1.0, 1.0)
+                override val pid = PID(PIDTerms(1.5, 90.0), 0.0, 1800.0, -1.0, 1.0)
                 override val motor = motor
                 override val motor2 = motor2
             }
@@ -101,6 +101,8 @@ class Pivot(hardwareMap: HardwareMap) : System {
                 it.motor.power = -.02
 
             }
+
+            println(limitSwitch.state)
 
             if (!limitSwitch.state) {
                 exHub.setJunkTicks()

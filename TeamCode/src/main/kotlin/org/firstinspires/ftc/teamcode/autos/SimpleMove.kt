@@ -76,12 +76,20 @@ class SimpleMove : LinearOpMode() {
                 }
         )
 
-        dashboardTelemetry.addData("xPV", odometrySystem.globalPose.x)
-        dashboardTelemetry.addData("yPV", odometrySystem.globalPose.y)
-        dashboardTelemetry.addData("rPV", odometrySystem.globalPose.rotation.degrees)
-        dashboardTelemetry.addData("xSP", poseToMove.x)
-        dashboardTelemetry.addData("ySP", poseToMove.y)
-        dashboardTelemetry.addData("rSP", poseToMove.rotation.degrees)
+//        dashboardTelemetry.addData("xPV", odometrySystem.globalPose.x)
+//        dashboardTelemetry.addData("yPV", odometrySystem.globalPose.y)
+//        dashboardTelemetry.addData("rPV", odometrySystem.globalPose.rotation.degrees)
+//        dashboardTelemetry.addData("xSP", poseToMove.x)
+//        dashboardTelemetry.addData("ySP", poseToMove.y)
+//        dashboardTelemetry.addData("rSP", poseToMove.rotation.degrees)
+//        dashboardTelemetry.update()
+
+        dashboardTelemetry.addData("xVPV", 0)
+        dashboardTelemetry.addData("yVPV", 0)
+        dashboardTelemetry.addData("rVPV", 0)
+        dashboardTelemetry.addData("xPSP", 0)
+        dashboardTelemetry.addData("yPSP", 0)
+        dashboardTelemetry.addData("rPSP", 0)
         dashboardTelemetry.update()
 
         waitForStart()

@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.axiom.commands
 
 import org.firstinspires.ftc.teamcode.utils.Time
+import org.firstinspires.ftc.teamcode.utils.max
 import java.util.Stack
 
 object Scheduler {
@@ -118,11 +119,13 @@ object Scheduler {
         }
 
         sortedCommands.forEach(Command<*>::execute)
+        val longestTime = sortedCommands.maxBy { it.state.executionTime.seconds() }
 
         removeQueue.forEach(this::internalRemove)
         removeQueue.clear()
 
         loopDeltaTime = Time.fromMilliseconds(java.lang.System.currentTimeMillis() - startTime)
+        println("The longest time was ${longestTime.state.name} at ${longestTime.state.executionTime.milliseconds()}ms taking ${(longestTime.state.executionTime / loopDeltaTime).seconds() * 100}%")
     }
 
     fun clear() {

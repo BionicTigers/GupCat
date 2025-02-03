@@ -23,10 +23,10 @@ class PID(
     var pvMin: Double,
     var pvMax: Double,
     var cvMin: Double,
-    var cvMax: Double
+    var cvMax: Double,
+    private val sampleTime: Int = 20
 ) {
     //Time between cycles, in ms
-    private val sampleTime = 20
 
     private val elapsedTime = ElapsedTime(ElapsedTime.Resolution.MILLISECONDS)
 
@@ -49,7 +49,9 @@ class PID(
                 pvMin: Double,
                 pvMax: Double,
                 cvMin: Double,
-                cvMax: Double): this(terms.kP, terms.tI, terms.tD, pvMin, pvMax, cvMin, cvMax)
+                cvMax: Double,
+                sampleTime: Int = 100
+        ): this(terms.kP, terms.tI, terms.tD, pvMin, pvMax, cvMin, cvMax, sampleTime)
 
     /**
      * Calculate the control variable (Output)

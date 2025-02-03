@@ -57,7 +57,7 @@ class MainControl : LinearOpMode() {
         while (opModeIsActive()) {
 //            Persistents.log(telemetry)
             Scheduler.update()
-            odometry.log(telemetry)
+            odometry.logMaximums(telemetry)
             pivot.log(telemetry)
             arm.log(telemetry)
             slides.log(telemetry)

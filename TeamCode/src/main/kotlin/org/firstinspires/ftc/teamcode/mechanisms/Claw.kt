@@ -14,7 +14,7 @@ import org.firstinspires.ftc.teamcode.utils.getByName
 //}
 
 
-class Claw(hardwareMap: HardwareMap) : System {
+class Claw(hardwareMap: HardwareMap, val openPos: Double = .25) : System {
     override val dependencies: List<System> = emptyList()
     override val beforeRun = null
     override val afterRun = null
@@ -28,7 +28,7 @@ class Claw(hardwareMap: HardwareMap) : System {
     }
 
     private fun open() {
-        position = 0.25
+        position = openPos
     }
 
     private fun close() {

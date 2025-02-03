@@ -53,7 +53,7 @@ interface SlidesState : CommandState {
 
 class Slides(hardwareMap: HardwareMap, pivot: Pivot) : System {
     private val exHub = ControlHub(hardwareMap, "Expansion Hub 2")
-    private val max = 3500
+    private val max = 3550
     private val pivotDownMax = 2300
 
 //    val velocity = Vector2((deltaLocalX + deltaStrafeX).mm / deltaTime, (deltaLocalY + deltaStrafeY).mm / deltaTime)
@@ -77,7 +77,7 @@ class Slides(hardwareMap: HardwareMap, pivot: Pivot) : System {
             exHub.refreshBulkData()
             ticks = exHub.getEncoderTicks(2)
 
-            val percent = 1 - min(pivot.pivotTicks, max) / pivot.max
+            val percent = 1 - min(pivot.pivotTicks, pivot.max) / pivot.max
             targetPosition = targetPosition.coerceIn(-200, max - percent * (max - pivotDownMax))
 
 //            if (it.changed) {
