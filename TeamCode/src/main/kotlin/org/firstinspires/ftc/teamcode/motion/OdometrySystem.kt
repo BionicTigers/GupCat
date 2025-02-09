@@ -5,10 +5,12 @@ import com.qualcomm.hardware.bosch.BNO055IMUImpl
 import com.qualcomm.hardware.bosch.BNO055IMUNew
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot
 import com.qualcomm.robotcore.hardware.HardwareMap
+import com.qualcomm.robotcore.util.RollingAverage
 import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference
+import org.firstinspires.ftc.robotcore.external.navigation.Position
 import org.firstinspires.ftc.teamcode.axiom.commands.Command
 import org.firstinspires.ftc.teamcode.axiom.commands.CommandState
 import org.firstinspires.ftc.teamcode.utils.ControlHub
@@ -17,6 +19,7 @@ import org.firstinspires.ftc.teamcode.utils.Vector2
 import org.firstinspires.ftc.teamcode.axiom.commands.*
 import org.firstinspires.ftc.teamcode.utils.Angle
 import org.firstinspires.ftc.teamcode.utils.Distance
+import org.firstinspires.ftc.teamcode.utils.NewRollingAverage
 import org.firstinspires.ftc.teamcode.utils.Persistents
 import org.firstinspires.ftc.teamcode.utils.Time
 import org.firstinspires.ftc.teamcode.utils.getByName
@@ -42,6 +45,10 @@ interface OdometrySystemState : CommandState {
     var globalAcceleration: Pair<Vector2, Angle>
 
     var virtualPose: Pose
+
+    val xAverage: NewRollingAverage
+    val yAverage: NewRollingAverage
+    val angularAverage: NewRollingAverage
 }
 
 class OdometrySystem(hardwareMap: HardwareMap, initialPose: Pose? = null) : System {
@@ -76,7 +83,7 @@ class OdometrySystem(hardwareMap: HardwareMap, initialPose: Pose? = null) : Syst
     }
 
     //    val limelight3A = hardwareMap.getByName<Limelight3A>("limelight")
-    val robotConfig = Main
+    val robotConfig = Test
 
     override val dependencies: List<System> = emptyList()
     override val beforeRun =
@@ -93,6 +100,9 @@ class OdometrySystem(hardwareMap: HardwareMap, initialPose: Pose? = null) : Syst
             override var virtualPose = Pose(virtualOffsetX.mm, virtualOffsetY.mm, 0)
             override var odoDiameter = 47.3 //48
             override var gearRatio = 1.0
+            override var xAverage = NewRollingAverage(5)
+            override var yAverage = NewRollingAverage(5)
+            override var angularAverage = NewRollingAverage(5)
         } as OdometrySystemState)
             .setOnEnter {
                 hub.setJunkTicks()
@@ -188,7 +198,10 @@ class OdometrySystem(hardwareMap: HardwareMap, initialPose: Pose? = null) : Syst
                 val oldGlobalVel = it.globalVelocity
                 it.globalVelocity = Pair(Vector2(virtualGlobalDeltaX, virtualGlobalDeltaY) / deltaTime, Angle.degrees(localRotation.degrees / deltaTime))
                 it.globalAcceleration = Pair(oldGlobalVel.first - it.globalVelocity.first, oldGlobalVel.second - it.globalVelocity.second)
-                println(it.globalVelocity.first)
+
+                it.xAverage.addNumber(it.globalVelocity.first.x)
+                it.yAverage.addNumber(it.globalVelocity.first.y)
+                it.angularAverage.addNumber(it.globalVelocity.second.degrees)
 
                 hub.setJunkTicks()
                 exHub.setJunkTicks()
@@ -224,7 +237,7 @@ class OdometrySystem(hardwareMap: HardwareMap, initialPose: Pose? = null) : Syst
         }
 
     val globalVelocity: Pair<Vector2, Angle>
-        get() = beforeRun.state.globalVelocity
+        get() = Pair(Vector2(beforeRun.state.xAverage.average, beforeRun.state.yAverage.average), Angle.radians(beforeRun.state.angularAverage.average))
 
 
     var localMaxAccelX = 0.0
@@ -269,6 +282,15 @@ class OdometrySystem(hardwareMap: HardwareMap, initialPose: Pose? = null) : Syst
         telemetry.addData("YVirtual", beforeRun.state.virtualPose.y)
         telemetry.addData("Y", globalPose.y)
         telemetry.addData("Rotation", globalPose.degrees)
+    }
+
+    @Suppress("unused")
+    fun logVelocities(telemetry: Telemetry){
+        val (linearVelocity, angularVelocity) = globalVelocity
+        telemetry.addData("linear x", linearVelocity.x)
+        telemetry.addData("linear y", linearVelocity.x)
+        telemetry.addData("angular", angularVelocity.degrees)
+
     }
 
     @Suppress("unused")

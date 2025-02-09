@@ -12,7 +12,7 @@ data class Time internal constructor(private val time: Double = 0.0) {
         }
 
         fun fromNanoseconds(nanoseconds: Number): Time {
-            return Time(nanoseconds.toDouble() * 60.0)
+            return Time(nanoseconds.toDouble() / 1000000000.0)
         }
     }
 
