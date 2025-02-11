@@ -30,6 +30,10 @@ class Angle private constructor(val radians: Double) {
         return radians(radians / otherRotation.radians)
     }
 
+    operator fun div(other: Number): Angle {
+        return radians(radians / other.toDouble())
+    }
+
     operator fun unaryMinus(): Angle {
         return radians(-radians)
     }

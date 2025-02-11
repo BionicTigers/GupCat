@@ -18,7 +18,7 @@ class DriveOp : LinearOpMode() {
         val odometrySystem = OdometrySystem(hardwareMap)
         val gamepadSystem = GamepadSystem(gamepad1, gamepad2)
         val drivetrain = Drivetrain(hardwareMap, gamepadSystem, odometrySystem)
-        val dash: FtcDashboard = FtcDashboard.getInstance()
+        val dash = FtcDashboard.getInstance()
 
         Scheduler.addSystem(odometrySystem, gamepadSystem, drivetrain)
         waitForStart()
@@ -26,7 +26,7 @@ class DriveOp : LinearOpMode() {
 
         while (opModeIsActive()) {
             val (velocity, angVelocity) = odometrySystem.globalVelocity
-            odometrySystem.logVelocities(telemetry)
+            odometrySystem.logPosition(telemetry)
             dash.telemetry.addData("linear x", velocity.x)
             dash.telemetry.addData("linear y", velocity.y)
             dash.telemetry.addData("angular", angVelocity.degrees)

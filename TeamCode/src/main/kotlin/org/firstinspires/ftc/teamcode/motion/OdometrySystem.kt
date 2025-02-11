@@ -237,7 +237,7 @@ class OdometrySystem(hardwareMap: HardwareMap, initialPose: Pose? = null) : Syst
         }
 
     val globalVelocity: Pair<Vector2, Angle>
-        get() = Pair(Vector2(beforeRun.state.xAverage.average, beforeRun.state.yAverage.average), Angle.radians(beforeRun.state.angularAverage.average))
+        get() = Pair(Vector2(beforeRun.state.xAverage.average, beforeRun.state.yAverage.average), Angle.degrees(beforeRun.state.angularAverage.average))
 
 
     var localMaxAccelX = 0.0
