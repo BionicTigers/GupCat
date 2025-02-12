@@ -4,7 +4,7 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.Exposur
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.FocusControl
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.PtzControl.PanTiltHolder
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.WhiteBalanceControl
-import org.firstinspires.ftc.teamcode.utils.Time
+import io.github.bionictigers.axiom.utils.Time
 import org.openftc.easyopencv.OpenCvWebcam
 import java.util.concurrent.TimeUnit
 

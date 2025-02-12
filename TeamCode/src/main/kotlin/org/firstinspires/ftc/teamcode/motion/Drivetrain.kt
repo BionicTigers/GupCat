@@ -5,13 +5,14 @@ import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.HardwareMap
 import org.firstinspires.ftc.robotcore.external.Telemetry
-import org.firstinspires.ftc.teamcode.axiom.commands.*
-import org.firstinspires.ftc.teamcode.axiom.input.Gamepad
-import org.firstinspires.ftc.teamcode.axiom.input.GamepadSystem
+import io.github.bionictigers.axiom.commands.*
+import org.firstinspires.ftc.teamcode.input.Gamepad
+import org.firstinspires.ftc.teamcode.input.GamepadSystem
 import org.firstinspires.ftc.teamcode.utils.Angle
 import org.firstinspires.ftc.teamcode.utils.ControlHub
 import org.firstinspires.ftc.teamcode.utils.Pose
-import org.firstinspires.ftc.teamcode.utils.Time
+import io.github.bionictigers.axiom.utils.Time
+import io.github.bionictigers.axiom.web.WebData
 import org.firstinspires.ftc.teamcode.utils.Vector2
 import org.firstinspires.ftc.teamcode.utils.getByName
 import org.firstinspires.ftc.teamcode.utils.interpolatedMapOf
@@ -20,8 +21,6 @@ import kotlin.math.abs
 import kotlin.math.atan
 import kotlin.math.atan2
 import kotlin.math.cos
-import kotlin.math.max
-import kotlin.math.min
 import kotlin.math.sin
 
 data class Motors(
@@ -37,6 +36,8 @@ data class Motors(
         this.backLeft.power = backLeft / ratio
         this.frontRight.power = frontRight / ratio
         this.backRight.power = backRight / ratio
+
+        WebData.setDrivetrain(frontLeft,frontRight, backLeft, backRight)
     }
 
     fun setPower(power: Double) {

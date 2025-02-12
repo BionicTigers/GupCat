@@ -2,9 +2,9 @@ package org.firstinspires.ftc.teamcode.autos
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
-import org.firstinspires.ftc.teamcode.axiom.commands.Scheduler
-import org.firstinspires.ftc.teamcode.axiom.commands.statelessCommand
-import org.firstinspires.ftc.teamcode.axiom.input.GamepadSystem
+import io.github.bionictigers.axiom.commands.Scheduler
+import io.github.bionictigers.axiom.commands.statelessCommand
+import org.firstinspires.ftc.teamcode.input.GamepadSystem
 import org.firstinspires.ftc.teamcode.motion.Drivetrain
 import org.firstinspires.ftc.teamcode.motion.OdometrySystem
 import org.firstinspires.ftc.teamcode.utils.Persistents

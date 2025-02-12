@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode.motion
 
-import org.firstinspires.ftc.teamcode.utils.Time
+import io.github.bionictigers.axiom.utils.Time
 import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.math.sign
@@ -56,10 +56,16 @@ private fun generateMotionProfile(
 ): MotionResult {
     var start = s
     var final = f
+    var v0: Double? = startingVelocity
 
     val inverse = final - start < 0
 
     if (inverse) {
+        if (v0 != null) {
+            v0 = -v0
+            if (v0 < 0) v0 = null
+        }
+
         start = f
         final = s
     }
@@ -89,7 +95,6 @@ private fun generateMotionProfile(
     val p5: Double
     val p6: Double
 
-    var v0: Double? = startingVelocity
     var v1: Double
     var v2: Double
     var v3: Double
@@ -170,21 +175,25 @@ private fun generateMotionProfile(
         if (v0 > v3) { v0 = v3 }
 
         if (v0 < v1) {
-            t0 = (2 * v0 / jerk).pow(.5)
+            t0 = (2 * abs(v0) / jerk).pow(.5)
             a0 = jerk * t0
             p0 = jerk * (t0.pow(3)) / 6
+            println("v0 < v1")
         } else if (v0 < v2) {
             a0 = maxAcceleration
             t0 = t1 + (v0 - v1) / maxAcceleration
             p0 = p1 + v1 * (t0 - t1) + maxAcceleration * (t0 - t1).pow(2) / 2
+            println("v0 < v2")
         } else if (v0 < v3) {
             t0 = t3 - ((2 / jerk) * (v3 - v0)).pow(.5)
             a0 = a2 - (t0 - t2) * jerk
             p0 = p2 + v2 * (t0 - t2) + a2 * (t0 - t2).pow(2) / 2 - jerk * (t0 - t2).pow(3) / 6
+            println("v0 < v3")
         } else {
             t0 = t3
             a0 = 0.0
             p0 = p3
+            println("else")
         }
 
         target += p0
@@ -193,7 +202,6 @@ private fun generateMotionProfile(
     } else {
         v0 = 0.0
     }
-
 
     if ((va > vMax && sa < target) || (va > vMax && sa > target && sv < target)) {
         //A & C.1

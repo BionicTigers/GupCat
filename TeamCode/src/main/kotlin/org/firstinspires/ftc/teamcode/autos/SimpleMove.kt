@@ -3,18 +3,16 @@ package org.firstinspires.ftc.teamcode.autos
 import com.acmerobotics.dashboard.FtcDashboard
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
-import org.firstinspires.ftc.robotcore.external.Telemetry
-import org.firstinspires.ftc.teamcode.axiom.Timer
-import org.firstinspires.ftc.teamcode.axiom.commands.Scheduler
-import org.firstinspires.ftc.teamcode.axiom.commands.statelessCommand
-import org.firstinspires.ftc.teamcode.axiom.input.GamepadSystem
+import io.github.bionictigers.axiom.utils.Timer
+import io.github.bionictigers.axiom.commands.Scheduler
+import io.github.bionictigers.axiom.commands.statelessCommand
+import org.firstinspires.ftc.teamcode.input.GamepadSystem
 import org.firstinspires.ftc.teamcode.mechanisms.Pivot
-import org.firstinspires.ftc.teamcode.mechanisms.Slides
 import org.firstinspires.ftc.teamcode.motion.Drivetrain
 import org.firstinspires.ftc.teamcode.motion.OdometrySystem
 import org.firstinspires.ftc.teamcode.utils.Persistents
 import org.firstinspires.ftc.teamcode.utils.Pose
-import org.firstinspires.ftc.teamcode.utils.Time
+import io.github.bionictigers.axiom.utils.Time
 
 @Autonomous(name = "SimpleMTP")
 class SimpleMove : LinearOpMode() {

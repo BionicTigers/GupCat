@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.utils
 
 import org.firstinspires.ftc.robotcore.external.Telemetry
-import org.firstinspires.ftc.teamcode.axiom.input.Gamepad
 
 object Persistents {
     var pose = Pose(0, 0, 0)

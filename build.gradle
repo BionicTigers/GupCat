@@ -19,7 +19,7 @@ buildscript {
 ext {
     defaultTargetSdkVersion = 34
     defaultTargetSdkVersion1 = 34
-    defaultMinSdkVersion = 24
+    defaultMinSdkVersion = 25
 }
 
 // This is now required because aapt2 has to be downloaded from the

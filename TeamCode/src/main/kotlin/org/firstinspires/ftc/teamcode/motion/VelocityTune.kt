@@ -6,8 +6,8 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
-import org.firstinspires.ftc.teamcode.axiom.commands.Scheduler
-import org.firstinspires.ftc.teamcode.axiom.commands.statelessCommand
+import io.github.bionictigers.axiom.commands.Scheduler
+import io.github.bionictigers.axiom.commands.statelessCommand
 import org.firstinspires.ftc.teamcode.utils.assignTracker
 import org.firstinspires.ftc.teamcode.utils.getByName
 import org.firstinspires.ftc.teamcode.utils.getTracker

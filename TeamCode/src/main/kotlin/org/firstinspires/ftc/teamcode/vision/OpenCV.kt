@@ -2,9 +2,9 @@ package org.firstinspires.ftc.teamcode.vision
 
 import com.qualcomm.robotcore.hardware.HardwareMap
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName
-import org.firstinspires.ftc.teamcode.axiom.commands.Command
-import org.firstinspires.ftc.teamcode.axiom.commands.CommandState
-import org.firstinspires.ftc.teamcode.axiom.commands.System
+import io.github.bionictigers.axiom.commands.Command
+import io.github.bionictigers.axiom.commands.CommandState
+import io.github.bionictigers.axiom.commands.System
 import org.openftc.easyopencv.OpenCvCamera
 import org.openftc.easyopencv.OpenCvCameraFactory
 

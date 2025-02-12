@@ -2,17 +2,15 @@ package org.firstinspires.ftc.teamcode.teleops
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
-import org.firstinspires.ftc.teamcode.axiom.commands.Scheduler
-import org.firstinspires.ftc.teamcode.axiom.commands.statelessCommand
-import org.firstinspires.ftc.teamcode.axiom.input.GamepadSystem
+import io.github.bionictigers.axiom.commands.Scheduler
+import io.github.bionictigers.axiom.commands.statelessCommand
+import org.firstinspires.ftc.teamcode.input.GamepadSystem
 import org.firstinspires.ftc.teamcode.mechanisms.Arm
 import org.firstinspires.ftc.teamcode.mechanisms.Claw
 import org.firstinspires.ftc.teamcode.mechanisms.Pivot
 import org.firstinspires.ftc.teamcode.mechanisms.Slides
 import org.firstinspires.ftc.teamcode.motion.Drivetrain
 import org.firstinspires.ftc.teamcode.motion.OdometrySystem
-import org.firstinspires.ftc.teamcode.utils.Persistents
-import org.firstinspires.ftc.teamcode.utils.Pose
 
 @TeleOp(name = "MainControl")
 class MainControl : LinearOpMode() {
@@ -25,7 +23,7 @@ class MainControl : LinearOpMode() {
         val pivot = Pivot(hardwareMap)
         val slides = Slides(hardwareMap, pivot)
         val arm = Arm(hardwareMap)
-        val claw = Claw(hardwareMap)
+        val claw = Claw(hardwareMap, 0.0)
 
 //        odometry.globalPose = Pose(850.9, 215.9, 0)
 

@@ -7,11 +7,11 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.DigitalChannel
 import com.qualcomm.robotcore.hardware.HardwareMap
 import org.firstinspires.ftc.robotcore.external.Telemetry
-import org.firstinspires.ftc.teamcode.axiom.commands.Command
-import org.firstinspires.ftc.teamcode.axiom.commands.CommandState
-import org.firstinspires.ftc.teamcode.axiom.commands.Scheduler
-import org.firstinspires.ftc.teamcode.axiom.commands.System
-import org.firstinspires.ftc.teamcode.axiom.input.Gamepad
+import io.github.bionictigers.axiom.commands.Command
+import io.github.bionictigers.axiom.commands.CommandState
+import io.github.bionictigers.axiom.commands.Scheduler
+import io.github.bionictigers.axiom.commands.System
+import org.firstinspires.ftc.teamcode.input.Gamepad
 import org.firstinspires.ftc.teamcode.motion.PID
 import org.firstinspires.ftc.teamcode.motion.PIDTerms
 import org.firstinspires.ftc.teamcode.utils.ControlHub
@@ -97,12 +97,9 @@ class Pivot(hardwareMap: HardwareMap) : System {
                 it.motor.power = power
                 it.motor2.power = power
             } else {
-                it.motor2.power = -.02
-                it.motor.power = -.02
-
+                it.motor2.power = -.05
+                it.motor.power = -.05
             }
-
-            println(limitSwitch.state)
 
             if (!limitSwitch.state) {
                 exHub.setJunkTicks()

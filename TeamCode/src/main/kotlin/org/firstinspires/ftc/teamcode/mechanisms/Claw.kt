@@ -3,8 +3,8 @@ package org.firstinspires.ftc.teamcode.mechanisms
 import com.qualcomm.robotcore.hardware.HardwareMap
 import com.qualcomm.robotcore.hardware.Servo
 import org.firstinspires.ftc.robotcore.external.Telemetry
-import org.firstinspires.ftc.teamcode.axiom.commands.System
-import org.firstinspires.ftc.teamcode.axiom.input.Gamepad
+import io.github.bionictigers.axiom.commands.System
+import org.firstinspires.ftc.teamcode.input.Gamepad
 import org.firstinspires.ftc.teamcode.utils.getByName
 
 //enum class Sample {
@@ -14,7 +14,7 @@ import org.firstinspires.ftc.teamcode.utils.getByName
 //}
 
 
-class Claw(hardwareMap: HardwareMap, val openPos: Double = .25) : System {
+class Claw(hardwareMap: HardwareMap, private val openPos: Double = .05) : System {
     override val dependencies: List<System> = emptyList()
     override val beforeRun = null
     override val afterRun = null
@@ -32,7 +32,7 @@ class Claw(hardwareMap: HardwareMap, val openPos: Double = .25) : System {
     }
 
     private fun close() {
-        position = 0.6
+        position = 0.4
     }
 
     var position: Double

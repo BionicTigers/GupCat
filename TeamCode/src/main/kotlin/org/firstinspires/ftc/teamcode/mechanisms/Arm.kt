@@ -1,17 +1,10 @@
 package org.firstinspires.ftc.teamcode.mechanisms
 
-import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.HardwareMap
 import com.qualcomm.robotcore.hardware.Servo
 import org.firstinspires.ftc.robotcore.external.Telemetry
-import org.firstinspires.ftc.teamcode.axiom.commands.CommandState
-import org.firstinspires.ftc.teamcode.axiom.commands.System
-import org.firstinspires.ftc.teamcode.axiom.input.Gamepad
-import org.firstinspires.ftc.teamcode.motion.MotionResult
-import org.firstinspires.ftc.teamcode.motion.PID
-import org.firstinspires.ftc.teamcode.motion.PIDTerms
-import org.firstinspires.ftc.teamcode.motion.generateMotionProfile
-import org.firstinspires.ftc.teamcode.utils.Time
+import io.github.bionictigers.axiom.commands.System
+import org.firstinspires.ftc.teamcode.input.Gamepad
 
 class Arm(hardwareMap: HardwareMap) : System {
     override val dependencies: List<System> = emptyList()
@@ -21,9 +14,9 @@ class Arm(hardwareMap: HardwareMap) : System {
     private val arm = hardwareMap.get(Servo::class.java, "arm")
 
     enum class Position(val target: Double) {
-        Down(.1),
-        Middle(.45),
-        Up(1.0),
+        Down(.975),
+        Middle(.65),
+        Up(.2),
     }
 
     var target = Position.Down

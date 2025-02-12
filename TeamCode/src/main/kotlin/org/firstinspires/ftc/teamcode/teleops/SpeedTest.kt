@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode.teleops
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
-import org.firstinspires.ftc.teamcode.utils.Time
+import io.github.bionictigers.axiom.utils.Time
 
 @TeleOp(name = "Speed")
 class SpeedTest : LinearOpMode() {

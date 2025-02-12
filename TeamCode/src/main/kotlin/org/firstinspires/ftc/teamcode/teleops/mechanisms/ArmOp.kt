@@ -2,8 +2,8 @@ package org.firstinspires.ftc.teamcode.teleops.mechanisms
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
-import org.firstinspires.ftc.teamcode.axiom.commands.Scheduler
-import org.firstinspires.ftc.teamcode.axiom.input.GamepadSystem
+import io.github.bionictigers.axiom.commands.Scheduler
+import org.firstinspires.ftc.teamcode.input.GamepadSystem
 import org.firstinspires.ftc.teamcode.mechanisms.Arm
 
 @TeleOp(name="ArmOp", group = "mechanisms")

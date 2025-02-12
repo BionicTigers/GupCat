@@ -1,8 +1,10 @@
 package org.firstinspires.ftc.teamcode.utils
 
+import io.github.bionictigers.axiom.commands.Display
+import io.github.bionictigers.axiom.commands.Value
 import kotlin.math.absoluteValue
 
-class Pose(val x: Double, val y: Double, private val rot: Double) {
+class Pose(val x: Double, val y: Double, private val rot: Double) : Display() {
     constructor(x: Number, y: Number, rot: Number) : this(x.toDouble(), y.toDouble(), rot.toDouble())
     constructor(x: Number, y: Number, rot: Angle) : this(x.toDouble(), y.toDouble(), rot.degrees)
 
@@ -35,6 +37,10 @@ class Pose(val x: Double, val y: Double, private val rot: Double) {
 
     val absoluteValue: Pose
         get() = Pose(x.absoluteValue, y.absoluteValue, rot.absoluteValue)
+
+    override fun serialize(): Map<String, Value> {
+        return mapOf("x" to Value(x, true), "y" to Value(y, true), "rot" to Value(degrees, true))
+    }
 
     override fun toString(): String {
         return "Pose(x=$x, y=$y, rot=$rot)"

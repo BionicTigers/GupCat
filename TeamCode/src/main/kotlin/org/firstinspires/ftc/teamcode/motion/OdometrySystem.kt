@@ -9,16 +9,17 @@ import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference
-import org.firstinspires.ftc.teamcode.axiom.commands.Command
-import org.firstinspires.ftc.teamcode.axiom.commands.CommandState
+import io.github.bionictigers.axiom.commands.Command
+import io.github.bionictigers.axiom.commands.CommandState
 import org.firstinspires.ftc.teamcode.utils.ControlHub
 import org.firstinspires.ftc.teamcode.utils.Pose
 import org.firstinspires.ftc.teamcode.utils.Vector2
-import org.firstinspires.ftc.teamcode.axiom.commands.*
+import io.github.bionictigers.axiom.commands.*
 import org.firstinspires.ftc.teamcode.utils.Angle
 import org.firstinspires.ftc.teamcode.utils.Distance
 import org.firstinspires.ftc.teamcode.utils.Persistents
-import org.firstinspires.ftc.teamcode.utils.Time
+import io.github.bionictigers.axiom.utils.Time
+import io.github.bionictigers.axiom.web.WebData
 import org.firstinspires.ftc.teamcode.utils.getByName
 import kotlin.math.PI
 import kotlin.math.abs
@@ -188,7 +189,17 @@ class OdometrySystem(hardwareMap: HardwareMap, initialPose: Pose? = null) : Syst
                 val oldGlobalVel = it.globalVelocity
                 it.globalVelocity = Pair(Vector2(virtualGlobalDeltaX, virtualGlobalDeltaY) / deltaTime, Angle.degrees(localRotation.degrees / deltaTime))
                 it.globalAcceleration = Pair(oldGlobalVel.first - it.globalVelocity.first, oldGlobalVel.second - it.globalVelocity.second)
-                println(it.globalVelocity.first)
+
+                // CONVERT VIRTUAL INTO GLOBAL
+                val y = it.virtualPose.y - (it.virtualOffsetY * it.virtualPose.rotation.cos).mm + (it.virtualOffsetX * it.virtualPose.rotation.sin).mm
+                val x = it.virtualPose.x - (it.virtualOffsetY * it.virtualPose.rotation.sin).mm - (it.virtualOffsetX * it.virtualPose.rotation.cos).mm
+
+                _globalPose = Pose(x, y, it.virtualPose.rotation)
+
+                // Update to web data
+                WebData.x = x
+                WebData.y = y
+                WebData.rotation = it.virtualPose.rotation.radians
 
                 hub.setJunkTicks()
                 exHub.setJunkTicks()
@@ -204,17 +215,9 @@ class OdometrySystem(hardwareMap: HardwareMap, initialPose: Pose? = null) : Syst
 
     override val afterRun: Command<*>? = null
 
+    private var _globalPose: Pose = Pose(0, 0, 0)
     var globalPose: Pose
-        get() {
-            val state = beforeRun.state
-            val currentVPose = state.virtualPose
-
-            // CONVERT VIRTUAL INTO GLOBAL
-            val y = currentVPose.y - (state.virtualOffsetY * currentVPose.rotation.cos).mm + (state.virtualOffsetX * currentVPose.rotation.sin).mm
-            val x = currentVPose.x - (state.virtualOffsetY * currentVPose.rotation.sin).mm - (state.virtualOffsetX * currentVPose.rotation.cos).mm
-
-            return Pose(x, y, currentVPose.rotation)
-        }
+        get() = _globalPose
         set(value) {
             val state = beforeRun.state
 
