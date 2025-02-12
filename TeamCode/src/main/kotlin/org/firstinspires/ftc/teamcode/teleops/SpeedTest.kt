@@ -2,13 +2,8 @@ package org.firstinspires.ftc.teamcode.teleops
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
-import com.qualcomm.robotcore.hardware.DcMotor
-import com.qualcomm.robotcore.hardware.DcMotorEx
-import com.qualcomm.robotcore.hardware.Servo
 import org.firstinspires.ftc.teamcode.utils.ControlHub
-import org.firstinspires.ftc.teamcode.utils.Time
-import org.firstinspires.ftc.teamcode.utils.getByName
-import kotlin.random.Random
+import io.github.bionictigers.axiom.utils.Time
 
 @TeleOp(name = "Speed")
 class SpeedTest : LinearOpMode() {

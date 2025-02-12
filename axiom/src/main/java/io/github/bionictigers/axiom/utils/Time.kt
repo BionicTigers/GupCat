@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.utils
+package io.github.bionictigers.axiom.utils
 
 data class Time internal constructor(private val time: Double = 0.0) {
     constructor() : this(0.0)
