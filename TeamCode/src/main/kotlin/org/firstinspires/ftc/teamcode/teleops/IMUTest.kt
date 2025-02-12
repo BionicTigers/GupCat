@@ -21,6 +21,7 @@ class IMUTest : LinearOpMode() {
     override fun runOpMode() {
 
         val imu = hardwareMap.getByName<BNO055IMUNew>("InternalIMU")
+//        val otherimu = hardwareMap.getByName<>()
         imu.initialize(BNO055IMUNew.Parameters(RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.UP, RevHubOrientationOnRobot.UsbFacingDirection.FORWARD)))
 
         waitForStart()

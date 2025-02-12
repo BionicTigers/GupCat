@@ -21,7 +21,7 @@ class SimpleMove : LinearOpMode() {
         val gamepadSystem = GamepadSystem(gamepad1, gamepad2)
         val odometrySystem = OdometrySystem(hardwareMap)
         val drivetrain = Drivetrain(hardwareMap, gamepadSystem, odometrySystem)
-        val pivot = Pivot(hardwareMap)
+//        val pivot = Pivot(hardwareMap)
 //        val slides = Slides(hardwareMap)
 
         val dashboard = FtcDashboard.getInstance()
@@ -88,6 +88,8 @@ class SimpleMove : LinearOpMode() {
         dashboardTelemetry.addData("xPSP", 0)
         dashboardTelemetry.addData("yPSP", 0)
         dashboardTelemetry.addData("rPSP", 0)
+        dashboardTelemetry.addData("xPower", 0)
+        dashboardTelemetry.addData("yPower", 0)
         dashboardTelemetry.update()
 
         waitForStart()
