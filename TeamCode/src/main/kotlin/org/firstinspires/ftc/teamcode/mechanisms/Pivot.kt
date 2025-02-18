@@ -26,15 +26,17 @@ interface PivotState : CommandState {
     val pid: PID
     val motor: DcMotorEx
     val motor2: DcMotorEx
+    var enabled: Boolean
 
     companion object {
         fun default(motor: DcMotorEx, motor2: DcMotorEx, encoder: Encoder): PivotState {
             return object : PivotState, CommandState by CommandState.default("Pivot") {
                 override val encoder = encoder
                 override var targetPosition = 0
-                override val pid = PID(PIDTerms(1.5, 90.0), 0.0, 1800.0, -1.0, 1.0)
+                override val pid = PID(PIDTerms(3.0, 40.0), 0.0, 2040.0, -1.0, 1.0)
                 override val motor = motor
                 override val motor2 = motor2
+                override var enabled = true
             }
         }
     }
@@ -62,10 +64,13 @@ class Pivot(hardwareMap: HardwareMap) : System {
         1.0 to -0.15,
         25.0 to 0.2,
         750.0 to 0.25,
-        1500.0 to 0.075
+        1500.0 to 0.18
     )
 
     var ticks = 0
+    var enabled: Boolean
+        get() = beforeRun.state.enabled
+        set(value) { beforeRun.state.enabled = value }
 
     override val dependencies: List<System> = emptyList()
     override val beforeRun = Command(PivotState.default(hardwareMap.getByName("pivot"), hardwareMap.getByName("pivot2"), exHub.getEncoder(1)))
@@ -80,10 +85,17 @@ class Pivot(hardwareMap: HardwareMap) : System {
             it.pid.reset()
 
 //            println(Persistents.pivotTicks)
+//            exHub.setEncoderDirection(3, ControlHub.Direction.Backward)
             if (Persistents.pivotTicks == null) Persistents.pivotTicks = exHub.rawGetEncoderTicks(3)
             exHub.setJunkTicks(3, Persistents.pivotTicks)
         }
         .setAction {
+            if (!enabled) {
+                it.motor.power = 0.0
+                it.motor2.power = 0.0
+                return@setAction false
+            }
+
             exHub.refreshBulkData()
             ticks = exHub.getEncoderTicks(3)
 
@@ -116,7 +128,7 @@ class Pivot(hardwareMap: HardwareMap) : System {
         }
     override val afterRun = null
 
-    val max = 1800
+    val max = 2040
 
     //TODO: Swap to an angle
     var pivotTicks: Int
@@ -136,6 +148,8 @@ class Pivot(hardwareMap: HardwareMap) : System {
         gamepad.rightTrigger.onHold {
             pivotTicks += (1500 * Scheduler.loopDeltaTime.seconds() * it).toInt()
         }
+
+//        gamepad.getBooleanButton()
     }
 
     fun log(telemetry: Telemetry) {

@@ -1,6 +1,7 @@
 package io.github.bionictigers.axiom.commands
 
 import io.github.bionictigers.axiom.utils.Time
+import io.github.bionictigers.axiom.web.Hidden
 import io.github.bionictigers.axiom.web.Server
 import java.util.*
 import kotlin.collections.HashMap
@@ -64,7 +65,7 @@ object Scheduler {
 
         val fields = cmdState::class.java.declaredFields
         fields.forEach {
-            if (it.isSynthetic || it.name == "name") return@forEach
+            if (it.isSynthetic || it.name == "name" || it.annotations.contains(Hidden())) return@forEach
             it.isAccessible = true
             try {
                 val value = it.get(cmdState)?.let { it1 -> serializeVariable(it1) }

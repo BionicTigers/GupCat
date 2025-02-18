@@ -14,7 +14,7 @@ class Arm(hardwareMap: HardwareMap) : System {
     private val arm = hardwareMap.get(Servo::class.java, "arm")
 
     enum class Position(val target: Double) {
-        Down(.975),
+        Down(.95),
         Middle(.65),
         Up(.2),
     }

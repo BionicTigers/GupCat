@@ -45,6 +45,7 @@ interface OdometrySystemState : CommandState {
     var globalAcceleration: Pair<Vector2, Angle>
 
     var virtualPose: Pose
+    var pose: Pose
 
     val xAverage: NewRollingAverage
     val yAverage: NewRollingAverage
@@ -103,6 +104,7 @@ class OdometrySystem(hardwareMap: HardwareMap, initialPose: Pose? = null) : Syst
             override var xAverage = NewRollingAverage(5)
             override var yAverage = NewRollingAverage(5)
             override var angularAverage = NewRollingAverage(5)
+            override var pose = Pose(0, 0, 0)
         } as OdometrySystemState)
             .setOnEnter {
                 hub.setJunkTicks()
@@ -207,7 +209,7 @@ class OdometrySystem(hardwareMap: HardwareMap, initialPose: Pose? = null) : Syst
                 val y = it.virtualPose.y - (it.virtualOffsetY * it.virtualPose.rotation.cos).mm + (it.virtualOffsetX * it.virtualPose.rotation.sin).mm
                 val x = it.virtualPose.x - (it.virtualOffsetY * it.virtualPose.rotation.sin).mm - (it.virtualOffsetX * it.virtualPose.rotation.cos).mm
 
-                _globalPose = Pose(x, y, it.virtualPose.rotation)
+                it.pose = Pose(x, y, it.virtualPose.rotation)
 
                 // Update to web data
                 WebData.x = x
@@ -228,9 +230,8 @@ class OdometrySystem(hardwareMap: HardwareMap, initialPose: Pose? = null) : Syst
 
     override val afterRun: Command<*>? = null
 
-    private var _globalPose: Pose = Pose(0, 0, 0)
     var globalPose: Pose
-        get() = _globalPose
+        get() = beforeRun.state.pose
         set(value) {
             val state = beforeRun.state
 

@@ -101,8 +101,8 @@ class Slides(hardwareMap: HardwareMap, pivot: Pivot) : System {
             acceleration = (velocity - lastVelocity) / it.deltaTime.seconds()
             accelerationMax = max(accelerationMax, acceleration)
             lastVelocity = velocity
-            val percent = 1 - min(pivot.pivotTicks, pivot.max) / pivot.max
-            it.targetPosition = targetPosition.coerceIn(-200, max - percent * (max - pivotDownMax))
+            val percent = min(pivot.pivotTicks, pivot.max) / pivot.max
+            it.targetPosition = targetPosition.coerceIn(-200, max + percent * (max - pivotDownMax))
 
 //            if (it.changed && it.timeInScheduler - it.moveStartTime > Time.fromSeconds(.5)) {
 //                it.profile = generateMotionProfile(ticks, it.targetPosition, 60000, 3000000, 50000)
