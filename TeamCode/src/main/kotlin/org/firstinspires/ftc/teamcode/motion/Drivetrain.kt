@@ -77,9 +77,9 @@ interface DrivetrainState : CommandState {
 
     val controlHub: ControlHub
 
-    val velXSP: Double
-    val velYSP: Double
-    val velRSP: Double
+    var velXSP: Double
+    var velYSP: Double
+    var velRSP: Double
 
     companion object {
         fun default(motors: Motors, hardwareMap: HardwareMap): DrivetrainState {
@@ -91,21 +91,21 @@ interface DrivetrainState : CommandState {
                 override var targetPose = Pose(0.0, 0.0, 0.0)
                 override var mode = Drivetrain.ControlMode.DRIVER_CONTROL
 
-                override val pPidX = PID(PIDTerms(8000.0, 30.0), 0.0, 3657.6, -1104.0, 1104.0, 100)
-                override val pPidY = PID(PIDTerms(11000.0, 30.0), 0.0, 3657.6, -1427.0, 1427.0, 100)
-                override val pPidRot = PID(PIDTerms(5.0, 70.0), -2 * PI, 2 * PI, Angle.degrees(-294.81).radians, Angle.degrees(294.81).radians, 100)
+                override val pPidX = PID(PIDTerms(6000.0, 0.0), 0.0, 3657.6, -1104.0, 1104.0, 100)
+                override val pPidY = PID(PIDTerms(6000.0, 0.0), 0.0, 3657.6, -1427.0, 1427.0, 100)
+                override val pPidRot = PID(PIDTerms(5000.0, 0.0), -2 * PI, 2 * PI, Angle.degrees(-294.81).radians, Angle.degrees(294.81).radians, 100)
 
                 override val vPidX = PID(PIDTerms(4.0, 5.0), -1104.0, 1104.0, -1.0, 1.0, 40)
                 override val vPidY = PID(PIDTerms(3.0,  5.0), -1427.0, 1427.0, -1.0, 1.0, 40)
-                override val vPidRot = PID(PIDTerms(0.042, 0.0), Angle.degrees(-294.81).radians, Angle.degrees(294.81).radians, -1.0, 1.0)
+                override val vPidRot = PID(PIDTerms(4.0, 5.0), Angle.degrees(-294.81).radians, Angle.degrees(294.81).radians, -1.0, 1.0)
 
                 override val pidX = PID(PIDTerms(22.0, 20.0), 0.0, 3657.6, -1.0, 1.0)
                 override val pidY = PID(PIDTerms(22.0, 20.0), 0.0, 3657.6, -1.0, 1.0)
                 override val pidRot = PID(PIDTerms(16.0, 60.0), -2 * PI, 2 * PI, -1.0, 1.0)
 
-                override val velXSP = 0.0
-                override val velYSP = 0.0
-                override val velRSP = 200.0
+                override var velXSP = 0.0
+                override var velYSP = 0.0
+                override var velRSP = 0.0
 
                 override var profileX: MotionResult? = null
                 override var profileY: MotionResult? = null
@@ -172,9 +172,9 @@ class Drivetrain(
 
     object Mecanum {
         // TODO: update these values and figure out how to actually measure jerk instead of making it up
-        val xJerk = 2000.0
-        val yJerk = 2000.0
-        val angularJerk = 2000.0
+        val xJerk = 4000.0
+        val yJerk = 4000.0
+        val angularJerk = 400.0
         val xMaxAcceleration = 7441.0
         val yMaxAcceleration = 8087.0
         val angularMaxAcceleration = Angle.degrees(81.7315)
@@ -187,6 +187,10 @@ class Drivetrain(
             200.0 to 6.0,
             800.0 to 9.0,
             1427.0 to 11.0,
+        )
+        val ypPIDPMap = interpolatedMapOf(
+            100.0 to 7000.0,
+            1000.0 to 6000.0,
         )
 
         val xvPIDPMap = interpolatedMapOf(
@@ -261,60 +265,60 @@ class Drivetrain(
             return calculatePowers(angleX, angleY, rotation)
         }
 
-        fun moveToPosition(state: DrivetrainState, odometry: OdometrySystem, targetPose: Pose? = null) {
-            if (targetPose != null) {
-                state.targetPose = targetPose
-                state.timeStarted = state.timeInScheduler
-
-                state.pPidX.reset()
-                state.pPidY.reset()
-                state.pPidRot.reset()
-
-                state.profileX = generateMotionProfile(
-                    odometry.globalPose.x,
-                    state.targetPose.x,
-                    xJerk,
-                    xMaxAcceleration,
-                    xMaxVelocity,
-//                    odometry.beforeRun.state.velocity.x
-                )
-                println()
-
-                state.profileY = generateMotionProfile(
-                    odometry.globalPose.y,
-                    state.targetPose.y,
-                    yJerk,
-                    yMaxAcceleration,
-                    yMaxVelocity,
-//                    odometry.beforeRun.state.velocity.y
-                )
-            }
-
-            val pose = odometry.globalPose
-
-            val powerX = state.vPidX.calculate(pose.x, state.profileX!!.getPosition(state.timeInScheduler - state.timeStarted))
-            val powerY = state.vPidY.calculate(pose.y, state.profileY!!.getPosition(state.timeInScheduler - state.timeStarted))
-            val targetx = state.profileX!!.getPosition(state.timeInScheduler - state.timeStarted)
-            val targety = state.profileY!!.getPosition(state.timeInScheduler - state.timeStarted)
-            println("TargetX: $targetx")
-            println("TargetY: $targety")
-
-//            val powerRot = state.pidRot.calculate(pose.radians, state.profileRot!!.getPosition(state.timeInScheduler - state.timeStarted))
-
-//            println("X: ${state.profileX!!.getPosition(state.timeInScheduler - state.timeStarted)}")
-//            println("Y: ${state.profileY!!.getPosition(state.timeInScheduler - state.timeStarted)}")
-
-//            val powerX = state.pidX.calculate(pose.x, state.targetPose.x)
-//            val powerY = state.pidY.calculate(pose.y, state.targetPose.y)
-            val powerRot = state.pPidRot.calculate(pose.radians, state.targetPose.radians)
-            println("powerX $powerX")
-            println("powerY $powerY")
-            println("powerRot $powerRot")
-            val powers = fieldCalculatePowers(-powerX, powerY, powerRot, pose.radians)
-            val modifier = 1
-//            powers = fieldCalculatePowers(1.0, 0.0, 0.0, pose.radians)
-            state.motors.setPower(powers[0] * modifier, powers[1] * modifier, powers[2] * modifier, powers[3] * modifier)
-        }
+//        fun moveToPosition(state: DrivetrainState, odometry: OdometrySystem, targetPose: Pose? = null) {
+//            if (targetPose != null) {
+//                state.targetPose = targetPose
+//                state.timeStarted = state.timeInScheduler
+//
+//                state.pPidX.reset()
+//                state.pPidY.reset()
+//                state.pPidRot.reset()
+//
+//                state.profileX = generateMotionProfile(
+//                    odometry.globalPose.x,
+//                    state.targetPose.x,
+//                    xJerk,
+//                    xMaxAcceleration,
+//                    xMaxVelocity,
+////                    odometry.beforeRun.state.velocity.x
+//                )
+//                println()
+//
+//                state.profileY = generateMotionProfile(
+//                    odometry.globalPose.y,
+//                    state.targetPose.y,
+//                    yJerk,
+//                    yMaxAcceleration,
+//                    yMaxVelocity,
+////                    odometry.beforeRun.state.velocity.y
+//                )
+//            }
+//
+//            val pose = odometry.globalPose
+//
+//            val powerX = state.vPidX.calculate(pose.x, state.profileX!!.getPosition(state.timeInScheduler - state.timeStarted))
+//            val powerY = state.vPidY.calculate(pose.y, state.profileY!!.getPosition(state.timeInScheduler - state.timeStarted))
+//            val targetx = state.profileX!!.getPosition(state.timeInScheduler - state.timeStarted)
+//            val targety = state.profileY!!.getPosition(state.timeInScheduler - state.timeStarted)
+//            println("TargetX: $targetx")
+//            println("TargetY: $targety")
+//
+////            val powerRot = state.pidRot.calculate(pose.radians, state.profileRot!!.getPosition(state.timeInScheduler - state.timeStarted))
+//
+////            println("X: ${state.profileX!!.getPosition(state.timeInScheduler - state.timeStarted)}")
+////            println("Y: ${state.profileY!!.getPosition(state.timeInScheduler - state.timeStarted)}")
+//
+////            val powerX = state.pidX.calculate(pose.x, state.targetPose.x)
+////            val powerY = state.pidY.calculate(pose.y, state.targetPose.y)
+//            val powerRot = state.pPidRot.calculate(pose.radians, state.targetPose.radians)
+//            println("powerX $powerX")
+//            println("powerY $powerY")
+//            println("powerRot $powerRot")
+//            val powers = fieldCalculatePowers(-powerX, powerY, powerRot, pose.radians)
+//            val modifier = 1
+////            powers = fieldCalculatePowers(1.0, 0.0, 0.0, pose.radians)
+//            state.motors.setPower(powers[0] * modifier, powers[1] * modifier, powers[2] * modifier, powers[3] * modifier)
+//        }
 
         var beta: Double = 0.0
         var starting: Vector2 = Vector2()
@@ -334,32 +338,39 @@ class Drivetrain(
                 state.pPidY.reset()
                 state.pPidRot.reset()
 
-                state.profileRot = generateMotionProfile(
-                    odometry.globalPose.radians,
-                    state.targetPose.radians,
-                    angularJerk,
-                    angularMaxAcceleration.radians,
-                    angularMaxVelocity.radians,
-                )
+//                state.profileRot = generateMotionProfile(
+//                    odometry.globalPose.radians,
+//                    state.targetPose.radians,
+//                    angularJerk,
+//                    angularMaxAcceleration.radians,
+//                    angularMaxVelocity.radians,
+//                )
 
                 // TODO: Iterate trueMax over all rotations throughout the move to find the lowest and apply it instead of just the starting max
                 state.profileDist = generateMotionProfile(
                     0.0,
                     (state.targetPose.position - odometry.globalPose.position).magnitude(),
-                    yJerk*.65,
-                    yMaxAcceleration*.65,
-                    yMaxVelocity*.65
+                    yJerk,
+                    yMaxAcceleration,
+                    yMaxVelocity
                 )
             }
 
             val xPosition = starting.x + sin(beta) * state.profileDist!!.getPosition(state.timeInScheduler - state.timeStarted)
             val yPosition = starting.y + cos(beta) * state.profileDist!!.getPosition(state.timeInScheduler - state.timeStarted)
-            val rotPosition = state.profileRot!!.getPosition(state.timeInScheduler - state.timeStarted)
+//            val rotPosition = state.profileRot!!.getPosition(state.timeInScheduler - state.timeStarted)
+            val rotPosition = state.targetPose.radians
+
 
             // position PIDs, output is velocity
             val xVelocity = state.pPidX.calculate(xPosition, pose.x)
+            state.pPidY.p = ypPIDPMap[yPosition]
             val yVelocity = state.pPidY.calculate(yPosition, pose.y)
             val rotVelocity = state.pPidRot.calculate(rotPosition, pose.radians)
+
+            state.velXSP = xVelocity
+            state.velYSP = yVelocity
+            state.velRSP = rotVelocity
 
             println("xVel: $xVelocity")
             println("yVel: $yVelocity")
@@ -369,10 +380,10 @@ class Drivetrain(
 //            val yPower = state.vPidY.calculate(pose.y, yPosition)
             val (vel, ang) = odometry.globalVelocity
 
-            state.vPidX.p = xvPIDPMap[vel.x]
+            state.vPidX.p = xvPIDPMap[xVelocity]
             val xPower = state.vPidX.calculate(xVelocity, vel.x)
 
-            state.vPidY.p = yvPIDPMap[vel.y]
+            state.vPidY.p = yvPIDPMap[yVelocity]
             val yPower = state.vPidY.calculate(yVelocity, vel.y)
 
 //            state.vPidRot.p = rvPIDPMap[ang.radians]
@@ -461,7 +472,7 @@ class Drivetrain(
 
     val moveFinished: Boolean
         get() {
-            val compare = Pose(15, 15, 7.5)
+            val compare = Pose(5, 5, 5)
             val diff = beforeRun.state.timeInScheduler - beforeRun.state.timeStarted
 //            println("Within: ${odometrySystem.globalPose.within(targetPose, compare)}, Timeout: ${(beforeRun.state.moveToPositionTimeout != null && diff > beforeRun.state.moveToPositionTimeout!!)}")
             return odometrySystem.globalPose.within(targetPose, compare)// && (beforeRun.state.moveToPositionTimeout != null && diff > beforeRun.state.moveToPositionTimeout!!)

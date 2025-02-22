@@ -101,9 +101,9 @@ class OdometrySystem(hardwareMap: HardwareMap, initialPose: Pose? = null) : Syst
             override var virtualPose = Pose(virtualOffsetX.mm, virtualOffsetY.mm, 0)
             override var odoDiameter = 47.3 //48
             override var gearRatio = 1.0
-            override var xAverage = NewRollingAverage(5)
-            override var yAverage = NewRollingAverage(5)
-            override var angularAverage = NewRollingAverage(5)
+            override var xAverage = NewRollingAverage(3)
+            override var yAverage = NewRollingAverage(3)
+            override var angularAverage = NewRollingAverage(3)
             override var pose = Pose(0, 0, 0)
         } as OdometrySystemState)
             .setOnEnter {
