@@ -32,7 +32,7 @@ class Claw(hardwareMap: HardwareMap, private val openPos: Double = .05) : System
     }
 
     private fun close() {
-        position = 0.51
+        position = .63
     }
 
     var position: Double

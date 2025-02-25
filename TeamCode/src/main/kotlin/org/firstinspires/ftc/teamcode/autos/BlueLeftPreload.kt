@@ -87,15 +87,15 @@ class BlueLeftPreload : LinearOpMode() {
 
         Scheduler.addSystem(odometrySystem, drivetrain, pivot, slides)
 
-        val highBasketPosition = Pose(355.8, 485.8, 45)
-        val highBasketHeight = 3500
-        val highBasketPivot = 1800
+        val highBasketPosition = Pose(375.8, 505.8, 45)
+        val highBasketHeight = 51500//3500
+        val highBasketPivot = 2040
 
         val groundRightPosition = Pose(590, 846, 0)
         val groundMiddlePosition = Pose(359, 846, 0)
 
         val groundLeftPosition = Pose(450, 500, -25)
-        val leftSlidesHeight = 1900
+        val leftSlidesHeight = 40000//1900
 
         val moveForward = statelessCommand("moveForward")
         val scoreHighBasket = Command(HighBasketScore.default())

@@ -26,7 +26,7 @@ class DriveOp : LinearOpMode() {
 
         while (opModeIsActive()) {
             val (velocity, angVelocity) = odometrySystem.globalVelocity
-            odometrySystem.logPosition(telemetry)
+            odometrySystem.logMaximums(telemetry)
             dash.telemetry.addData("linear x", velocity.x)
             dash.telemetry.addData("linear y", velocity.y)
             dash.telemetry.addData("angular", angVelocity.degrees)

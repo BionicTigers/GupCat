@@ -30,7 +30,7 @@ class SimpleMove : LinearOpMode() {
         Scheduler.addSystem(odometrySystem, drivetrain)
 
 
-        val poseToMove = Pose(0, 0, 360)
+        val poseToMove = Pose(0, 0, 180)
         val otherToMove = Pose(0, 0, 0)
 
         Persistents.reset()

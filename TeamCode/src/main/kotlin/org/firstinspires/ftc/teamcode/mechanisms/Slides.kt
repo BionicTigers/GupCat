@@ -28,9 +28,9 @@ import kotlin.math.min
 @Config
 object SlidesPID {
     @JvmField
-    var p = 2.0
+    var p = 1.8
     @JvmField
-    var i = 100.0
+    var i = 30.0
     @JvmField
     var d = 0.0
 }

@@ -4,11 +4,12 @@ import io.github.bionictigers.axiom.utils.Time
 import io.github.bionictigers.axiom.web.Hidden
 import io.github.bionictigers.axiom.web.Server
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.collections.HashMap
 import kotlin.reflect.KMutableProperty
 
 object Scheduler {
-    private val commands = HashMap<Int, Command<*>>()
+    private val commands = ConcurrentHashMap<Int, Command<*>>()
     private val sortedCommands = ArrayList<Command<*>>()
 
     private val addQueue: ArrayList<Command<*>> = ArrayList()
