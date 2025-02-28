@@ -10,16 +10,16 @@ buildscript {
         google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.5.2'
+        // Note for FTC Teams: Do not modify this yourself.
+        classpath 'com.android.tools.build:gradle:8.8.1'
         classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.10'
-        //1.8.10 = Latest Kotlin Version
     }
 }
 
 ext {
-    defaultTargetSdkVersion = 34
-    defaultTargetSdkVersion1 = 34
-    defaultMinSdkVersion = 25
+    projectTargetSdkVersion = 35
+    projectMinSdkVersion = 25 // 25 is the minimum supported version for the Control Hub
+    projectJavaVersion = JavaVersion.VERSION_17
 }
 
 // This is now required because aapt2 has to be downloaded from the
@@ -33,8 +33,4 @@ allprojects {
 
 repositories {
     mavenCentral()
-
-    flatDir {
-        dirs '../libs'
-    }
 }

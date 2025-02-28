@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.teleops.mechanisms
 
 import android.health.connect.datatypes.units.Velocity
-import com.acmerobotics.dashboard.FtcDashboard
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import io.github.bionictigers.axiom.commands.Scheduler
@@ -18,7 +17,6 @@ class DriveOp : LinearOpMode() {
         val odometrySystem = OdometrySystem(hardwareMap)
         val gamepadSystem = GamepadSystem(gamepad1, gamepad2)
         val drivetrain = Drivetrain(hardwareMap, gamepadSystem, odometrySystem)
-        val dash = FtcDashboard.getInstance()
 
         Scheduler.addSystem(odometrySystem, gamepadSystem, drivetrain)
         waitForStart()
@@ -27,10 +25,6 @@ class DriveOp : LinearOpMode() {
         while (opModeIsActive()) {
             val (velocity, angVelocity) = odometrySystem.globalVelocity
             odometrySystem.logPosition(telemetry)
-            dash.telemetry.addData("linear x", velocity.x)
-            dash.telemetry.addData("linear y", velocity.y)
-            dash.telemetry.addData("angular", angVelocity.degrees)
-            dash.telemetry.update()
             telemetry.update()
             Scheduler.update()
         }

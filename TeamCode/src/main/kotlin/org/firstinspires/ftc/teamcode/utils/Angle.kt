@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.utils
 
 import kotlin.math.PI
+import kotlin.math.absoluteValue
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.tan
@@ -46,6 +47,8 @@ class Angle private constructor(val radians: Double) {
         return radians.compareTo(otherRotation.radians)
     }
 
+    val abs: Angle
+        get() = degrees(this.degrees.absoluteValue)
     val sin = sin(radians)
     val cos = cos(radians)
     val tan = tan(radians)

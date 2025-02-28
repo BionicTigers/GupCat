@@ -1,8 +1,8 @@
 package org.firstinspires.ftc.teamcode.motion
 
 import com.qualcomm.robotcore.util.ElapsedTime
-import io.github.bionictigers.axiom.commands.Display
-import io.github.bionictigers.axiom.commands.Value
+import io.github.bionictigers.axiom.web.Editable
+import io.github.bionictigers.io.github.bionictigers.axiom.web.Display
 
 /**
  * Class to control errors
@@ -19,15 +19,15 @@ import io.github.bionictigers.axiom.commands.Value
  * @param cvMax Maximum control variable
  */
 class PID(
-    var kP: Double,
-    var tI: Double,
-    var tD: Double,
+    @Display @Editable var kP: Double,
+    @Display @Editable var tI: Double,
+    @Display @Editable var tD: Double,
     var pvMin: Double,
     var pvMax: Double,
     var cvMin: Double,
     var cvMax: Double,
     private val sampleTime: Int = 20
-) /*: Display()*/ {
+) {
     //Time between cycles, in ms
 
     private val elapsedTime = ElapsedTime(ElapsedTime.Resolution.MILLISECONDS)
@@ -41,6 +41,7 @@ class PID(
         internal set
     var previousError: Double = 0.0
         internal set
+    @Display
     var cv: Double = 0.0
         internal set
 
@@ -87,13 +88,10 @@ class PID(
     fun reset() {
         i = 0.0
         cv = 0.0
+        previousError = 0.0
     }
 
     fun log() {
         println("P: $p, I: $i, D: $d, E: $previousError")
     }
-
-//    override fun serialize(): Map<String, Value> {
-//        return mapOf("cv" to Value(cv, true))
-//    }
 }

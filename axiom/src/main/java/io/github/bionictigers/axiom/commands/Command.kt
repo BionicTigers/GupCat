@@ -30,7 +30,7 @@ interface CommandState {
  * @see Scheduler
  * @see System
  */
-class Command<T: CommandState>(val state: T, private val interval: Time? = null) {
+data class Command<T: CommandState>(val state: T, private val interval: Time? = null) {
     val dependencies = ArrayList<Command<*>>()
 
     private var predicate: (T) -> Boolean = { true }

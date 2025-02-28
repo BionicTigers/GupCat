@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.mechanisms
 
-import com.acmerobotics.dashboard.config.Config
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.DcMotorSimple
@@ -25,7 +24,6 @@ import org.firstinspires.ftc.teamcode.utils.getByName
 import kotlin.math.max
 import kotlin.math.min
 
-@Config
 object SlidesPID {
     @JvmField
     var p = 2.0

@@ -5,11 +5,11 @@ plugins {
 
 android {
     namespace = "io.github.bionictigers"
-    compileSdk = 34
+    compileSdk = rootProject.extra["projectTargetSdkVersion"] as Int
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = rootProject.extra["projectJavaVersion"] as JavaVersion
+        targetCompatibility = rootProject.extra["projectJavaVersion"] as JavaVersion
     }
 
     kotlinOptions {
@@ -21,9 +21,13 @@ android {
         unitTests.isIncludeAndroidResources = true
     }
 
+    lint {
+        targetSdk = rootProject.extra["projectTargetSdkVersion"] as Int
+
+    }
+
     defaultConfig {
-        targetSdkVersion(rootProject.extra["defaultTargetSdkVersion"] as Int)
-        minSdkVersion(rootProject.extra["defaultMinSdkVersion"] as Int)
+        minSdk = rootProject.extra["projectMinSdkVersion"] as Int
     }
 }
 
@@ -47,6 +51,7 @@ dependencies {
     // Add Moshi dependencies:
     implementation("com.squareup.moshi:moshi:1.14.0")
     implementation("com.squareup.moshi:moshi-kotlin:1.14.0")
+    implementation("com.squareup.moshi:moshi-adapters:1.14.0")
 
     // Include the nanohttpd-websocket dependency but exclude its transitive nanohttpd dependency
     implementation("org.nanohttpd:nanohttpd-websocket:2.3.1") {

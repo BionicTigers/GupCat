@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.utils
 
-import io.github.bionictigers.axiom.commands.Display
-import io.github.bionictigers.axiom.commands.Value
+import io.github.bionictigers.io.github.bionictigers.axiom.web.Display
 import java.util.LinkedList
 import java.util.Queue
 
@@ -9,7 +8,7 @@ import java.util.Queue
  * Calculate a rolling average from a stream of numbers. Only the last 'size' elements will be
  * considered.
  */
-class NewRollingAverage(var size: Int) : Display() {
+class NewRollingAverage(var size: Int) {
     private val queue: Queue<Double> = LinkedList()
     private var total: Double = 0.0
 
@@ -49,7 +48,13 @@ class NewRollingAverage(var size: Int) : Display() {
 
         queue.add(number)
         total += number
+
+        if (queue.isEmpty()) avg = 0.0
+        avg = total / queue.size.toDouble()
     }
+
+    @Display
+    private var avg: Double = 0.0
 
     val average: Double
         /**
@@ -66,9 +71,5 @@ class NewRollingAverage(var size: Int) : Display() {
      */
     fun reset() {
         queue.clear()
-    }
-
-    override fun serialize(): Map<String, Value> {
-        return mapOf("average" to Value(average, true))
     }
 }

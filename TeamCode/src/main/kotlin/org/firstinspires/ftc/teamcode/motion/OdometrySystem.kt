@@ -21,6 +21,7 @@ import org.firstinspires.ftc.teamcode.utils.Distance
 import org.firstinspires.ftc.teamcode.utils.NewRollingAverage
 import org.firstinspires.ftc.teamcode.utils.Persistents
 import io.github.bionictigers.axiom.utils.Time
+import io.github.bionictigers.axiom.web.Hidden
 import io.github.bionictigers.axiom.web.WebData
 import org.firstinspires.ftc.teamcode.utils.getByName
 import kotlin.math.PI
@@ -36,7 +37,9 @@ interface OdometrySystemState : CommandState {
     val virtualOffsetY: Distance
     val virtualOffsetX: Distance
 
+    @Hidden
     var gearRatio: Double
+    @Hidden
     var odoDiameter: Double
 
     var localVelocity: Vector2
@@ -44,6 +47,7 @@ interface OdometrySystemState : CommandState {
     var globalVelocity: Pair<Vector2, Angle>
     var globalAcceleration: Pair<Vector2, Angle>
 
+    @Hidden
     var virtualPose: Pose
     var pose: Pose
 
@@ -55,9 +59,9 @@ interface OdometrySystemState : CommandState {
 class OdometrySystem(hardwareMap: HardwareMap, initialPose: Pose? = null) : System {
     val hub = ControlHub(hardwareMap, "Control Hub")
     val exHub = ControlHub(hardwareMap, "Expansion Hub 2")
-//    val leftOdo = hardwareMap.get(DcMotorEx::class.java, "backRight")
-//    val rightOdo = hardwareMap.get(DcMotorEx::class.java, "hub3")
-//    val backOdo = hardwareMap.get(DcMotorEx::class.java, "hub0")
+//    val leftOdo = hardwareMap.get(DcMotorEx::class.kotlin, "backRight")
+//    val rightOdo = hardwareMap.get(DcMotorEx::class.kotlin, "hub3")
+//    val backOdo = hardwareMap.get(DcMotorEx::class.kotlin, "hub0")
 
     private var ticksL: Int = 0
     private var ticksR: Int = 0
@@ -113,7 +117,7 @@ class OdometrySystem(hardwareMap: HardwareMap, initialPose: Pose? = null) : Syst
                 hub.setEncoderDirection(0, ControlHub.Direction.Backward) // (back pod)
                 hub.setEncoderDirection(3, ControlHub.Direction.Backward) // (right pod)
 
-                it.virtualPose = initialPose ?: Persistents.pose
+                it.virtualPose = initialPose ?: Pose(0, 0, 0)//Persistents.pose
             }
             .setAction {
                 val circumference: Double = it.odoDiameter * it.gearRatio * PI

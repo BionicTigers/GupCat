@@ -1,6 +1,8 @@
 package io.github.bionictigers.axiom.utils
 
-data class Time internal constructor(private val time: Double = 0.0) {
+import io.github.bionictigers.io.github.bionictigers.axiom.web.Display
+
+data class Time internal constructor(@Display private val time: Double = 0.0) {
     constructor() : this(0.0)
 
     companion object {

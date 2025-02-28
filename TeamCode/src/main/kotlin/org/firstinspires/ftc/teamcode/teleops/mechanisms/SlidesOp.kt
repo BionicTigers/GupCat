@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.teleops.mechanisms
 
-import com.acmerobotics.dashboard.FtcDashboard
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import io.github.bionictigers.axiom.commands.Scheduler
@@ -16,9 +15,6 @@ class SlidesOp : LinearOpMode() {
         val slides = Slides(hardwareMap, pivot)
         val (gp1, gp2) = gamepadSystem.gamepads
 
-        val dashboard = FtcDashboard.getInstance()
-        val dTelemetry = dashboard.telemetry
-
         slides.setupDriverControl(gp1)
         pivot.setupDriverControl(gp1)
 
@@ -28,9 +24,6 @@ class SlidesOp : LinearOpMode() {
 
         while (true) {
             Scheduler.update()
-            dTelemetry.addData("PV", slides.ticks)
-            dTelemetry.addData("SP", slides.targetPosition)
-            dTelemetry.update()
         }
     }
 }

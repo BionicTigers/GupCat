@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.mechanisms
 
-import com.acmerobotics.dashboard.FtcDashboard
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.DcMotorSimple
@@ -45,8 +44,6 @@ interface PivotState : CommandState {
 class Pivot(hardwareMap: HardwareMap) : System {
     val exHub = ControlHub(hardwareMap, "Expansion Hub 2")
     val limitSwitch = hardwareMap.getByName<DigitalChannel>("pivotSwitch")
-
-    private val telemetry = FtcDashboard.getInstance().telemetry
 
 //    val upPIDTerms = interpolatedMapOf(
 //        0.0 to 4.75,

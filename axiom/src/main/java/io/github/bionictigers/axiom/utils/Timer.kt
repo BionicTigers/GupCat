@@ -16,8 +16,6 @@ class Timer(val duration: Time) {
             isFinished = true
         }
 
-        println(state.timeInScheduler - initialTime!!)
-
         return this
     }
 
