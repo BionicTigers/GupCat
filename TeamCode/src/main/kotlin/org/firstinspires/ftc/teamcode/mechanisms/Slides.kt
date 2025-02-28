@@ -151,6 +151,15 @@ class Slides(hardwareMap: HardwareMap, pivot: Pivot) : System {
         gamepad.getBooleanButton(Gamepad.Buttons.DPAD_DOWN).onHold {
             targetPosition -= (max * .8 * Scheduler.loopDeltaTime.seconds()).toInt()
         }
+
+        gamepad.leftJoystick.continuous {
+            targetPosition += (max * .5 * Scheduler.loopDeltaTime.seconds() * it.y * 1.1).toInt()
+        }
+
+        gamepad.getBooleanButton(Gamepad.Buttons.DPAD_RIGHT).onDown {
+            targetPosition = 20000 // hang height
+        }
+
     }
 
     var targetPosition: Int = 0

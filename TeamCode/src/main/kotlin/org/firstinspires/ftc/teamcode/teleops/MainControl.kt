@@ -23,7 +23,7 @@ class MainControl : LinearOpMode() {
         val pivot = Pivot(hardwareMap)
         val slides = Slides(hardwareMap, pivot)
         val arm = Arm(hardwareMap)
-        val claw = Claw(hardwareMap, 0.0)
+        val claw = Claw(hardwareMap, 0.15)
 
 //        odometry.globalPose = Pose(850.9, 215.9, 0)
 

@@ -202,16 +202,20 @@ class OdometrySystem(hardwareMap: HardwareMap, initialPose: Pose? = null) : Syst
                 it.localAcceleration = Vector2((it.localVelocity.x - oldVelocity.x) / deltaTime, (it.localVelocity.y - oldVelocity.y) / deltaTime)
 
                 val oldGlobalVel = it.globalVelocity
-                it.globalVelocity = Pair(Vector2(virtualGlobalDeltaX, virtualGlobalDeltaY) / deltaTime, Angle.degrees(localRotation.degrees / deltaTime))
-                it.globalAcceleration = Pair(oldGlobalVel.first - it.globalVelocity.first, oldGlobalVel.second - it.globalVelocity.second)
 
                 it.xAverage.addNumber(it.globalVelocity.first.x)
                 it.yAverage.addNumber(it.globalVelocity.first.y)
                 it.angularAverage.addNumber(it.globalVelocity.second.degrees)
 
-                // CONVERT VIRTUAL INTO GLOBAL
+                val oldY = it.pose.y
+                val oldX = it.pose.x
+
+                // CONVERT VIRTUAL INTO FINAL
                 val y = it.virtualPose.y - (it.virtualOffsetY * it.virtualPose.rotation.cos).mm + (it.virtualOffsetX * it.virtualPose.rotation.sin).mm
                 val x = it.virtualPose.x - (it.virtualOffsetY * it.virtualPose.rotation.sin).mm - (it.virtualOffsetX * it.virtualPose.rotation.cos).mm
+
+                it.globalVelocity = Pair(Vector2(x - oldX, y - oldY) / deltaTime, Angle.degrees(localRotation.degrees / deltaTime))
+                it.globalAcceleration = Pair(oldGlobalVel.first - it.globalVelocity.first, oldGlobalVel.second - it.globalVelocity.second)
 
                 it.pose = Pose(x, y, it.virtualPose.rotation)
 

@@ -130,7 +130,7 @@ interface DrivetrainState : CommandState {
                 override val pPidY = PID(PIDTerms(5000.0, 100.0), 0.0, 3657.6, -1427.0, 1427.0, 100)
                 override val pPidRot = PID(PIDTerms(80.0, 40.0), -2 * PI, 2 * PI, Angle.degrees(-294.81).radians, Angle.degrees(294.81).radians, 100)
 
-                override val vPidX = PID(PIDTerms(3.5, 3.5), -1104.0, 1104.0, -1.0, 1.0, 40)
+                override val vPidX = PID(PIDTerms(3.3, 3.5), -1104.0, 1104.0, -1.0, 1.0, 40)
                 override val vPidY = PID(PIDTerms(3.5,  3.5), -1427.0, 1427.0, -1.0, 1.0, 40)
                 override val vPidRot = PID(PIDTerms(2.0, 10.0), Angle.degrees(-294.81).radians, Angle.degrees(294.81).radians, -1.0, 1.0)
 
@@ -210,6 +210,8 @@ class Drivetrain(
     private var referencePose = odometrySystem.globalPose
 
     fun veloTest(power: Double, direction: Pose) = Mecanum.velocityCoeffTest(beforeRun.state, power, direction)
+
+    fun accelerateToVelocity(targetVel: Pose) = Mecanum.accelerateToVelocity(beforeRun.state, odometrySystem, targetVel)
 
     object Mecanum {
         // TODO: update these values and figure out how to actually measure jerk instead of making it up
@@ -504,6 +506,23 @@ class Drivetrain(
                     rotationFinished = true
                 }
             }
+
+            val powers = fieldCalculatePowers(xPower, -yPower, -rotPower, odometry.globalPose.radians)
+
+            val modifier = 1
+            state.motors.setPower(powers[0] * modifier, powers[1] * modifier, powers[2] * modifier, powers[3] * modifier)
+        }
+
+        fun accelerateToVelocity(state: DrivetrainState, odometry: OdometrySystem, targetVel: Pose) {
+            val (vel, ang) = odometry.globalVelocity
+
+            state.vPidX.p = xvPIDPMap[targetVel.x]
+            val xPower = state.vPidX.calculate(targetVel.x, vel.x)
+
+            state.vPidY.p = yvPIDPMap[targetVel.y]
+            val yPower = state.vPidY.calculate(targetVel.y, vel.y)
+
+            val rotPower = state.vPidRot.calculate(targetVel.radians, ang.radians)
 
             val powers = fieldCalculatePowers(xPower, -yPower, -rotPower, odometry.globalPose.radians)
 
