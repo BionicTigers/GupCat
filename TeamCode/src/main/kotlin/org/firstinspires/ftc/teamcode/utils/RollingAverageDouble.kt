@@ -40,7 +40,7 @@ class NewRollingAverage(var size: Int) {
      * Add a number to the rolling average
      * @param number
      */
-    fun addNumber(number: Double) {
+    private fun addNumber(number: Double) {
         if (queue.size >= size) {
             val last = queue.remove()
             total -= last
@@ -52,6 +52,8 @@ class NewRollingAverage(var size: Int) {
         if (queue.isEmpty()) avg = 0.0
         avg = total / queue.size.toDouble()
     }
+
+    operator fun plusAssign(other: Double) = addNumber(other)
 
     @Display
     private var avg: Double = 0.0

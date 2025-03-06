@@ -26,8 +26,8 @@ interface HighBasketScore : CommandState {
     companion object {
         fun default(): HighBasketScore {
             return object : HighBasketScore, CommandState by CommandState.default("High Basket") {
-                override val pivotTimer = Timer(Time.fromSeconds(.55))
-                override val dropTimer = Timer(Time.fromSeconds(.55))
+                override val pivotTimer = Timer(Time.fromSeconds(.2))
+                override val dropTimer = Timer(Time.fromSeconds(.5))
             }
         }
     }
@@ -39,7 +39,7 @@ interface Retract : CommandState {
     companion object {
         fun default(): Retract {
             return object : Retract, CommandState by CommandState.default("Retract") {
-                override val slideEndTimer = Timer(Time.fromSeconds(.18))
+                override val slideEndTimer = Timer(Time.fromSeconds(.1))
             }
         }
     }
@@ -78,24 +78,26 @@ class BlueLeftPreload : LinearOpMode() {
         Persistents.reset()
         Scheduler.clear()
         val gamepadSystem = GamepadSystem(gamepad1, gamepad2)
-        val odometrySystem = OdometrySystem(hardwareMap, Pose(850.9, 215.9, 0))
-        val drivetrain = Drivetrain(hardwareMap, gamepadSystem, odometrySystem)
-        val pivot = Pivot(hardwareMap)
-        val slides = Slides(hardwareMap, pivot)
+        val odometrySystem = OdometrySystem(hardwareMap, Pose(812.9, 203.1, 90))
+        val drivetrain = Drivetrain(hardwareMap, gamepadSystem, odometrySystem, true)
+        val slides = Slides(hardwareMap)
+        val pivot = Pivot(hardwareMap, slides)
+        slides.pivot = pivot
         val claw = Claw(hardwareMap, 0.0)
         val arm = Arm(hardwareMap)
 
         Scheduler.addSystem(odometrySystem, drivetrain, pivot, slides)
 
-        val highBasketPosition = Pose(355.8, 485.8, 45)
-        val highBasketHeight = 3500
-        val highBasketPivot = 1800
+        val highBasketPosition = Pose(505.8, 505.8, 45)
+        val highBasketHeight = 52000
+        val highBasketPivot = pivot.max
 
-        val groundRightPosition = Pose(590, 846, 0)
-        val groundMiddlePosition = Pose(359, 846, 0)
+        val leftSlidesHeight = 24500
 
-        val groundLeftPosition = Pose(450, 500, -25)
-        val leftSlidesHeight = 1900
+        val groundRightPosition = Pose(460.8, 505.8, 18) // 460
+        val groundMiddlePosition = Pose(460, 505, -5)
+
+        val groundLeftPosition = Pose(460, 505, -28)
 
         val moveForward = statelessCommand("moveForward")
         val scoreHighBasket = Command(HighBasketScore.default())
@@ -109,34 +111,42 @@ class BlueLeftPreload : LinearOpMode() {
         var moveClaw = false
         var driveMoveFinished = false
 
-        val tAfkf = Timer(Time.fromSeconds(3))
+//        val tAfkf = Timer(Time.fromSeconds(3))
         moveForward
             .setOnEnter {
                 claw.open = false
-                drivetrain.moveToPose(Pose(900.9, 500.9, 0))
+                drivetrain.moveToPose(Pose(700.9, 505.1, 90))
             }
             .setAction {
-                return@setAction tAfkf.update(it).isFinished
+                return@setAction it.timeInScheduler >= Time.fromSeconds(.6)
             }
-            .setOnEnter {
+            .setOnExit {
                 Scheduler.add(scoreHighBasket)
             }
+
+        var pivotShouldMove = true
+        var slidesShouldMove = true
 
         scoreHighBasket
             .setOnEnter {
                 claw.open = false
                 arm.target = Arm.Position.Down
+                slides.mpMove(16000)
                 drivetrain.moveToPose(highBasketPosition, Time.fromSeconds(5))
+                it.pivotTimer.reset()
+                it.dropTimer.reset()
 //                273, 453
             }
             .setAction {
                 telemetry.addData("Move", "HighBasket")
+                if (!(drivetrain.moveFinished || driveMoveFinished)) pivot.mpSetPosition(highBasketPivot / 3)
+
                 if (drivetrain.moveFinished || driveMoveFinished) {
+                    if (!driveMoveFinished) pivot.mpSetPosition(highBasketPivot)
                     driveMoveFinished = true
-                    pivot.pivotTicks = highBasketPivot
-                    if (highBasketPivot - pivot.pivotTicks <= 100 && it.pivotTimer.update(it).isFinished) {
-                        slides.targetPosition = highBasketHeight
-                        if (slides.targetPosition - slides.ticks <= 900) {
+                    if (highBasketPivot - pivot.pivotTicks <= 1600 /*&& it.pivotTimer.update(it).isFinished*/) {
+                        slides.mpMove(highBasketHeight)
+                        if (highBasketHeight - slides.ticks <= 1250) {
                             arm.target = Arm.Position.Up
                             moveClaw = true
                         }
@@ -150,7 +160,7 @@ class BlueLeftPreload : LinearOpMode() {
                     }
                 }
 
-                driveMoveFinished && highBasketPivot - pivot.pivotTicks <= 100 && slides.targetPosition - slides.ticks <= 250 && it.dropTimer.isFinished
+                moveClaw && it.dropTimer.isFinished
             }
             .setOnExit {
                 driveMoveFinished = false
@@ -164,16 +174,21 @@ class BlueLeftPreload : LinearOpMode() {
             }
             .setAction {
                 telemetry.addData("Move", "Retract")
-                it.slideEndTimer.update(it).finished {
-                    slides.targetPosition = 0
-                    if (slides.ticks <= 400) {
-                        pivot.pivotTicks = 0
+//                it.slideEndTimer.update(it).finished {
+                    slides.mpMove(leftSlidesHeight)
+                    if (abs(slides.ticks - leftSlidesHeight) <= 2500) {
+                        if (pivotShouldMove) {
+                            pivot.mpSetPosition(-200)
+                            pivotShouldMove = false
+                        }
                     }
-                }
+//                }
 
-                pivot.pivotTicks <= 100 && abs(slides.targetPosition - slides.ticks) <= 250
+                pivot.ticks <= 1600 && !pivotShouldMove
             }
             .setOnExit {
+                pivotShouldMove = true
+                slidesShouldMove = true
                 it.slideEndTimer.reset()
                 if (samplesCollected == 0) {
                     Scheduler.add(groundRight)
@@ -193,69 +208,88 @@ class BlueLeftPreload : LinearOpMode() {
             }
             .setAction {
                 telemetry.addData("Move", "Ground Right")
-                if (drivetrain.moveFinished) {
+                if (drivetrain.moveFinished && !driveMoveFinished) {
                     driveMoveFinished = true
+                    slides.mpMove(leftSlidesHeight)
+                }
+
+                if (abs(slides.ticks - leftSlidesHeight) < 350 && driveMoveFinished) {
                     claw.open = false
                 }
 
-                driveMoveFinished && it.hoverTimer.update(it).isFinished
+                driveMoveFinished && abs(slides.ticks - leftSlidesHeight) < 350 && it.hoverTimer.update(it).isFinished
             }
             .setOnExit {
-                scoreHighBasket.state.dropTimer.reset()
-                scoreHighBasket.state.pivotTimer.reset()
                 driveMoveFinished = false
                 moveClaw = false
                 Scheduler.add(scoreHighBasket)
             }
 
+//        groundMiddle
+//            .setOnEnter {
+//                drivetrain.moveToPose(groundMiddlePosition, Time.fromSeconds(3.5))
+//            }
+//            .setAction {
+//                telemetry.addData("Move", "Ground Middle")
+//                if (drivetrain.moveFinished) {
+//                    driveMoveFinished = true
+//                    claw.open = false
+//                }
+//
+//                driveMoveFinished && it.hoverTimer.update(it).isFinished
+//            }
+//            .setOnExit {
+//                scoreHighBasket.state.dropTimer.reset()
+//                scoreHighBasket.state.pivotTimer.reset()
+//                driveMoveFinished = false
+//                moveClaw = false
+//                Scheduler.add(scoreHighBasket)
+//            }
         groundMiddle
             .setOnEnter {
+                println("Moving to Middle")
                 drivetrain.moveToPose(groundMiddlePosition, Time.fromSeconds(3.5))
             }
             .setAction {
-                telemetry.addData("Move", "Ground Middle")
-                if (drivetrain.moveFinished) {
+                telemetry.addData("Move", "Ground Right")
+                if (drivetrain.moveFinished && !driveMoveFinished) {
                     driveMoveFinished = true
+                    slides.mpMove(leftSlidesHeight - 2500)
+                }
+
+                if (abs(slides.ticks - (leftSlidesHeight - 2500)) < 800 && driveMoveFinished) {
                     claw.open = false
                 }
 
-                driveMoveFinished && it.hoverTimer.update(it).isFinished
+                driveMoveFinished && !claw.open && it.hoverTimer.update(it).isFinished
             }
             .setOnExit {
-                scoreHighBasket.state.dropTimer.reset()
-                scoreHighBasket.state.pivotTimer.reset()
                 driveMoveFinished = false
                 moveClaw = false
                 Scheduler.add(scoreHighBasket)
             }
+
 
         var bringIn = false
         groundLeft
             .setOnEnter {
+                println("Moving to Left")
                 drivetrain.moveToPose(groundLeftPosition, Time.fromSeconds(3.5))
             }
             .setAction {
                 telemetry.addData("Move", "Ground Left")
-                if (it.liftTime.update(it).isFinished) {
-                    slides.targetPosition = leftSlidesHeight
-                    println("${it.driveTimer.update(it).isFinished} ${slides.targetPosition - slides.ticks <= 50}")
-                    if (it.driveTimer.update(it).isFinished && slides.targetPosition - slides.ticks <= 80) {
-                        driveMoveFinished = true
-                        claw.open = false
-                        bringIn = true
-                    }
+                if (drivetrain.moveFinished && !driveMoveFinished) {
+                    driveMoveFinished = true
+                    slides.mpMove(leftSlidesHeight + 1000)
                 }
 
-                if (bringIn) {
-                    slides.targetPosition = 0
+                if (abs(slides.ticks - (leftSlidesHeight + 1000)) < 1000 && driveMoveFinished) {
+                    claw.open = false
                 }
 
-                println("$driveMoveFinished, $leftSlidesHeight - ${slides.ticks}, ${it.hoverTimer.update(it).isFinished}, ${it.liftTime.update(it).isFinished}, $bringIn")
-                driveMoveFinished && slides.targetPosition - slides.ticks <= 50 && it.hoverTimer.update(it).isFinished && it.liftTime.update(it).isFinished && bringIn
+                driveMoveFinished && !claw.open && it.hoverTimer.update(it).isFinished
             }
             .setOnExit {
-                scoreHighBasket.state.dropTimer.reset()
-                scoreHighBasket.state.pivotTimer.reset()
                 driveMoveFinished = false
                 moveClaw = false
                 Scheduler.add(scoreHighBasket)
@@ -267,11 +301,12 @@ class BlueLeftPreload : LinearOpMode() {
 
         while (opModeIsActive()) {
             Scheduler.update()
-            odometrySystem.log(telemetry)
+            odometrySystem.logPosition(telemetry)
             claw.logClaw(telemetry)
             arm.log(telemetry)
             slides.log(telemetry)
             pivot.log(telemetry)
+            telemetry.update()
         }
 
         Scheduler.clear()

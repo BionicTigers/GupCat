@@ -53,6 +53,5 @@ class Claw(hardwareMap: HardwareMap, private val openPos: Double = .15) : System
 
     fun logClaw(telemetry: Telemetry) {
         telemetry.addData("position", claw.position)
-        telemetry.update()
     }
 }

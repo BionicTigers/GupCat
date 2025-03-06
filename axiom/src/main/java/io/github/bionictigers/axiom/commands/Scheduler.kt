@@ -4,11 +4,10 @@ import com.qualcomm.robotcore.util.RobotLog
 import io.github.bionictigers.axiom.utils.Time
 import io.github.bionictigers.axiom.web.Editable
 import io.github.bionictigers.axiom.web.Hidden
-import io.github.bionictigers.axiom.web.Server
 import io.github.bionictigers.io.github.bionictigers.axiom.utils.convertTo
 import io.github.bionictigers.io.github.bionictigers.axiom.utils.hasAnnotationOnProperty
 import io.github.bionictigers.io.github.bionictigers.axiom.web.Display
-import io.github.bionictigers.io.github.bionictigers.axiom.web.Value
+import io.github.bionictigers.axiom.web.Value
 import java.lang.reflect.Field
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -89,6 +88,8 @@ object Scheduler {
 //                println("Failed to serialize ${it.name} from ${cmdState.name} is ${it.type}")
             }
         }
+
+        map["deltaTime"] = 0.0
 
         return map
     }

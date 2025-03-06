@@ -24,7 +24,7 @@ class DriveOp : LinearOpMode() {
 
         while (opModeIsActive()) {
             val (velocity, angVelocity) = odometrySystem.globalVelocity
-            odometrySystem.logPosition(telemetry)
+            odometrySystem.logMaximums(telemetry)
             telemetry.update()
             Scheduler.update()
         }

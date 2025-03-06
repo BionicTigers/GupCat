@@ -156,6 +156,7 @@ data class Command<T: CommandState>(val state: T, private val interval: Time? = 
 
         if (result) {
             onExit(state)
+            state.enteredAt = Time()
             running = false
             Scheduler.remove(this)
         }

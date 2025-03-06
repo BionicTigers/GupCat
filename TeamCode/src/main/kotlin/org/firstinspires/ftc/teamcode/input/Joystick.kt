@@ -44,7 +44,7 @@ class Joystick(value: Vector2) : BaseButton<Vector2>(value) {
         super.update(value)
 
         return when (state) {
-            JoystickState.IN_DEAD_ZONE -> listOf(inDeadZone, continuous).flatten()
+            JoystickState.IN_DEAD_ZONE -> inDeadZone
             JoystickState.ON_MOVE -> listOf(onMove, continuous).flatten()
             JoystickState.CONTINUOUS -> continuous
         }

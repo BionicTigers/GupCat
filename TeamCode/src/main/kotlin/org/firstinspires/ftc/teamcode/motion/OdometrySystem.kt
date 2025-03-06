@@ -30,6 +30,14 @@ import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.sin
 
+interface RobotConfig {
+    val leftOffset: Distance
+    val rightOffset: Distance
+    val backOffset: Distance
+    val virtualOffsetY: Distance
+    val virtualOffsetX: Distance
+}
+
 interface OdometrySystemState : CommandState {
     val leftOffset: Distance
     val rightOffset: Distance
@@ -54,6 +62,33 @@ interface OdometrySystemState : CommandState {
     val xAverage: NewRollingAverage
     val yAverage: NewRollingAverage
     val angularAverage: NewRollingAverage
+
+    companion object {
+        fun default(robotConfig: RobotConfig, initialPose: Pose = Pose(0, 0, 0)): OdometrySystemState {
+            val virtualY = initialPose.y + (robotConfig.virtualOffsetY * initialPose.rotation.cos).mm - (robotConfig.virtualOffsetX * initialPose.rotation.sin).mm
+            val virtualX = initialPose.x + (robotConfig.virtualOffsetY * initialPose.rotation.sin).mm + (robotConfig.virtualOffsetX * initialPose.rotation.cos).mm
+            val virtualPose = Pose(virtualX, virtualY, initialPose.rotation)
+
+            return object : OdometrySystemState, CommandState by CommandState.default("Odometry") {
+                override val leftOffset: Distance = robotConfig.leftOffset
+                override val rightOffset: Distance = robotConfig.rightOffset
+                override val backOffset: Distance = robotConfig.backOffset
+                override val virtualOffsetY: Distance = robotConfig.virtualOffsetY
+                override val virtualOffsetX: Distance = robotConfig.virtualOffsetX
+                override var localVelocity: Vector2 = Vector2()
+                override var localAcceleration: Vector2 = Vector2()
+                override var globalVelocity: Pair<Vector2, Angle> = Pair(Vector2(), Angle.degrees(0.0))
+                override var globalAcceleration: Pair<Vector2, Angle> = Pair(Vector2(), Angle.degrees(0.0))
+                override var virtualPose = virtualPose
+                override var odoDiameter = 47.3 //48
+                override var gearRatio = 1.0
+                override var xAverage = NewRollingAverage(3)
+                override var yAverage = NewRollingAverage(3)
+                override var angularAverage = NewRollingAverage(3)
+                override var pose = initialPose
+            }
+        }
+    }
 }
 
 class OdometrySystem(hardwareMap: HardwareMap, initialPose: Pose? = null) : System {
@@ -70,20 +105,20 @@ class OdometrySystem(hardwareMap: HardwareMap, initialPose: Pose? = null) : Syst
     var dt: Time = Time.fromSeconds(1)
 
     companion object {
-        object Test {
-            val leftOffset: Distance = Distance.mm(204.0) - Distance.mm(5.0) //Distance.mm( 173.83125) + Distance.mm(10)
-            val rightOffset: Distance = Distance.mm(142.0) - Distance.mm(5.0) // Distance.mm(165.1) + Distance.mm(10) //152.4 //169.0
-            val backOffset: Distance = Distance.mm(82.0)  //Distance.mm(3/4 + 3/32) //152.4 //152.4 //95.25
-            val virtualOffsetY: Distance = Distance.mm(-68.92)  //Distance.mm(-68.97)
-            val virtualOffsetX: Distance = Distance.mm(31.0)  //Distance.mm(5.45)
+        object Test: RobotConfig {
+            override val leftOffset: Distance = Distance.mm(204.0) - Distance.mm(5.0) //Distance.mm( 173.83125) + Distance.mm(10)
+            override val rightOffset: Distance = Distance.mm(142.0) - Distance.mm(5.0) // Distance.mm(165.1) + Distance.mm(10) //152.4 //169.0
+            override val backOffset: Distance = Distance.mm(82.0)  //Distance.mm(3/4 + 3/32) //152.4 //152.4 //95.25
+            override val virtualOffsetY: Distance = Distance.mm(-68.92)  //Distance.mm(-68.97)
+            override val virtualOffsetX: Distance = Distance.mm(31.0)  //Distance.mm(5.45)
         }
 
-        object Main {
-            val leftOffset: Distance = Distance.mm(171)
-            val rightOffset: Distance = Distance.mm(171)
-            val backOffset: Distance = Distance.mm(70.8)
-            val virtualOffsetY: Distance = Distance.mm(0)
-            val virtualOffsetX: Distance = Distance.mm(23)
+        object Main: RobotConfig {
+            override val leftOffset: Distance = Distance.mm(171)
+            override val rightOffset: Distance = Distance.mm(171)
+            override val backOffset: Distance = Distance.mm(22.86)
+            override val virtualOffsetY: Distance = Distance.mm(-83.82)
+            override val virtualOffsetX: Distance = Distance.mm(0)
         }
     }
 
@@ -92,24 +127,7 @@ class OdometrySystem(hardwareMap: HardwareMap, initialPose: Pose? = null) : Syst
 
     override val dependencies: List<System> = emptyList()
     override val beforeRun =
-        Command(object : OdometrySystemState, CommandState by CommandState.default("Odometry") {
-            override val leftOffset: Distance = robotConfig.leftOffset
-            override val rightOffset: Distance = robotConfig.rightOffset
-            override val backOffset: Distance = robotConfig.backOffset
-            override val virtualOffsetY: Distance = robotConfig.virtualOffsetY
-            override val virtualOffsetX: Distance = robotConfig.virtualOffsetX
-            override var localVelocity: Vector2 = Vector2()
-            override var localAcceleration: Vector2 = Vector2()
-            override var globalVelocity: Pair<Vector2, Angle> = Pair(Vector2(), Angle.degrees(0.0))
-            override var globalAcceleration: Pair<Vector2, Angle> = Pair(Vector2(), Angle.degrees(0.0))
-            override var virtualPose = Pose(virtualOffsetX.mm, virtualOffsetY.mm, 0)
-            override var odoDiameter = 47.3 //48
-            override var gearRatio = 1.0
-            override var xAverage = NewRollingAverage(3)
-            override var yAverage = NewRollingAverage(3)
-            override var angularAverage = NewRollingAverage(3)
-            override var pose = Pose(0, 0, 0)
-        } as OdometrySystemState)
+        Command(OdometrySystemState.default(robotConfig, initialPose ?: Pose(0, 0, 0)))
             .setOnEnter {
                 hub.setJunkTicks()
                 exHub.setJunkTicks()
@@ -117,9 +135,11 @@ class OdometrySystem(hardwareMap: HardwareMap, initialPose: Pose? = null) : Syst
                 hub.setEncoderDirection(0, ControlHub.Direction.Backward) // (back pod)
                 hub.setEncoderDirection(3, ControlHub.Direction.Backward) // (right pod)
 
-                it.virtualPose = initialPose ?: Pose(0, 0, 0)//Persistents.pose
+                globalPose = initialPose ?: Pose(0, 0, 0)//Persistents.pose
             }
             .setAction {
+                dt += it.deltaTime
+//                if (dt < Time.fromSeconds(.1)) return@setAction false
                 val circumference: Double = it.odoDiameter * it.gearRatio * PI
 
                 // Find Local Updates
@@ -194,18 +214,20 @@ class OdometrySystem(hardwareMap: HardwareMap, initialPose: Pose? = null) : Syst
                 Persistents.pose = it.virtualPose
 
                 // Update velocity and acceleration
-                val deltaTime = it.deltaTime.seconds()
-                dt = it.deltaTime
-
                 val oldVelocity = it.localVelocity
-                it.localVelocity = Vector2((deltaLocalX + deltaStrafeX).mm / deltaTime, (deltaLocalY + deltaStrafeY).mm / deltaTime)
-                it.localAcceleration = Vector2((it.localVelocity.x - oldVelocity.x) / deltaTime, (it.localVelocity.y - oldVelocity.y) / deltaTime)
+                it.localVelocity = Vector2((deltaLocalX + deltaStrafeX).mm / dt.seconds(), (deltaLocalY + deltaStrafeY).mm / dt.seconds())
+
+                if (abs(it.localVelocity.x) > abs(oldVelocity.x))
+                    it.localAcceleration.x = (it.localVelocity.x - oldVelocity.x) / dt.seconds()
+
+                if (abs(it.localVelocity.y) > abs(oldVelocity.y))
+                    it.localAcceleration.y = (it.localVelocity.y - oldVelocity.y) / dt.seconds()
 
                 val oldGlobalVel = it.globalVelocity
 
-                it.xAverage.addNumber(it.globalVelocity.first.x)
-                it.yAverage.addNumber(it.globalVelocity.first.y)
-                it.angularAverage.addNumber(it.globalVelocity.second.degrees)
+                it.xAverage += it.globalVelocity.first.x
+                it.yAverage += it.globalVelocity.first.y
+                it.angularAverage += it.globalVelocity.second.degrees
 
                 val oldY = it.pose.y
                 val oldX = it.pose.x
@@ -214,8 +236,8 @@ class OdometrySystem(hardwareMap: HardwareMap, initialPose: Pose? = null) : Syst
                 val y = it.virtualPose.y - (it.virtualOffsetY * it.virtualPose.rotation.cos).mm + (it.virtualOffsetX * it.virtualPose.rotation.sin).mm
                 val x = it.virtualPose.x - (it.virtualOffsetY * it.virtualPose.rotation.sin).mm - (it.virtualOffsetX * it.virtualPose.rotation.cos).mm
 
-                it.globalVelocity = Pair(Vector2(x - oldX, y - oldY) / deltaTime, Angle.degrees(localRotation.degrees / deltaTime))
-                it.globalAcceleration = Pair(oldGlobalVel.first - it.globalVelocity.first, oldGlobalVel.second - it.globalVelocity.second)
+                it.globalVelocity = Pair(Vector2(x - oldX, y - oldY) / dt.seconds(), Angle.degrees(localRotation.degrees / dt.seconds()))
+                it.globalAcceleration = Pair((it.globalVelocity.first - oldGlobalVel.first) / dt.seconds(), (it.globalVelocity.second - oldGlobalVel.second) / dt.seconds())
 
                 it.pose = Pose(x, y, it.virtualPose.rotation)
 
@@ -223,6 +245,8 @@ class OdometrySystem(hardwareMap: HardwareMap, initialPose: Pose? = null) : Syst
                 WebData.x = x
                 WebData.y = y
                 WebData.rotation = it.virtualPose.rotation.radians
+
+                dt = Time.fromSeconds(0.0)
 
                 hub.setJunkTicks()
                 exHub.setJunkTicks()
@@ -238,6 +262,9 @@ class OdometrySystem(hardwareMap: HardwareMap, initialPose: Pose? = null) : Syst
 
     override val afterRun: Command<*>? = null
 
+    val globalVelocity: Pair<Vector2, Angle>
+        get() = Pair(Vector2(beforeRun.state.xAverage.average, beforeRun.state.yAverage.average), Angle.degrees(beforeRun.state.angularAverage.average))
+
     var globalPose: Pose
         get() = beforeRun.state.pose
         set(value) {
@@ -248,9 +275,9 @@ class OdometrySystem(hardwareMap: HardwareMap, initialPose: Pose? = null) : Syst
             beforeRun.state.virtualPose = Pose(virtualX, virtualY, value.rotation)
         }
 
-    val globalVelocity: Pair<Vector2, Angle>
-        get() = Pair(Vector2(beforeRun.state.xAverage.average, beforeRun.state.yAverage.average), Angle.degrees(beforeRun.state.angularAverage.average))
-
+    init {
+        globalPose = initialPose ?: Pose(0, 0, 0)
+    }
 
     var localMaxAccelX = 0.0
     var localMaxAccelY = 0.0

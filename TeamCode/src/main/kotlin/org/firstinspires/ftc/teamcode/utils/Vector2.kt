@@ -7,7 +7,7 @@ import kotlin.math.sqrt
  * @param x The x component.
  * @param y The y component.
  */
-data class Vector2(val x: Double, val y: Double) {
+data class Vector2(var x: Double, var y: Double) {
     constructor(x: Number, y: Number) : this(x.toDouble(), y.toDouble())
     constructor() : this(0.0, 0.0)
 
@@ -21,6 +21,10 @@ data class Vector2(val x: Double, val y: Double) {
 
     operator fun div(num: Number): Vector2 {
         return Vector2(this.x / num.toDouble(), this.y / num.toDouble())
+    }
+
+    operator fun div(other: Vector2): Vector2 {
+        return Vector2(this.x / other.x, this.y / other.y)
     }
 
     operator fun minus(num: Number): Vector2 {

@@ -24,7 +24,7 @@ interface CommandMove : CommandState {
     companion object {
         fun default(): CommandMove {
             return object : CommandMove, CommandState by CommandState.default("Meow :3") {
-                override val poseToMove = Pose(0, 1000, 180)
+                override val poseToMove = Pose(0, 1000, 0)
             }
         }
     }

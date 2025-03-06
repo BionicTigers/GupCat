@@ -11,8 +11,9 @@ import org.firstinspires.ftc.teamcode.mechanisms.Slides
 class SlidesOp : LinearOpMode() {
     override fun runOpMode() {
         val gamepadSystem = GamepadSystem(gamepad1, gamepad2)
-        val pivot = Pivot(hardwareMap)
-        val slides = Slides(hardwareMap, pivot)
+        val slides = Slides(hardwareMap)
+        val pivot = Pivot(hardwareMap, slides)
+        slides.pivot = pivot
         val (gp1, gp2) = gamepadSystem.gamepads
 
         slides.setupDriverControl(gp1)

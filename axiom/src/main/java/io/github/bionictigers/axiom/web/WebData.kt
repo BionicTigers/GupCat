@@ -16,8 +16,8 @@ object WebData {
         set(value) {
             if (value != null) {
                 if (value.size != 4) error("Drivetrain Powers must be { FL, FR, BL, BR }")
-                val max = max(value.maxOf { abs(it) }, 1.0)
-                field = value.map { it / max }
+                val max = max(value.maxOf { abs(it.takeUnless { it.isNaN() } ?: 0.0) }, 1.0)
+                field = value.map { (it / max).takeUnless { it.isNaN() } ?: 0.0 }
             } else {
                 field = null
             }

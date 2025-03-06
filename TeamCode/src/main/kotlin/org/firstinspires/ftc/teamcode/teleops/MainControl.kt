@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import io.github.bionictigers.axiom.commands.Scheduler
 import io.github.bionictigers.axiom.commands.statelessCommand
+import org.firstinspires.ftc.teamcode.input.Gamepad
 import org.firstinspires.ftc.teamcode.input.GamepadSystem
 import org.firstinspires.ftc.teamcode.mechanisms.Arm
 import org.firstinspires.ftc.teamcode.mechanisms.Claw
@@ -20,8 +21,9 @@ class MainControl : LinearOpMode() {
         val gamepadSystem = GamepadSystem(gamepad1, gamepad2)
         val odometry = OdometrySystem(hardwareMap)
         val drivetrain = Drivetrain(hardwareMap, gamepadSystem, odometry)
-        val pivot = Pivot(hardwareMap)
-        val slides = Slides(hardwareMap, pivot)
+        val slides = Slides(hardwareMap)
+        val pivot = Pivot(hardwareMap, slides)
+        slides.pivot = pivot
         val arm = Arm(hardwareMap)
         val claw = Claw(hardwareMap, 0.15)
 
@@ -39,7 +41,17 @@ class MainControl : LinearOpMode() {
         arm.setupDriverControl(gp2) // b toggles 180 degrees, y goes to 90
         claw.setupDriverControl(gp2) // a toggles open and close
 
-        val init = statelessCommand()
+        gp2.getBooleanButton(Gamepad.Buttons.DPAD_LEFT).onDown {
+            pivot.mpSetPosition(pivot.max)
+            slides.mpMove(slides.max)
+        }
+
+        gp2.getBooleanButton(Gamepad.Buttons.RIGHT_BUMPER).onDown {
+            pivot.mpSetPosition(0)
+            slides.mpMove(0)
+        }
+
+        Scheduler.add(statelessCommand("initial")
             .setOnEnter {
                 claw.open = true
                 arm.target = Arm.Position.Down
@@ -47,8 +59,7 @@ class MainControl : LinearOpMode() {
             .setAction {
                 true
             }
-
-        Scheduler.add(init)
+        )
 
         waitForStart()
 
@@ -56,9 +67,9 @@ class MainControl : LinearOpMode() {
 //            Persistents.log(telemetry)
             Scheduler.update()
 //            odometry.logPosition(telemetry)
-            pivot.log(telemetry)
+//            pivot.log(telemetry)
 //            arm.log(telemetry)
-//            slides.log(telemetry)
+            slides.log(telemetry)
             telemetry.update()
         }
 
