@@ -203,6 +203,7 @@ class Drivetrain(
     override val dependencies: List<System> = listOf(odometrySystem)
     var disabled = false
 
+    var drivetrainIsMovingAuto = false
     override val beforeRun = Command(DrivetrainState.default(motors, hardwareMap))
         .setOnEnter {
 //            imu.initialize(BNO055IMUNew.Parameters(RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.UP, RevHubOrientationOnRobot.UsbFacingDirection.FORWARD)))
@@ -217,7 +218,7 @@ class Drivetrain(
             } else {
                 if (moveFinished) {
                     stop()
-                } else {
+                } else if (drivetrainIsMovingAuto) {
                     Mecanum.moveToPosition(it, odometrySystem)
                 }
             }
@@ -364,9 +365,9 @@ class Drivetrain(
 //            println("$velocity")
 
             return calculatePowers(
-                angleX + (.37 / voltage * 12.39).withSign(angleX) * abs(cos(movementAngle)) * (if (velocity < .0675) 1 else 0) * if (abs(angleX) > .0044) 1 else 0,
-                angleY + (.18 / voltage * 12.39).withSign(angleY) * abs(sin(movementAngle)) * (if (velocity < .0675) 1 else 0) * if (abs(angleY) > .0044) 1 else 0,
-                rotation + (.1 / voltage * 12.38).withSign(rotation) * (if (velocity < .0675) 1 else 0) * if (abs(rotation) > .004) 1 else 0
+                angleX + (.37 / voltage * 12.39).withSign(angleX) * abs(cos(movementAngle)) * (if (velocity < .0475) 1 else 0) * if (abs(angleX) > .005) 1 else 0,
+                angleY + (.18 / voltage * 12.39).withSign(angleY) * abs(sin(movementAngle)) * (if (velocity < .0475) 1 else 0) * if (abs(angleY) > .005) 1 else 0,
+                rotation + (.1 / voltage * 12.38).withSign(rotation) * (if (velocity < .0375) 1 else 0) * if (abs(rotation) > .005) 1 else 0
             )
         }
 
@@ -377,6 +378,7 @@ class Drivetrain(
         fun moveToPosition(state: DrivetrainState, odometry: OdometrySystem, targetPose: Pose? = null) {
             val pose = odometry.globalPose
 
+            if (targetPose == null && state.targetPose == Pose(0, 0, 0)) return
             if (targetPose != null) {
                 beta = atan2((state.targetPose.x - pose.x), (state.targetPose.y - pose.y))
 
@@ -407,6 +409,10 @@ class Drivetrain(
                     yMaxVelocity * .7
                 )
             }
+
+            println(state.targetPose.position)
+            println(odometry.globalPose.position)
+            println(starting)
 
             val xPosition =
                 starting.x + sin(beta) * state.profileDist!!.getPosition(state.timeInScheduler - state.timeStarted)
@@ -664,6 +670,7 @@ class Drivetrain(
         targetPose = pose
         Mecanum.moveToPosition(beforeRun.state, odometrySystem, pose)
         beforeRun.state.moveToPositionTimeout = timeout
+        drivetrainIsMovingAuto = true
         setMode(ControlMode.AUTONOMOUS)
     }
 

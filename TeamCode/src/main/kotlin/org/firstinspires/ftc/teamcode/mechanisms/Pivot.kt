@@ -141,7 +141,7 @@ class Pivot(hardwareMap: HardwareMap, val slides: Slides) : System {
 
             var pidPower = it.pid.calculate(it.targetPosition.toDouble(), ticks.toDouble())
 
-            val power = pidPower + (slides.ticks / slides.max) * .2 * (1 - ticks / max)
+            val power = pidPower + (slides.ticks / slides.max) * .05 * (1 - ticks / max)
             if (limitSwitch.state || it.targetPosition > 0) {
                 it.motor.power = power
                 it.motor2.power = power

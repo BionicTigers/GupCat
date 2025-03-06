@@ -92,12 +92,12 @@ class BlueLeftPreload : LinearOpMode() {
         val highBasketHeight = 52000
         val highBasketPivot = pivot.max
 
-        val leftSlidesHeight = 24500
+        val leftSlidesHeight = 24700
 
         val groundRightPosition = Pose(460.8, 505.8, 18) // 460
         val groundMiddlePosition = Pose(460, 505, -5)
 
-        val groundLeftPosition = Pose(460, 505, -28)
+        val groundLeftPosition = Pose(460, 505, -26)
 
         val moveForward = statelessCommand("moveForward")
         val scoreHighBasket = Command(HighBasketScore.default())
@@ -139,8 +139,10 @@ class BlueLeftPreload : LinearOpMode() {
             }
             .setAction {
                 telemetry.addData("Move", "HighBasket")
-                if (!(drivetrain.moveFinished || driveMoveFinished)) pivot.mpSetPosition(highBasketPivot / 3)
-
+                if (!(drivetrain.moveFinished || driveMoveFinished)) {
+                    pivot.mpSetPosition((highBasketPivot / 1.5).toInt())
+                    slides.mpMove(22000)
+                }
                 if (drivetrain.moveFinished || driveMoveFinished) {
                     if (!driveMoveFinished) pivot.mpSetPosition(highBasketPivot)
                     driveMoveFinished = true
@@ -159,6 +161,8 @@ class BlueLeftPreload : LinearOpMode() {
                         claw.open = true
                     }
                 }
+
+                println(it.dropTimer.isFinished)
 
                 moveClaw && it.dropTimer.isFinished
             }
