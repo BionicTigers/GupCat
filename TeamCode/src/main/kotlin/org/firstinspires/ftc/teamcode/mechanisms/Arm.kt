@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap
 import com.qualcomm.robotcore.hardware.Servo
 import org.firstinspires.ftc.robotcore.external.Telemetry
 import io.github.bionictigers.axiom.commands.System
+import io.github.bionictigers.axiom.commands.statelessCommand
 import org.firstinspires.ftc.teamcode.input.Gamepad
 
 class Arm(hardwareMap: HardwareMap) : System {

@@ -163,6 +163,16 @@ data class Command<T: CommandState>(val state: T, private val interval: Time? = 
 
         return result
     }
+
+    companion object {
+        fun default(name: String = "Unnamed Command", interval: Time? = null) {
+            Command(CommandState.default(name), interval)
+        }
+
+        fun <T: CommandState> of(state: T, interval: Time? = null): Command<T> {
+            return Command(state, interval)
+        }
+    }
 }
 
 fun statelessCommand(name: String = "Unnamed Command"): Command<CommandState> {

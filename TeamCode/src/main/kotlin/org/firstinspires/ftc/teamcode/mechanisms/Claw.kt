@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.mechanisms
 
 import com.qualcomm.robotcore.hardware.HardwareMap
 import com.qualcomm.robotcore.hardware.Servo
+import io.github.bionictigers.axiom.commands.Command
 import org.firstinspires.ftc.robotcore.external.Telemetry
 import io.github.bionictigers.axiom.commands.System
 import org.firstinspires.ftc.teamcode.input.Gamepad
@@ -15,10 +16,6 @@ import org.firstinspires.ftc.teamcode.utils.getByName
 
 
 class Claw(hardwareMap: HardwareMap, private val openPos: Double = .15) : System {
-    override val dependencies: List<System> = emptyList()
-    override val beforeRun = null
-    override val afterRun = null
-
     private val claw = hardwareMap.getByName<Servo>("claw")
 
     fun setupDriverControl(gp: Gamepad) {

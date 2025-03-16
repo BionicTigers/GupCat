@@ -1,5 +1,6 @@
 package io.github.bionictigers.axiom.web
 
+import android.annotation.SuppressLint
 import android.content.Context
 import com.qualcomm.ftccommon.FtcEventLoop
 import com.qualcomm.robotcore.eventloop.opmode.OpMode
@@ -20,8 +21,13 @@ import fi.iki.elonen.NanoHTTPD.Response.Status
 import fi.iki.elonen.NanoWSD.WebSocket
 import fi.iki.elonen.NanoWSD.WebSocketFrame
 import fi.iki.elonen.NanoWSD.WebSocketFrame.CloseCode
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -34,6 +40,8 @@ import org.firstinspires.ftc.robotcore.internal.opmode.RegisteredOpModes
 import java.io.IOException
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.coroutineContext
 
 @JsonClass(generateAdapter = true)
 sealed class IncomingMessage {
@@ -58,7 +66,10 @@ object Server {
     // Keep track of active WebSocket connections
     private val connections = mutableListOf<UpdatesWebSocket>()
 
-    var isRunning = false
+    private val serverJob = SupervisorJob()
+    private val serverScope = CoroutineScope(Dispatchers.Default + serverJob)
+
+    private var isRunning = false
 
     // Moshi instance configured with the Kotlin adapter
     private val moshi: Moshi = Moshi.Builder()
@@ -73,7 +84,6 @@ object Server {
     @OptIn(ExperimentalStdlibApi::class)
     private val messageAdapter = moshi.adapter<IncomingMessage>()
 
-    @OptIn(DelicateCoroutinesApi::class)
     @JvmStatic
     @OnCreate
     fun start(context: Context?) {
@@ -97,8 +107,7 @@ object Server {
         RobotLog.dd("Axiom", "NanoWSD server started on port 10464")
 
         //Scheduler update loop
-        //TODO: Change to a custom scope
-        GlobalScope.launch {
+        serverScope.launch {
             while (true) {
                 val data = generateSchedulerData()
                 send(data)
@@ -239,10 +248,19 @@ object Server {
             Running
         }
 
-        lateinit var eventLoop: FtcEventLoop
-            private set
-        var opModeManager: OpModeManagerImpl? = null
-            private set
+        data class FTCApplicationData(var eventLoop: FtcEventLoop? = null, var opModeManager: OpModeManagerImpl? = null)
+
+        private val applicationData = FTCApplicationData()
+        var eventLoop: FtcEventLoop?
+            get() = applicationData.eventLoop
+            set(value) {
+                applicationData.eventLoop = value
+            }
+        var opModeManager: OpModeManagerImpl?
+            get() = applicationData.opModeManager
+            set(value) {
+                applicationData.opModeManager = value
+            }
 
         val teleOpModes = ConcurrentLinkedQueue<String>()
         val autoOpModes = ConcurrentLinkedQueue<String>()
@@ -266,7 +284,7 @@ object Server {
             opModeManager = eventLoop.opModeManager
             opModeManager?.registerListener(this)
 
-            run {
+            serverScope.launch {
                 val registeredOpModes = RegisteredOpModes.getInstance()
                 RobotLog.dd("Axiom", "Waiting for op modes")
                 registeredOpModes.waitOpModesRegistered()
