@@ -110,14 +110,20 @@ class Slides(hardwareMap: HardwareMap, var pivot: Pivot? = null) : System {
             it.targetPosition = targetPosition.coerceIn(-200, max - slope * ticksFrom90)
 
             val direction = if (it.targetPosition >= ticks.toDouble()) -1 else 1
-
-            if (it.targetPosition >= ticks.toDouble()) {
+            if (pivot?.ticks != null && pivot?.ticks!! < 30) {
+                it.gpPid.kP = 7.0
+            } else if (it.targetPosition >= ticks.toDouble()) {
                 it.pid.kP = 18.0
-                it.gpPid.kP = 14.0
+                it.gpPid.kP = 10.0 // 12
             } else {
                 it.pid.kP = 14.0
-                it.gpPid.kP = 10.0
+                it.gpPid.kP = 4.0 // 7
             }
+
+//            if (pivot?.ticks != null && pivot?.ticks!! < 70){
+//                it.gpPid.pvMin = 1000.0
+//                println("--------------------------------------------------------------------------------------------------------------")
+//            }
 
             val power = if (it.limitSwitch.state || it.targetPosition > 0) {
 //                it.pid.calculate(it.profile.getPosition(it.timeInScheduler - it.moveStartTime), ticks.toDouble())
@@ -125,7 +131,7 @@ class Slides(hardwareMap: HardwareMap, var pivot: Pivot? = null) : System {
                     it.pid.calculate(it.targetPosition.toDouble(), ticks.toDouble())
                 } else {
                     it.gpPid.calculate(it.targetPosition.toDouble(), ticks.toDouble())
-                } + .1.withSign(it.targetPosition - ticks)
+                } //+ .1.withSign(it.targetPosition - ticks)
             } else {
                 -0.02
             }
@@ -155,13 +161,19 @@ class Slides(hardwareMap: HardwareMap, var pivot: Pivot? = null) : System {
 
     fun setupDriverControl(gamepad: Gamepad) {
         gamepad.getBooleanButton(Gamepad.Buttons.DPAD_UP).onHold {
-            targetPosition += (max * .8 * Scheduler.loopDeltaTime.seconds()).toInt()
+            if (pivot!!.ticks < 500)
+                targetPosition += (max * .7 * Scheduler.loopDeltaTime.seconds()).toInt()
+            else
+                targetPosition += (max * .8 * Scheduler.loopDeltaTime.seconds()).toInt()
             beforeRun.state.profile = null
             beforeRun.state.moveStartTime = null
         }
 
         gamepad.getBooleanButton(Gamepad.Buttons.DPAD_DOWN).onHold {
-            targetPosition -= (max * .8 * Scheduler.loopDeltaTime.seconds()).toInt()
+            if (pivot!!.ticks < 500)
+                targetPosition -= (max * .7 * Scheduler.loopDeltaTime.seconds()).toInt()
+            else
+                targetPosition -= (max * .8 * Scheduler.loopDeltaTime.seconds()).toInt()
             beforeRun.state.profile = null
             beforeRun.state.moveStartTime = null
         }
@@ -170,6 +182,13 @@ class Slides(hardwareMap: HardwareMap, var pivot: Pivot? = null) : System {
             targetPosition -= (max * .35 * Scheduler.loopDeltaTime.seconds() * it.y * 1.1).toInt()
             beforeRun.state.profile = null
             beforeRun.state.moveStartTime = null
+        }
+
+        gamepad.getBooleanButton(Gamepad.Buttons.DPAD_LEFT).onDown {
+            mpMove(18400) // specimen
+        }
+        gamepad.getBooleanButton(Gamepad.Buttons.DPAD_RIGHT).onDown {
+            mpMove(26400) // hang
         }
     }
 

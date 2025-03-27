@@ -22,12 +22,14 @@ import kotlin.math.abs
 interface HighBasketScore : CommandState {
     val pivotTimer: Timer
     val dropTimer: Timer
+    val moveTimer: Timer
 
     companion object {
         fun default(): HighBasketScore {
             return object : HighBasketScore, CommandState by CommandState.default("High Basket") {
                 override val pivotTimer = Timer(Time.fromSeconds(.2))
-                override val dropTimer = Timer(Time.fromSeconds(.5))
+                override val dropTimer = Timer(Time.fromSeconds(.9))
+                override val moveTimer = Timer(Time.fromSeconds(3))
             }
         }
     }
@@ -73,13 +75,13 @@ interface LeftPickupTime : PickupTime {
 }
 
 @Autonomous
-class BlueLeftPreload : LinearOpMode() {
+class Sample : LinearOpMode() {
     override fun runOpMode() {
         Persistents.reset()
         Scheduler.clear()
         val gamepadSystem = GamepadSystem(gamepad1, gamepad2)
         val odometrySystem = OdometrySystem(hardwareMap, Pose(812.9, 203.1, 90))
-        val drivetrain = Drivetrain(hardwareMap, gamepadSystem, odometrySystem, true)
+        val drivetrain = Drivetrain(hardwareMap, gamepadSystem, odometrySystem, isAuto = true, sample = true)
         val slides = Slides(hardwareMap)
         val pivot = Pivot(hardwareMap, slides)
         slides.pivot = pivot
@@ -88,16 +90,16 @@ class BlueLeftPreload : LinearOpMode() {
 
         Scheduler.addSystem(odometrySystem, drivetrain, pivot, slides)
 
-        val highBasketPosition = Pose(505.8, 505.8, 45)
+        val highBasketPosition = Pose(502.8, 502.8, 45)
         val highBasketHeight = 52000
         val highBasketPivot = pivot.max
 
-        val leftSlidesHeight = 24700
+        val leftSlidesHeight = 28000
 
         val groundRightPosition = Pose(460.8, 505.8, 18) // 460
-        val groundMiddlePosition = Pose(460, 505, -5)
+        val groundMiddlePosition = Pose(460, 505, -6)
 
-        val groundLeftPosition = Pose(460, 505, -26)
+        val groundLeftPosition = Pose(460, 505, -23.5)
 
         val moveForward = statelessCommand("moveForward")
         val scoreHighBasket = Command(HighBasketScore.default())
@@ -126,24 +128,33 @@ class BlueLeftPreload : LinearOpMode() {
 
         var pivotShouldMove = true
         var slidesShouldMove = true
+        var moveStart = false
 
         scoreHighBasket
             .setOnEnter {
                 claw.open = false
                 arm.target = Arm.Position.Down
                 slides.mpMove(16000)
-                drivetrain.moveToPose(highBasketPosition, Time.fromSeconds(5))
                 it.pivotTimer.reset()
                 it.dropTimer.reset()
+                it.moveTimer.reset()
+                moveStart = true
 //                273, 453
             }
             .setAction {
+                if (moveStart) {
+                    drivetrain.moveToPose(highBasketPosition, Time.fromSeconds(5))
+                    moveStart = false
+                }
+
                 telemetry.addData("Move", "HighBasket")
-                if (!(drivetrain.moveFinished || driveMoveFinished)) {
+                telemetry.addData("timer", it.moveTimer.duration)
+                it.moveTimer.update(it)
+                if (!(drivetrain.moveFinished || driveMoveFinished || it.moveTimer.isFinished)) {
                     pivot.mpSetPosition((highBasketPivot / 1.5).toInt())
                     slides.mpMove(22000)
                 }
-                if (drivetrain.moveFinished || driveMoveFinished) {
+                if (drivetrain.moveFinished || driveMoveFinished || it.moveTimer.isFinished) {
                     if (!driveMoveFinished) pivot.mpSetPosition(highBasketPivot)
                     driveMoveFinished = true
                     if (highBasketPivot - pivot.pivotTicks <= 1600 /*&& it.pivotTimer.update(it).isFinished*/) {
@@ -306,7 +317,7 @@ class BlueLeftPreload : LinearOpMode() {
         while (opModeIsActive()) {
             Scheduler.update()
             odometrySystem.logPosition(telemetry)
-            claw.logClaw(telemetry)
+            claw.log(telemetry)
             arm.log(telemetry)
             slides.log(telemetry)
             pivot.log(telemetry)

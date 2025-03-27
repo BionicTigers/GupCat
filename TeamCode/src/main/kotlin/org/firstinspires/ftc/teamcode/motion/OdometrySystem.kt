@@ -1,15 +1,7 @@
 package org.firstinspires.ftc.teamcode.motion
 
-import com.qualcomm.hardware.bosch.BNO055IMU
-import com.qualcomm.hardware.bosch.BNO055IMUImpl
-import com.qualcomm.hardware.bosch.BNO055IMUNew
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot
 import com.qualcomm.robotcore.hardware.HardwareMap
-import com.qualcomm.robotcore.util.RollingAverage
 import org.firstinspires.ftc.robotcore.external.Telemetry
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference
 import io.github.bionictigers.axiom.commands.Command
 import io.github.bionictigers.axiom.commands.CommandState
 import org.firstinspires.ftc.teamcode.utils.ControlHub
@@ -23,7 +15,6 @@ import org.firstinspires.ftc.teamcode.utils.Persistents
 import io.github.bionictigers.axiom.utils.Time
 import io.github.bionictigers.axiom.web.Hidden
 import io.github.bionictigers.axiom.web.WebData
-import org.firstinspires.ftc.teamcode.utils.getByName
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.cos
@@ -103,7 +94,6 @@ class OdometrySystem(hardwareMap: HardwareMap, initialPose: Pose? = null) : Syst
     private var ticksB: Int = 0
 
     var dt: Time = Time.fromSeconds(1)
-
     companion object {
         object Test: RobotConfig {
             override val leftOffset: Distance = Distance.mm(204.0) - Distance.mm(5.0) //Distance.mm( 173.83125) + Distance.mm(10)
@@ -316,9 +306,9 @@ class OdometrySystem(hardwareMap: HardwareMap, initialPose: Pose? = null) : Syst
 
     @Suppress("unused")
     fun logPosition(telemetry: Telemetry) {
-        telemetry.addData("XVirtual", beforeRun.state.virtualPose.x)
+//        telemetry.addData("XVirtual", beforeRun.state.virtualPose.x)
         telemetry.addData("X", globalPose.x)
-        telemetry.addData("YVirtual", beforeRun.state.virtualPose.y)
+//        telemetry.addData("YVirtual", beforeRun.state.virtualPose.y)
         telemetry.addData("Y", globalPose.y)
         telemetry.addData("Rotation", globalPose.degrees)
     }

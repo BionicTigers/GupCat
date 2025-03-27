@@ -26,6 +26,7 @@ import org.firstinspires.ftc.teamcode.utils.getByName
 import org.firstinspires.ftc.teamcode.utils.interpolatedMapOf
 import kotlin.math.abs
 import kotlin.math.max
+import kotlin.math.withSign
 
 interface PivotState : CommandState {
     val encoder: Encoder
@@ -45,7 +46,7 @@ interface PivotState : CommandState {
                 override val encoder = encoder
                 override var targetPosition = 0
                 @Editable
-                override val pid = PID(PIDTerms(3.0, 40.0), 0.0, 2040.0, -1.0, 1.0)
+                override val pid = PID(PIDTerms(0.0, 50.0), -0.0, 1860.0, -1.0, 1.0)
                 override var ticks = 0
                 override val motor = motor
                 override val motor2 = motor2
@@ -58,7 +59,7 @@ interface PivotState : CommandState {
     }
 }
 
-class Pivot(hardwareMap: HardwareMap, val slides: Slides) : System {
+class Pivot(hardwareMap: HardwareMap, val slides: Slides, val downLim: Double? = 0.0) : System {
     val exHub = ControlHub(hardwareMap, "Expansion Hub 2")
     val limitSwitch = hardwareMap.getByName<DigitalChannel>("pivotSwitch")
 
@@ -89,10 +90,17 @@ class Pivot(hardwareMap: HardwareMap, val slides: Slides) : System {
     val pivotAngle: Angle
         get() = Angle.degrees(ticks / max.toDouble() * 90)
 
+    var switchPressed = true
+
+    var motor1Pow = 0.0
+    var motor2Pow = 0.0
+
     var oldVel = 0.0
     var oldAccel = 0.0
 
     var motionProfile: MotionResult? = null
+
+    var weird = false
 
     override val dependencies: List<System> = emptyList()
     override val beforeRun = Command(PivotState.default(hardwareMap.getByName("pivot"), hardwareMap.getByName("pivot2"), exHub.getEncoder(1)))
@@ -103,6 +111,8 @@ class Pivot(hardwareMap: HardwareMap, val slides: Slides) : System {
             it.motor.direction = DcMotorSimple.Direction.REVERSE
             it.motor2.power = 0.0
 //            it.motor2.direction = DcMotorSimple.Direction.REVERSE
+            if (downLim != 0.0)
+                it.pid.pvMin = downLim!!
 
             it.pid.reset()
 
@@ -139,21 +149,42 @@ class Pivot(hardwareMap: HardwareMap, val slides: Slides) : System {
                     motionProfile!!.getPosition(it.timeInScheduler - it.moveStarted!!).toInt()
             }
 
+            if (it.targetPosition > ticks && ticks < 235) {
+                it.pid.kP = 3.0
+            } else {
+                it.pid.kP = 2.5
+            }
+
             var pidPower = it.pid.calculate(it.targetPosition.toDouble(), ticks.toDouble())
 
-            val power = pidPower + (slides.ticks / slides.max) * .05 * (1 - ticks / max)
+            val power = pidPower + ((slides.ticks / slides.max) * .05 * (1 - ticks / max)).withSign(it.targetPosition - ticks)
+
             if (limitSwitch.state || it.targetPosition > 0) {
+                switchPressed = false
+
                 it.motor.power = power
                 it.motor2.power = power
+
+                it.pid.tI = 50.0
             } else {
-                it.motor2.power = -.15
-                it.motor.power = -.15
+                switchPressed = true
+
+                it.motor2.power = -.2
+                it.motor.power = -.2
+
+                it.pid.tI = 0.0
             }
+            // 600
 
             if (!limitSwitch.state) {
                 exHub.setJunkTicks()
                 Persistents.pivotTicks = exHub.rawGetEncoderTicks(3)
             }
+
+//            if (weird) {
+//                it.motor2.power = -.4
+//                it.motor.power = -.4
+//            }
 
 //            println(Persistents.pivotTicks)
 
@@ -161,11 +192,13 @@ class Pivot(hardwareMap: HardwareMap, val slides: Slides) : System {
 //            telemetry.addData("Pivot Process Value", exHub.getEncoderTicks(3))
 //            telemetry.addData("Pivot Set Point", it.targetPosition)
 //            telemetry.update()
+            motor1Pow = it.motor.power
+            motor2Pow = it.motor2.power
             false
         }
     override val afterRun = null
 
-    val max = 2040
+    val max = 1860
 
     //TODO: Swap to an angle
     var pivotTicks: Int
@@ -200,7 +233,27 @@ class Pivot(hardwareMap: HardwareMap, val slides: Slides) : System {
             motionProfile = null
             beforeRun.state.moveStarted = null
         }
+        gamepad.getBooleanButton(Gamepad.Buttons.RIGHT_STICK_BUTTON).onDown {
+            pivotTicks = 600
+        }
     }
+
+//    fun setupWeirdDC(gamepad: Gamepad) {
+//        gamepad.leftTrigger.onHold {
+//            if (limitSwitch.state) {
+//                weird = true
+//            } else {
+//                weird = false
+//            }
+//        }
+//        gamepad.leftTrigger.onUp {
+//            weird = false
+//        }
+//    }
+//
+//    fun powerDown() {
+//
+//    }
 
     var maxVelocity = 0.0
     var maxAccel = 0.0
@@ -209,6 +262,9 @@ class Pivot(hardwareMap: HardwareMap, val slides: Slides) : System {
         maxVelocity = max(abs(beforeRun.state.velocity), maxVelocity)
         maxAccel = max(abs(beforeRun.state.acceleration), maxAccel)
 
+        telemetry.addData("power 1", motor1Pow)
+        telemetry.addData("power 2", motor2Pow)
+        telemetry.addData("switch pressed",switchPressed)
         telemetry.addData("pivotTicks", pivotTicks)
         telemetry.addData("pivotActualTicks", ticks)
         telemetry.addData("max velocity" , maxVelocity)

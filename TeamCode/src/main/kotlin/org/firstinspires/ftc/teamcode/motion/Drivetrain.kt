@@ -14,6 +14,7 @@ import io.github.bionictigers.axiom.utils.Time
 import io.github.bionictigers.axiom.web.Editable
 import io.github.bionictigers.axiom.web.Hidden
 import io.github.bionictigers.axiom.web.WebData
+import org.firstinspires.ftc.teamcode.autos.Specimen
 import org.firstinspires.ftc.teamcode.utils.Vector2
 import org.firstinspires.ftc.teamcode.utils.getByName
 import org.firstinspires.ftc.teamcode.utils.interpolatedMapOf
@@ -153,9 +154,17 @@ interface DrivetrainState : CommandState {
                 override val vPidY = PID(PIDTerms(3.2,  7.0), -1812.0, 1812.0, -1.0, 1.0, 40)
                 override val vPidRot = PID(PIDTerms(5.0, 10.0), Angle.degrees(-294.81).radians, Angle.degrees(294.81).radians, -1.0, 1.0)
 
-                override val pidX = PID(PIDTerms(15.0, 0.0), 0.0, 3657.6, -1.0, 1.0)
-                override val pidY = PID(PIDTerms(11.0, 0.0), 0.0, 3657.6, -1.0, 1.0)
-                override val pidRot = PID(PIDTerms(14.0, 0.0), -2 * PI, 2 * PI, -1.0, 1.0)
+                override val pidX = PID(PIDTerms(14.0, 40.0), 0.0, 3657.6, -1.0, 1.0)
+                // 15 40 sample
+                // 7 60 specimen
+
+                override val pidY = PID(PIDTerms(11.0, 40.0), 0.0, 3657.6, -1.0, 1.0)
+                // 11 40 sample
+                // 5 60 specimen
+
+                override val pidRot = PID(PIDTerms(15.0, 0.0), -2 * PI, 2 * PI, -1.0, 1.0)
+                // 15 0 sample
+                // 5 90 specimen
 
                 override val drivePID = PID(PIDTerms(8.0, 0.0), -PI, PI, -1.0, 1.0)
 
@@ -186,6 +195,7 @@ class Drivetrain(
     gamepadSystem: GamepadSystem? = null,
     private val odometrySystem: OdometrySystem,
     private val isAuto: Boolean = false,
+    private val sample: Boolean? = false
 ) : System {
     enum class ControlMode {
         AUTONOMOUS,
@@ -208,6 +218,25 @@ class Drivetrain(
         .setOnEnter {
 //            imu.initialize(BNO055IMUNew.Parameters(RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.UP, RevHubOrientationOnRobot.UsbFacingDirection.FORWARD)))
             referencePose = odometrySystem.globalPose
+            if (sample != null && sample) {
+                it.pidX.kP = 12.0 // 12
+                it.pidX.tI = 40.0 // 40
+
+                it.pidY.kP = 11.0 // 11
+                it.pidY.tI = 40.0 // 40
+
+                it.pidRot.kP = 15.0 // 15
+                it.pidRot.tI = 0.0 // 0
+            } else if (sample != null) {
+                it.pidX.kP = 14.0 //7
+                it.pidX.tI = 100.0 //60
+
+                it.pidY.kP = 9.0
+                it.pidY.tI = 200.0
+
+                it.pidRot.kP = 5.5
+                it.pidRot.tI = 0.0
+            }
         }
         .setAction {
             if (disabled) return@setAction false
@@ -365,9 +394,9 @@ class Drivetrain(
 //            println("$velocity")
 
             return calculatePowers(
-                angleX + (.37 / voltage * 12.39).withSign(angleX) * abs(cos(movementAngle)) * (if (velocity < .0475) 1 else 0) * if (abs(angleX) > .005) 1 else 0,
-                angleY + (.18 / voltage * 12.39).withSign(angleY) * abs(sin(movementAngle)) * (if (velocity < .0475) 1 else 0) * if (abs(angleY) > .005) 1 else 0,
-                rotation + (.1 / voltage * 12.38).withSign(rotation) * (if (velocity < .0375) 1 else 0) * if (abs(rotation) > .005) 1 else 0
+                angleX + (.37 / voltage * 12.39).withSign(angleX) * abs(cos(movementAngle)) * (if (velocity < .0375) 1 else 0) * if (abs(angleX) > .004) 1 else 0, // .005
+                angleY + (.18 / voltage * 12.39).withSign(angleY) * abs(sin(movementAngle)) * (if (velocity < .0375) 1 else 0) * if (abs(angleY) > .004) 1 else 0, // 0475
+                rotation + (.1 / voltage * 12.38).withSign(rotation) * (if (velocity < .0250) 1 else 0) * if (abs(rotation) > .005) 1 else 0
             )
         }
 

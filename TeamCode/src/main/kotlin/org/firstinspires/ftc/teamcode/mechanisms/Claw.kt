@@ -32,7 +32,7 @@ class Claw(hardwareMap: HardwareMap, private val openPos: Double = .15) : System
     }
 
     private fun close() {
-        position = 0.60
+        position = 0.6
     }
 
     var position: Double
@@ -51,7 +51,7 @@ class Claw(hardwareMap: HardwareMap, private val openPos: Double = .15) : System
 //
 //    }
 
-    fun logClaw(telemetry: Telemetry) {
+    fun log(telemetry: Telemetry) {
         telemetry.addData("position", claw.position)
     }
 }

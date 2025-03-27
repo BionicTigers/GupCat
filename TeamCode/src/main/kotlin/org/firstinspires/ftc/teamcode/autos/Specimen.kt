@@ -14,6 +14,7 @@ import org.firstinspires.ftc.teamcode.mechanisms.Pivot
 import org.firstinspires.ftc.teamcode.mechanisms.Slides
 import org.firstinspires.ftc.teamcode.motion.Drivetrain
 import org.firstinspires.ftc.teamcode.motion.OdometrySystem
+import org.firstinspires.ftc.teamcode.utils.Persistents
 import org.firstinspires.ftc.teamcode.utils.Pose
 import kotlin.math.abs
 
@@ -51,12 +52,13 @@ class Specimen : LinearOpMode() {
     }
 
     override fun runOpMode() {
+        Persistents.reset()
         val slides = Slides(hardwareMap)
         val pivot = Pivot(hardwareMap, slides)
         slides.pivot = pivot
 
         val odometrySystem = OdometrySystem(hardwareMap, startingPose)
-        val drivetrain = Drivetrain(hardwareMap, odometrySystem = odometrySystem, isAuto = true)
+        val drivetrain = Drivetrain(hardwareMap, odometrySystem = odometrySystem, isAuto = true, sample = false)
 
         val claw = Claw(hardwareMap, 0.0)
         val arm = Arm(hardwareMap)
@@ -152,6 +154,7 @@ class Specimen : LinearOpMode() {
 
         while (opModeIsActive()) {
             Scheduler.update()
+            odometrySystem.logPosition(telemetry)
             telemetry.update()
         }
     }
