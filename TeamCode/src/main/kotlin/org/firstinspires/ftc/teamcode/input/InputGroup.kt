@@ -54,7 +54,7 @@ class InputGroup {
 
     fun build(): Command<InputGroupState> {
         return Command(InputGroupState.default())
-            .setAction {
+            .action {
                 val newState = checks.all { it() }
 
                 if (newState != it.state) {

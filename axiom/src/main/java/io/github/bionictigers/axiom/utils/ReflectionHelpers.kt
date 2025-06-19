@@ -44,6 +44,51 @@ inline fun <reified T : Annotation> hasAnnotationOnProperty(
     return searchSuperTypes(kClass, propertyName, T::class)
 }
 
+/**
+ * Recursively searches through supertypes for a property named [propertyName]
+ * and returns the first annotation of type [annotationClass], or null if not found.
+ */
+fun <T : Annotation> findAnnotationInSuperTypes(
+    kClass: KClass<*>,
+    propertyName: String,
+    annotationClass: KClass<T>
+): T? {
+    for (supertype in kClass.superclasses) {
+        // look for the property on this supertype
+        val superProp = supertype.memberProperties.firstOrNull { it.name == propertyName }
+        if (superProp != null) {
+            // if found, check its annotations
+            val ann = superProp.annotations.firstOrNull { annotationClass.isInstance(it) } as? T
+            if (ann != null) return ann
+        }
+        // otherwise recurse up
+        findAnnotationInSuperTypes(supertype, propertyName, annotationClass)?.let { return it }
+    }
+    return null
+}
+
+/**
+ * Inline helper that returns the annotation of type T on the named property,
+ * checking first on the instance's class, then up through its supertypes.
+ */
+inline fun <reified T : Annotation> getAnnotationOnProperty(
+    instance: Any,
+    propertyName: String
+): T? {
+    val kClass = instance::class
+    // check on this class
+    kClass.memberProperties
+        .firstOrNull { it.name == propertyName }
+        ?.annotations
+        ?.filterIsInstance<T>()
+        ?.firstOrNull()
+        ?.let { return it }
+
+    // delegate to recursive supertype search
+    return findAnnotationInSuperTypes(kClass, propertyName, T::class)
+}
+
+
 fun <T : Any> String.convertTo(targetClass: KClass<T>): T {
     return when (targetClass) {
         Int::class -> this.toInt() as T

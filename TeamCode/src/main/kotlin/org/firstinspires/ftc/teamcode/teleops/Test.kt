@@ -7,11 +7,7 @@ import io.github.bionictigers.axiom.commands.Command
 import io.github.bionictigers.axiom.commands.CommandState
 import io.github.bionictigers.axiom.commands.Scheduler
 import io.github.bionictigers.axiom.web.Editable
-import org.firstinspires.ftc.teamcode.autos.CommandMove
-import org.firstinspires.ftc.teamcode.input.GamepadSystem
-import org.firstinspires.ftc.teamcode.mechanisms.Pivot
 import org.firstinspires.ftc.teamcode.utils.ControlHub
-import org.firstinspires.ftc.teamcode.utils.Pose
 import org.firstinspires.ftc.teamcode.utils.getByName
 
 interface CommandSFRASS : CommandState {
@@ -42,7 +38,7 @@ class Test : LinearOpMode() {
         var oldPosition = motor.currentPosition
         Scheduler.add(
             Command(CommandSFRASS.default())
-                .setAction {
+                .action {
                     motor.power = it.power
                     controlHub.refreshBulkData()
                     val pos = controlHub.getEncoderTicks(3)

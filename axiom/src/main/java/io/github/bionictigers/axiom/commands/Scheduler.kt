@@ -1,31 +1,37 @@
 package io.github.bionictigers.axiom.commands
 
 import com.qualcomm.robotcore.util.RobotLog
-import io.github.bionictigers.axiom.utils.Time
 import io.github.bionictigers.axiom.web.Editable
 import io.github.bionictigers.axiom.web.Hidden
+import io.github.bionictigers.axiom.web.ObjectType
+import io.github.bionictigers.axiom.web.Value
 import io.github.bionictigers.io.github.bionictigers.axiom.utils.convertTo
 import io.github.bionictigers.io.github.bionictigers.axiom.utils.hasAnnotationOnProperty
 import io.github.bionictigers.io.github.bionictigers.axiom.web.Display
-import io.github.bionictigers.axiom.web.Value
 import java.lang.reflect.Field
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
+import kotlin.time.TimeSource
+
+typealias GenericCommand = Command<out BaseCommandState>
 
 object Scheduler {
-    private val commands = ConcurrentHashMap<Int, Command<*>>()
-    private val sortedCommands = ArrayList<Command<*>>()
+    private val commands = ConcurrentHashMap<Int, GenericCommand>()
+    private val sortedCommands = ArrayList<GenericCommand>()
 
-    private val addQueue: ArrayList<Command<*>> = ArrayList()
-    private val removeQueue: ArrayList<Command<*>> = ArrayList()
+    private val systems = ConcurrentHashMap<Int, System>()
+//    private val systemsToCommands = ConcurrentHashMap<Int, Int>()
+
+    private val addQueue: ArrayList<GenericCommand> = ArrayList()
+    private val removeQueue: ArrayList<GenericCommand> = ArrayList()
     private val editQueue: ArrayList<Pair<String, Any>> = ArrayList()
+
+    private val persistentStates = ConcurrentHashMap<String, BaseCommandState>()
 
     private var changed = false
     private var inUpdateCycle = false
-
-    var loopDeltaTime = Time()
 
 //    init {
 //        Server.start()
@@ -39,7 +45,7 @@ object Scheduler {
      * @param command The commands to add.
      * @see Command
      */
-    fun add(vararg command: Command<*>) {
+    fun add(vararg command: GenericCommand) {
         if (inUpdateCycle)
             addQueue.addAll(command)
         else {
@@ -49,7 +55,7 @@ object Scheduler {
         }
     }
 
-    fun add(commands: Collection<Command<*>>) {
+    fun add(commands: Collection<GenericCommand>) {
         commands.forEach {
             add(it)
         }
@@ -73,10 +79,10 @@ object Scheduler {
         }
     }
 
-    private fun serializeState(cmdState: CommandState): Map<String, Any> {
+    private fun serializeState(cmdState: Any): Map<String, Any>? {
         val map = HashMap<String, Any>()
 
-        cmdState::class.java.declaredFields.forEach {
+        (cmdState::class.java.declaredFields + cmdState::class.java.superclass.declaredFields).forEach {
             val isHidden = hasAnnotationOnProperty<Hidden>(cmdState, it.name)
             val isEditable = hasAnnotationOnProperty<Editable>(cmdState, it.name)
             if (it.isSynthetic || it.name == "name" || isHidden) return@forEach
@@ -89,23 +95,39 @@ object Scheduler {
             }
         }
 
-        map["deltaTime"] = 0.0
-
-        return map
+        return map.ifEmpty { null }
     }
 
     fun serialize(): ArrayList<Map<String, Any>> {
         val array = ArrayList<Map<String, Any>>()
         commands.values.forEach {
-            array.add(mapOf("name" to it.state.name, "hash" to it.hashCode(), "state" to serializeState(it.state)))
+            array += mapOf("name" to it.state.name, "hash" to it.hashCode(), "state" to (serializeState(it.state) ?: mapOf()), "type" to ObjectType.Command)
+        }
+        systems.values.forEach {
+            array += mapOf("name" to it.name, "hash" to it.hashCode(), "state" to (serializeState(it) ?: mapOf()), "type" to ObjectType.System)
         }
 
         return array
     }
 
-    private fun internalAdd(command: Command<*>) {
+    private fun internalAdd(command: GenericCommand) {
         changed = true
         commands[command.hashCode()] = command
+        command.enter()
+    }
+
+    fun <T: BaseCommandState> getPersistentState(name: String, default: T, onGet: T.() -> Unit = {}): T {
+        @Suppress("UNCHECKED_CAST")
+        //Default is unreachable but required to satisfy the compiler
+        if (persistentStates.containsKey(name) && persistentStates[name] as? T != null) {
+            val state = persistentStates[name] as? T ?: default
+            onGet(state)
+            persistentStates[name] = state
+            return state
+        }
+
+        persistentStates[name] = default
+        return default
     }
 
     /**
@@ -119,6 +141,9 @@ object Scheduler {
     fun addSystem(vararg system: System) {
         add(system.mapNotNull { it.beforeRun })
         add(system.mapNotNull { it.afterRun })
+        system.forEach {
+            systems[it.hashCode()] = it
+        }
     }
 
     /**
@@ -129,7 +154,7 @@ object Scheduler {
      * @param command The command to remove.
      * @see Command
      */
-    fun remove(vararg command: Command<*>) {
+    fun remove(vararg command: GenericCommand) {
         command.forEach {
             if (it !in commands.values) {
                 return
@@ -139,14 +164,22 @@ object Scheduler {
         }
     }
 
-    private fun internalRemove(command: Command<*>) {
+    private fun internalRemove(command: GenericCommand) {
         changed = true
         commands.remove(command.hashCode())
+        command.dependencies.forEach { dep ->
+            if (dep !in commands.values) {
+                return
+            }
+            dep.dependencies.remove(command)
+        }
+        command.exit()
+        command.reset()
     }
 
     private fun sort() {
-        val visited = HashSet<Command<*>>()
-        val stack = Stack<Command<*>>()
+        val visited = HashSet<GenericCommand>()
+        val stack = Stack<GenericCommand>()
 
         for (command in commands.values) {
             if (command !in visited) {
@@ -160,7 +193,7 @@ object Scheduler {
         }
     }
 
-    private fun topologicalSort(command: Command<*>, visited: HashSet<Command<*>>, stack: Stack<Command<*>>) {
+    private fun topologicalSort(command: GenericCommand, visited: HashSet<GenericCommand>, stack: Stack<GenericCommand>) {
         visited.add(command)
 
         for (dependency in command.dependencies) {
@@ -179,17 +212,19 @@ object Scheduler {
             internalEdit(path to value)
     }
 
+    //TODO: Make more universal/delegate
     private fun internalEdit(edit: Pair<String, Any>) {
         val (path, value) = edit
         val splitPath = path.split(".")
-        val command = commands[splitPath[0].toInt()] ?: return
+        val type = if (splitPath[0] == "Command") commands else systems
+        val command = type[splitPath[1].toInt()] ?: return
 
         //Unsafe magic!
-        var index = 1
+        var index = 2
         try {
-            var obj: Any = command.state
+            var obj: Any = if (splitPath[0] == "Command") (command as GenericCommand).state else command
             lateinit var field: Field
-            splitPath.subList(1, splitPath.size).forEach { fieldName ->
+            splitPath.subList(2, splitPath.size).forEach { fieldName ->
                 field = obj::class.java.getDeclaredField(fieldName)
                 field.isAccessible = true
                 index++
@@ -230,12 +265,12 @@ object Scheduler {
             changed = false
         }
 
-        sortedCommands.forEach(Command<*>::execute)
+        sortedCommands.forEach(GenericCommand::execute)
 
         removeQueue.forEach(this::internalRemove)
         removeQueue.clear()
 
-        loopDeltaTime = Time.fromMilliseconds(java.lang.System.currentTimeMillis() - startTime)
+        loopDeltaTime = (java.lang.System.currentTimeMillis() - startTime).milliseconds
 
         inUpdateCycle = false
     }

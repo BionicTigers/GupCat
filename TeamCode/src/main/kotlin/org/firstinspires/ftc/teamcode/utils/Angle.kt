@@ -8,8 +8,9 @@ import kotlin.math.tan
 
 class Angle private constructor(val radians: Double) {
     companion object {
-        fun radians(radians: Double) = Angle(radians)
-        fun degrees(degrees: Double) = Angle(degrees / 180 * PI)
+        fun radians(radians: Number) = Angle(radians.toDouble())
+        fun degrees(degrees: Number) = Angle(degrees.toDouble() / 180 * PI)
+        val zero = radians(0)
     }
 
     val degrees: Double

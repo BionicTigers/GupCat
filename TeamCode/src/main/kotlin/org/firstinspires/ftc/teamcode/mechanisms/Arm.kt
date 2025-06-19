@@ -7,6 +7,7 @@ import io.github.bionictigers.axiom.commands.System
 import org.firstinspires.ftc.teamcode.input.Gamepad
 
 class Arm(hardwareMap: HardwareMap) : System {
+    override val name = "Arm"
     override val dependencies: List<System> = emptyList()
     override val beforeRun = null
     override val afterRun = null
@@ -14,12 +15,12 @@ class Arm(hardwareMap: HardwareMap) : System {
     private val arm = hardwareMap.get(Servo::class.java, "arm")
 
     enum class Position(val target: Double) {
-        Down(.15),
+        Down(1.0),
         Middle(.65),
-        Up(.95),
+        Up(.15),
     }
 
-    var target = Position.Down
+    var target = Position.Up
         set(value) {
             position = value.target
             field = value

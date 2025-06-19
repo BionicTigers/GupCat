@@ -1,6 +1,6 @@
 package io.github.bionictigers.axiom.utils
 
-import io.github.bionictigers.axiom.commands.CommandState
+import io.github.bionictigers.axiom.commands.BaseCommandState
 
 class Timer(val duration: Time) {
     private var initialTime: Time? = null
@@ -9,12 +9,14 @@ class Timer(val duration: Time) {
     var isFinished = false
         private set
 
-    fun update(state: CommandState): Timer {
+    fun update(state: BaseCommandState): Timer {
         if (initialTime == null) {
             initialTime = state.timeInScheduler
         } else if (state.timeInScheduler - initialTime!! >= duration) {
             isFinished = true
         }
+
+        println(state.timeInScheduler - initialTime!!)
 
         return this
     }

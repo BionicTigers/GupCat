@@ -17,13 +17,10 @@ import org.firstinspires.ftc.teamcode.motion.PIDTerms
 import org.firstinspires.ftc.teamcode.motion.generateMotionProfile
 import org.firstinspires.ftc.teamcode.utils.ControlHub
 import org.firstinspires.ftc.teamcode.utils.Persistents
-import io.github.bionictigers.axiom.utils.Time
 import io.github.bionictigers.axiom.web.Editable
 import org.firstinspires.ftc.teamcode.utils.getByName
 import kotlin.math.abs
 import kotlin.math.max
-import kotlin.math.min
-import kotlin.math.withSign
 
 interface SlidesState : CommandState {
     var targetPosition: Int
@@ -44,8 +41,8 @@ interface SlidesState : CommandState {
                 @Editable
                 override var targetPosition = 0
                 @Editable
-                override val pid = PID(PIDTerms(0.0, 30.0, 0.0), 0.0, 52500.0, -1.0, 1.0)
-                override val gpPid = PID(PIDTerms(0.0,50.0,0.0), 0.0, 52500.0, -1.0, 1.0)
+                override val pid = PID(PIDTerms(0.0, 30.0, 0.0), 0.0, 47000.0, -1.0, 1.0)
+                override val gpPid = PID(PIDTerms(0.0,50.0,0.0), 0.0, 47000.0, -1.0, 1.0)
                 override val motorL = motorL
                 override val motorR = motorR
                 override var profile: MotionResult? = null
@@ -61,7 +58,7 @@ interface SlidesState : CommandState {
 
 class Slides(hardwareMap: HardwareMap, var pivot: Pivot? = null) : System {
     private val exHub = ControlHub(hardwareMap, "Expansion Hub 2")
-    val max = 52500
+    val max = 47000
     private val pivotDownMax = 26500
     private val pivotMaxVelocity = 50000
 
@@ -75,7 +72,7 @@ class Slides(hardwareMap: HardwareMap, var pivot: Pivot? = null) : System {
 
     override val dependencies: List<System> = emptyList() //TODO: make this not be so stupid (use a singleton)
     override val beforeRun = Command(SlidesState.default("Slides", hardwareMap.getByName("slidesL"), hardwareMap.getByName("slidesR"), hardwareMap.getByName("slideLimit")))
-        .setOnEnter {
+        .onEnter {
             it.motorR.mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
             it.motorR.direction = DcMotorSimple.Direction.REVERSE
             it.motorR.power = 0.0
@@ -86,7 +83,7 @@ class Slides(hardwareMap: HardwareMap, var pivot: Pivot? = null) : System {
             if (Persistents.slideTicks == null) Persistents.slideTicks = exHub.rawGetEncoderTicks(2)
             exHub.setJunkTicks(2, Persistents.slideTicks)
         }
-        .setAction {
+        .action {
             exHub.refreshBulkData()
             it.ticks = exHub.getEncoderTicks(2)
 
@@ -114,7 +111,7 @@ class Slides(hardwareMap: HardwareMap, var pivot: Pivot? = null) : System {
                 it.gpPid.kP = 7.0
             } else if (it.targetPosition >= ticks.toDouble()) {
                 it.pid.kP = 18.0
-                it.gpPid.kP = 10.0 // 12
+                it.gpPid.kP = 18.0 // 12
             } else {
                 it.pid.kP = 14.0
                 it.gpPid.kP = 4.0 // 7
@@ -161,19 +158,19 @@ class Slides(hardwareMap: HardwareMap, var pivot: Pivot? = null) : System {
 
     fun setupDriverControl(gamepad: Gamepad) {
         gamepad.getBooleanButton(Gamepad.Buttons.DPAD_UP).onHold {
-            if (pivot!!.ticks < 500)
-                targetPosition += (max * .7 * Scheduler.loopDeltaTime.seconds()).toInt()
+            targetPosition += if (pivot!!.ticks < 500)
+                (max * .7 * Scheduler.loopDeltaTime.seconds()).toInt()
             else
-                targetPosition += (max * .8 * Scheduler.loopDeltaTime.seconds()).toInt()
+                (max * .8 * Scheduler.loopDeltaTime.seconds()).toInt()
             beforeRun.state.profile = null
             beforeRun.state.moveStartTime = null
         }
 
         gamepad.getBooleanButton(Gamepad.Buttons.DPAD_DOWN).onHold {
-            if (pivot!!.ticks < 500)
-                targetPosition -= (max * .7 * Scheduler.loopDeltaTime.seconds()).toInt()
+            targetPosition -= if (pivot!!.ticks < 500)
+                (max * .7 * Scheduler.loopDeltaTime.seconds()).toInt()
             else
-                targetPosition -= (max * .8 * Scheduler.loopDeltaTime.seconds()).toInt()
+                (max * .8 * Scheduler.loopDeltaTime.seconds()).toInt()
             beforeRun.state.profile = null
             beforeRun.state.moveStartTime = null
         }

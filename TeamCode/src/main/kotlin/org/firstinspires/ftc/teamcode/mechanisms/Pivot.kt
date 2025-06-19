@@ -5,269 +5,114 @@ import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.DigitalChannel
 import com.qualcomm.robotcore.hardware.HardwareMap
-import org.firstinspires.ftc.robotcore.external.Telemetry
+import io.github.bionictigers.axiom.commands.BaseCommandState
 import io.github.bionictigers.axiom.commands.Command
-import io.github.bionictigers.axiom.commands.CommandState
 import io.github.bionictigers.axiom.commands.Scheduler
 import io.github.bionictigers.axiom.commands.System
-import io.github.bionictigers.axiom.utils.Time
 import io.github.bionictigers.axiom.web.Editable
-import org.firstinspires.ftc.teamcode.input.Gamepad
-import org.firstinspires.ftc.teamcode.motion.MotionResult
 import org.firstinspires.ftc.teamcode.motion.PID
 import org.firstinspires.ftc.teamcode.motion.PIDTerms
-import org.firstinspires.ftc.teamcode.motion.generateMotionProfile
 import org.firstinspires.ftc.teamcode.utils.Angle
 import org.firstinspires.ftc.teamcode.utils.ControlHub
 import org.firstinspires.ftc.teamcode.utils.Encoder
 import org.firstinspires.ftc.teamcode.utils.Persistents
-import org.firstinspires.ftc.teamcode.utils.Pose
 import org.firstinspires.ftc.teamcode.utils.getByName
-import org.firstinspires.ftc.teamcode.utils.interpolatedMapOf
-import kotlin.math.abs
-import kotlin.math.max
-import kotlin.math.withSign
 
-interface PivotState : CommandState {
-    val encoder: Encoder
-    var targetPosition: Int
-    val pid: PID
-    var ticks: Int
-    val motor: DcMotorEx
-    val motor2: DcMotorEx
-    var enabled: Boolean
-    var velocity: Double
-    var acceleration: Double
-    var moveStarted: Time?
-
-    companion object {
-        fun default(motor: DcMotorEx, motor2: DcMotorEx, encoder: Encoder): PivotState {
-            return object : PivotState, CommandState by CommandState.default("Pivot") {
-                override val encoder = encoder
-                override var targetPosition = 0
-                @Editable
-                override val pid = PID(PIDTerms(0.0, 50.0), -0.0, 1860.0, -1.0, 1.0)
-                override var ticks = 0
-                override val motor = motor
-                override val motor2 = motor2
-                override var enabled = true
-                override var velocity = 0.0
-                override var acceleration = 0.0
-                override var moveStarted: Time? = null
-            }
-        }
-    }
+data class PivotDataState(
+    val encoder: Encoder,
+    val limitSwitch: DigitalChannel,
+    var angle: Angle = Angle.radians(0),
+    var velocity: Angle = Angle.radians(0),
+    var acceleration: Angle = Angle.radians(0)
+) : BaseCommandState("PivotData") {
+    val isResting: Boolean
+        get() = limitSwitch.state
 }
 
+data class PivotMoveState(
+    val motor: DcMotorEx,
+    val motor2: DcMotorEx,
+    @Editable
+    val pid: PID = PID(PIDTerms(0.0, 50.0), -0.0, 1860.0, -1.0, 1.0),
+    var targetPosition: Angle = Angle.zero,
+) : BaseCommandState("PivotTargeting")
+
 class Pivot(hardwareMap: HardwareMap, val slides: Slides, val downLim: Double? = 0.0) : System {
-    val exHub = ControlHub(hardwareMap, "Expansion Hub 2")
-    val limitSwitch = hardwareMap.getByName<DigitalChannel>("pivotSwitch")
+    companion object {
+        /** Maximum ticks for the pivot encoder */
+        const val MAX_TICKS = 1860
+        /** Power applied when limit switch is active */
+        const val PIVOT_RESTING_POWER = -0.2
+    }
 
-//    val upPIDTerms = interpolatedMapOf(
-//        0.0 to 4.75,
-//        1500.0 to 1.0
-//    )
-//
-//    val downPIDTerms = interpolatedMapOf(
-//        1500.0 to 4.0,
-//        500.0 to 3.0,
-//        0.0 to 1.0
-//    )
-
-    val offset = interpolatedMapOf(
-        0.0 to 0.0,
-        50.0 to 0.0,
-        400.0 to 0.2,
-        750.0 to 0.25,
-        1500.0 to 0.18
-    )
-
-    val ticks: Int
-        get() = beforeRun.state.ticks
-    var enabled: Boolean
-        get() = beforeRun.state.enabled
-        set(value) { beforeRun.state.enabled = value }
-    val pivotAngle: Angle
-        get() = Angle.degrees(ticks / max.toDouble() * 90)
-
-    var switchPressed = true
-
-    var motor1Pow = 0.0
-    var motor2Pow = 0.0
-
-    var oldVel = 0.0
-    var oldAccel = 0.0
-
-    var motionProfile: MotionResult? = null
-
-    var weird = false
-
+    override val name = "pivot"
     override val dependencies: List<System> = emptyList()
-    override val beforeRun = Command(PivotState.default(hardwareMap.getByName("pivot"), hardwareMap.getByName("pivot2"), exHub.getEncoder(1)))
-        .setOnEnter {
-            it.motor.mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
-            it.motor.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
-            it.motor.power = 0.0
-            it.motor.direction = DcMotorSimple.Direction.REVERSE
-            it.motor2.power = 0.0
-//            it.motor2.direction = DcMotorSimple.Direction.REVERSE
-            if (downLim != 0.0)
-                it.pid.pvMin = downLim!!
 
-            it.pid.reset()
+    private val hub = ControlHub(hardwareMap, "Expansion Hub 2")
 
-//            println(Persistents.pivotTicks)
-//            exHub.setEncoderDirection(3, ControlHub.Direction.Backward)
-            if (Persistents.pivotTicks == null) Persistents.pivotTicks = exHub.rawGetEncoderTicks(3)
-            exHub.setJunkTicks(3, Persistents.pivotTicks)
+    private val pivotDataState = PivotDataState(hub.getEncoder(1), hardwareMap.getByName("pivotSwitch"))
+    private val pivotTargetingState = Scheduler.getPersistentState("pivotTargeting", PivotMoveState(
+        hardwareMap.getByName("pivot"),
+        hardwareMap.getByName("pivot2")
+    )) { targetPosition = Angle.zero }
+
+    private fun calculateAngle(ticks: Int): Angle = Angle.degrees(ticks.toDouble() / MAX_TICKS * 90.0)
+
+    private val gatherData = Command.create(pivotDataState) {
+        onEnter {
+            it.encoder.setJunkTicks(Persistents.pivotTicks)
+            it.angle = calculateAngle(it.encoder.ticks)
         }
-        .setAction {
-            if (!enabled) {
-                it.motor.power = 0.0
-                it.motor2.power = 0.0
-                return@setAction false
+
+        action {
+            if (it.isResting) {
+                it.encoder.refresh()
+                it.encoder.setJunkTicks()
+                Persistents.pivotTicks = it.encoder.rawTicks
             }
 
-            val oldTicks = it.ticks
-            oldVel = it.velocity
-            oldAccel = it.acceleration
+            val lastAngle = it.angle
+            val lastVelocity = it.velocity
 
-            exHub.refreshBulkData()
-            it.ticks = exHub.getEncoderTicks(3)
+            it.angle = calculateAngle(it.encoder.ticks)
+            it.velocity = (it.angle - lastAngle) / it.deltaTime.seconds
+            it.acceleration = (it.velocity - lastVelocity) / it.deltaTime.seconds
 
-            it.velocity = (it.ticks - oldTicks) / it.deltaTime.seconds()
-            if (abs(oldVel) < abs(it.velocity))
-                it.acceleration = (it.velocity - oldVel) / it.deltaTime.seconds()
-
-//            if (it.targetPosition >= ticks)
-//                it.pid.kP = upPIDTerms[ticks.toDouble()]
-//            else
-//                it.pid.kP = downPIDTerms[ticks.toDouble()]
-
-            if (motionProfile != null) {
-                it.targetPosition =
-                    motionProfile!!.getPosition(it.timeInScheduler - it.moveStarted!!).toInt()
-            }
-
-            if (it.targetPosition > ticks && ticks < 235) {
-                it.pid.kP = 3.0
-            } else {
-                it.pid.kP = 2.5
-            }
-
-            var pidPower = it.pid.calculate(it.targetPosition.toDouble(), ticks.toDouble())
-
-            val power = pidPower + ((slides.ticks / slides.max) * .05 * (1 - ticks / max)).withSign(it.targetPosition - ticks)
-
-            if (limitSwitch.state || it.targetPosition > 0) {
-                switchPressed = false
-
-                it.motor.power = power
-                it.motor2.power = power
-
-                it.pid.tI = 50.0
-            } else {
-                switchPressed = true
-
-                it.motor2.power = -.2
-                it.motor.power = -.2
-
-                it.pid.tI = 0.0
-            }
-            // 600
-
-            if (!limitSwitch.state) {
-                exHub.setJunkTicks()
-                Persistents.pivotTicks = exHub.rawGetEncoderTicks(3)
-            }
-
-//            if (weird) {
-//                it.motor2.power = -.4
-//                it.motor.power = -.4
-//            }
-
-//            println(Persistents.pivotTicks)
-
-//            telemetry.addData("Pivot Process P-VAL", it.pid.kP)
-//            telemetry.addData("Pivot Process Value", exHub.getEncoderTicks(3))
-//            telemetry.addData("Pivot Set Point", it.targetPosition)
-//            telemetry.update()
-            motor1Pow = it.motor.power
-            motor2Pow = it.motor2.power
             false
         }
-    override val afterRun = null
-
-    val max = 1860
-
-    //TODO: Swap to an angle
-    var pivotTicks: Int
-        set(value) {
-            beforeRun.state.targetPosition = value.coerceIn(-100,max)
-        }
-        get() = beforeRun.state.targetPosition
-
-    val currentPosition: Int
-        get() = exHub.getEncoderTicks(3)
-
-    var previous = 0
-    fun mpSetPosition(ticks: Int) {
-        if (previous == ticks) return
-        previous = ticks
-        motionProfile = if (ticks > beforeRun.state.ticks) // up
-            generateMotionProfile(beforeRun.state.ticks, ticks, 20000.0 / exHub.getVoltage() * 12.41 - slides.ticks / 7, 32000.9 / exHub.getVoltage() * 12.41, 3000.6 / exHub.getVoltage() * 12.41)
-        else
-            generateMotionProfile(beforeRun.state.ticks, ticks, 20000.0 / exHub.getVoltage() * 12.41 - slides.ticks / 7, 43981.9 / exHub.getVoltage() * 12.41, 2294.6 / exHub.getVoltage() * 12.41)
-        beforeRun.state.moveStarted = beforeRun.state.timeInScheduler
     }
 
-    fun setupDriverControl(gamepad: Gamepad) {
-        gamepad.leftTrigger.onHold {
-            pivotTicks -= (1500 * Scheduler.loopDeltaTime.seconds() * it).toInt()
-            motionProfile = null
-            beforeRun.state.moveStarted = null
+    private val pivotTargeting = Command.create(pivotTargetingState) {
+        onEnter {
+            it.motor.apply {
+                mode = DcMotor.RunMode.RUN_USING_ENCODER
+                zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
+                power = 0.0
+                direction = DcMotorSimple.Direction.REVERSE
+            }
+
+            it.motor2.apply {
+                mode = DcMotor.RunMode.RUN_USING_ENCODER
+                zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
+                power = 0.0
+            }
+
+            it.pid.reset()
         }
 
-        gamepad.rightTrigger.onHold {
-            pivotTicks += (1500 * Scheduler.loopDeltaTime.seconds() * it).toInt()
-            motionProfile = null
-            beforeRun.state.moveStarted = null
-        }
-        gamepad.getBooleanButton(Gamepad.Buttons.RIGHT_STICK_BUTTON).onDown {
-            pivotTicks = 600
+        action {
+            val power = if (pivotDataState.isResting)
+                it.pid.calculate(it.targetPosition.degrees, pivotDataState.angle.degrees)
+            else
+                PIVOT_RESTING_POWER
+
+            it.motor.power = power
+            it.motor2.power = power
+
+            false
         }
     }
 
-//    fun setupWeirdDC(gamepad: Gamepad) {
-//        gamepad.leftTrigger.onHold {
-//            if (limitSwitch.state) {
-//                weird = true
-//            } else {
-//                weird = false
-//            }
-//        }
-//        gamepad.leftTrigger.onUp {
-//            weird = false
-//        }
-//    }
-//
-//    fun powerDown() {
-//
-//    }
-
-    var maxVelocity = 0.0
-    var maxAccel = 0.0
-
-    fun log(telemetry: Telemetry) {
-        maxVelocity = max(abs(beforeRun.state.velocity), maxVelocity)
-        maxAccel = max(abs(beforeRun.state.acceleration), maxAccel)
-
-        telemetry.addData("power 1", motor1Pow)
-        telemetry.addData("power 2", motor2Pow)
-        telemetry.addData("switch pressed",switchPressed)
-        telemetry.addData("pivotTicks", pivotTicks)
-        telemetry.addData("pivotActualTicks", ticks)
-        telemetry.addData("max velocity" , maxVelocity)
-        telemetry.addData("max acceleration" , maxAccel)
-    }
+    override val beforeRun = gatherData
+    override val afterRun = pivotTargeting
 }

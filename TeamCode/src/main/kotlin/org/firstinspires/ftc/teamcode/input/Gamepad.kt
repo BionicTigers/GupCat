@@ -42,7 +42,7 @@ class Gamepad(private val ftcGamepad: FTCGamepad, system: GamepadSystem) {
         override val leftTrigger: Trigger = Trigger(0.0)
         override val rightTrigger: Trigger = Trigger(0.0)
     })
-        .setAction {
+        .action {
             it.boolButtons.forEach { (index, button) ->
                 val field = FTCGamepad::class.java.getDeclaredField(index.name.lowercase())
                 field.isAccessible = true

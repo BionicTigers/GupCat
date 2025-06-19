@@ -1,6 +1,8 @@
 repositories {
     mavenCentral()
     google() // Needed for androidx
+    maven { url = 'https://maven.pedropathing.com'}
+    maven { url = 'https://maven.brott.dev/' }
 }
 
 dependencies {
@@ -17,6 +19,9 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.2.0'
 
     // User Dependencies
+    implementation 'com.pedropathing:pedro:1.0.9'
+    implementation 'com.acmerobotics.dashboard:dashboard:0.4.16'
+
     implementation 'androidx.core:core-ktx:1.15.0'
     implementation 'org.openftc:easyopencv:1.7.3'
     implementation "org.jetbrains.kotlin:kotlin-reflect:2.0.21"

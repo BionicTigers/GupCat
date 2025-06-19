@@ -1,11 +1,11 @@
 package org.firstinspires.ftc.teamcode.utils
 
 import com.qualcomm.robotcore.hardware.DcMotorEx
+import com.qualcomm.robotcore.hardware.DigitalChannel
 import com.qualcomm.robotcore.hardware.HardwareDevice
 import com.qualcomm.robotcore.hardware.HardwareMap
 import io.github.bionictigers.axiom.commands.Scheduler
 import io.github.bionictigers.axiom.commands.statelessCommand
-import io.github.bionictigers.axiom.utils.Time
 
 val dcMotorTrackers = mutableMapOf<DcMotorEx, DcMotorTracker>()
 
@@ -50,6 +50,6 @@ fun DcMotorEx.getTracker(): DcMotorTracker {
 }
 
 
-inline fun <reified T : HardwareDevice> HardwareMap.getByName(name: String): T {
-    return this.get(T::class.java, name)
-}
+        inline fun <reified T : HardwareDevice> HardwareMap.getByName(name: String): T {
+            return this.get(T::class.java, name)
+        }
