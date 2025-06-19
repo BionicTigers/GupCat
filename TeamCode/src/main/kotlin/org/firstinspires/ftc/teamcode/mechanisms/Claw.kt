@@ -2,57 +2,54 @@ package org.firstinspires.ftc.teamcode.mechanisms
 
 import com.qualcomm.robotcore.hardware.HardwareMap
 import com.qualcomm.robotcore.hardware.Servo
-import org.firstinspires.ftc.robotcore.external.Telemetry
+import io.github.bionictigers.axiom.commands.InstantCommand
 import io.github.bionictigers.axiom.commands.System
-import org.firstinspires.ftc.teamcode.input.Gamepad
+import org.firstinspires.ftc.teamcode.input.ControlSchema
+import org.firstinspires.ftc.teamcode.input.Controllable
+import org.firstinspires.ftc.teamcode.input.Controls
+import org.firstinspires.ftc.teamcode.input.Gamepads
+import org.firstinspires.ftc.teamcode.input.Profile
+import org.firstinspires.ftc.teamcode.input.types.Digital
 import org.firstinspires.ftc.teamcode.utils.getByName
 
-//enum class Sample {
-//    YELLOW,
-//    BLUE,
-//    RED
-//}
+class Claw(hardwareMap: HardwareMap) : System, Controllable {
+    companion object {
+        /** Open position for the servo */
+        const val OPEN_POSITION = .1
 
+        /** Close position for the servo */
+        const val CLOSE_POSITION = 0.55
+    }
 
-class Claw(hardwareMap: HardwareMap, private val openPos: Double = .1) : System {
+    interface Schema : ControlSchema {
+        /** Opens the claw */
+        val open: Digital?
+
+        /** Closes the claw */
+        val close: Digital?
+
+        /** Toggles the claw */
+        val toggle: Digital?
+    }
+
     override val name = "Claw"
-    override val dependencies: List<System> = emptyList()
-    override val beforeRun = null
-    override val afterRun = null
 
     private val claw = hardwareMap.getByName<Servo>("claw")
 
-    fun setupDriverControl(gp: Gamepad) {
-        gp.getBooleanButton(Gamepad.Buttons.A).onDown {
-            open = !open
+    fun open(): InstantCommand = InstantCommand { claw.position = OPEN_POSITION }
+    fun close(): InstantCommand = InstantCommand { claw.position = CLOSE_POSITION }
+    fun toggle(): InstantCommand = InstantCommand {
+        claw.position = if (claw.position == OPEN_POSITION) CLOSE_POSITION else OPEN_POSITION
+    }
+
+    override fun bindControls(
+        profile: Profile,
+        gamepad: Gamepads,
+        builder: Controls.Builder
+    ): Unit =
+        with(profile.claw) {
+            open?.let { builder.register(it) { open() } }
+            close?.let { builder.register(it) { close() } }
+            toggle?.let { builder.register(it) { toggle() } }
         }
-    }
-
-    private fun open() {
-        position = openPos
-    }
-
-    private fun close() {
-        position = 0.55
-    }
-
-    var position: Double
-        get() = claw.position
-        set(value) {
-            claw.position = value.coerceIn(0.0, 1.0)
-        }
-
-    var open = false
-        set(value) {
-            if (value) open() else close()
-            field = value
-        }
-
-//    fun getDetection(): Sample {
-//
-//    }
-
-    fun log(telemetry: Telemetry) {
-        telemetry.addData("position", claw.position)
-    }
 }

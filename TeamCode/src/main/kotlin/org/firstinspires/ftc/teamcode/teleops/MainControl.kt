@@ -1,13 +1,11 @@
 package org.firstinspires.ftc.teamcode.teleops
 
-import com.pedropathing.follower.FollowerConstants
 import com.pedropathing.localization.PoseUpdater
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import io.github.bionictigers.axiom.commands.Command
 import io.github.bionictigers.axiom.commands.Scheduler
 import io.github.bionictigers.axiom.commands.statelessCommand
-import io.github.bionictigers.axiom.utils.Timer
 import org.firstinspires.ftc.teamcode.input.Gamepad
 import org.firstinspires.ftc.teamcode.input.GamepadSystem
 import org.firstinspires.ftc.teamcode.localization.CustomPedroLocalizer
@@ -15,11 +13,9 @@ import org.firstinspires.ftc.teamcode.mechanisms.Arm
 import org.firstinspires.ftc.teamcode.mechanisms.Claw
 import org.firstinspires.ftc.teamcode.mechanisms.Pivot
 import org.firstinspires.ftc.teamcode.mechanisms.Slides
-import org.firstinspires.ftc.teamcode.motion.Drivetrain
 import org.firstinspires.ftc.teamcode.pedro.FConstants
 import org.firstinspires.ftc.teamcode.pedro.LConstants
 import org.firstinspires.ftc.teamcode.utils.Persistents
-import org.firstinspires.ftc.teamcode.utils.Pose
 
 @TeleOp(name = "MainControl")
 class MainControl : LinearOpMode() {
@@ -60,7 +56,7 @@ class MainControl : LinearOpMode() {
             pivot.mpSetPosition(0)
         }
 
-        Scheduler.add(statelessCommand("initial")
+        Scheduler.schedule(statelessCommand("initial")
             .setOnEnter {
                 claw.open = true
                 arm.target = Arm.Position.Down
@@ -71,7 +67,7 @@ class MainControl : LinearOpMode() {
             }
         )
 
-        Scheduler.add(Command)
+        Scheduler.schedule(Command)
 
         waitForStart()
 

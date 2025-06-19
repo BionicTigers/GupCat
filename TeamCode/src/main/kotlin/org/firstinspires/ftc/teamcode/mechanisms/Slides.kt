@@ -5,214 +5,200 @@ import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.DigitalChannel
 import com.qualcomm.robotcore.hardware.HardwareMap
-import org.firstinspires.ftc.robotcore.external.Telemetry
+import io.github.bionictigers.axiom.commands.BaseCommandState
 import io.github.bionictigers.axiom.commands.Command
-import io.github.bionictigers.axiom.commands.CommandState
-import io.github.bionictigers.axiom.commands.Scheduler
+import io.github.bionictigers.axiom.commands.InstantCommand
 import io.github.bionictigers.axiom.commands.System
-import org.firstinspires.ftc.teamcode.input.Gamepad
-import org.firstinspires.ftc.teamcode.motion.MotionResult
+import io.github.bionictigers.axiom.commands.persistentState
+import io.github.bionictigers.axiom.web.Editable
+import org.firstinspires.ftc.teamcode.input.ControlSchema
+import org.firstinspires.ftc.teamcode.input.Controllable
+import org.firstinspires.ftc.teamcode.input.Controls
+import org.firstinspires.ftc.teamcode.input.Gamepads
+import org.firstinspires.ftc.teamcode.input.Profile
+import org.firstinspires.ftc.teamcode.input.matches
+import org.firstinspires.ftc.teamcode.input.types.Analog
+import org.firstinspires.ftc.teamcode.input.types.Control
+import org.firstinspires.ftc.teamcode.input.types.Digital
 import org.firstinspires.ftc.teamcode.motion.PID
 import org.firstinspires.ftc.teamcode.motion.PIDTerms
-import org.firstinspires.ftc.teamcode.motion.generateMotionProfile
 import org.firstinspires.ftc.teamcode.utils.ControlHub
+import org.firstinspires.ftc.teamcode.utils.Encoder
 import org.firstinspires.ftc.teamcode.utils.Persistents
-import io.github.bionictigers.axiom.web.Editable
 import org.firstinspires.ftc.teamcode.utils.getByName
-import kotlin.math.abs
-import kotlin.math.max
+import org.firstinspires.ftc.teamcode.utils.seconds
 
-interface SlidesState : CommandState {
-    var targetPosition: Int
-    var profile: MotionResult?
-    val pid: PID
-    val gpPid: PID
-    val motorL: DcMotorEx
-    val motorR: DcMotorEx
-    var moveStartTime: Time?
-    var changed: Boolean
-    var limitSwitch: DigitalChannel
-    var ticks: Int
-    var setPoint: Int
-
+class Slides(hardwareMap: HardwareMap, val pivot: Pivot? = null) : System, Controllable {
     companion object {
-        fun default(name: String, motorL: DcMotorEx, motorR: DcMotorEx, limitSwitch: DigitalChannel): SlidesState {
-            return object : SlidesState, CommandState by CommandState.default(name) {
-                @Editable
-                override var targetPosition = 0
-                @Editable
-                override val pid = PID(PIDTerms(0.0, 30.0, 0.0), 0.0, 47000.0, -1.0, 1.0)
-                override val gpPid = PID(PIDTerms(0.0,50.0,0.0), 0.0, 47000.0, -1.0, 1.0)
-                override val motorL = motorL
-                override val motorR = motorR
-                override var profile: MotionResult? = null
-                override var moveStartTime: Time? = null
-                override var changed = false
-                override var limitSwitch = limitSwitch
-                override var ticks = 0
-                override var setPoint = 0
-            }
-        }
+        /** Max Ticks for the slide encoder */
+        const val MAX_TICKS = 47000
+
+        /** Max Ticks for the slide encoder */
+        const val MIN_TICKS = -3000
+
+        /** Max Ticks for the slide encoder */
+        const val PIVOT_RESTING_MAX_TICKS = 26500
+
+        /** Power applied when limit switch is active */
+        const val RESTING_POWER = -0.02
     }
-}
 
-class Slides(hardwareMap: HardwareMap, var pivot: Pivot? = null) : System {
-    private val exHub = ControlHub(hardwareMap, "Expansion Hub 2")
-    val max = 47000
-    private val pivotDownMax = 26500
-    private val pivotMaxVelocity = 50000
+    interface Schema : ControlSchema {
+        /** Speed the slides target ticks changes per second */
+        val rate: Int
 
-    var lastTicks = 0
-    val ticks: Int
-        get() = beforeRun.state.ticks
-    var velocityMax = 0.0
-    var lastVelocity = 0.0
-    var acceleration = 0.0
-    var accelerationMax = 0.0
+        /** Control to move the slides upward */
+        val raise: Control<*>
 
-    override val dependencies: List<System> = emptyList() //TODO: make this not be so stupid (use a singleton)
-    override val beforeRun = Command(SlidesState.default("Slides", hardwareMap.getByName("slidesL"), hardwareMap.getByName("slidesR"), hardwareMap.getByName("slideLimit")))
-        .onEnter {
-            it.motorR.mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
-            it.motorR.direction = DcMotorSimple.Direction.REVERSE
-            it.motorR.power = 0.0
-            it.motorL.mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
-            it.motorL.power = 0.0
-            it.pid.reset()
-            exHub.refreshBulkData()
-            if (Persistents.slideTicks == null) Persistents.slideTicks = exHub.rawGetEncoderTicks(2)
-            exHub.setJunkTicks(2, Persistents.slideTicks)
+        /** Control to move the slides downward */
+        val lower: Control<*>
+
+        /** Move to maximum position */
+        val max: Digital?
+
+        /** Move to minimum position */
+        val min: Digital?
+    }
+
+    override val name = "Slides"
+
+    private val hub = ControlHub(hardwareMap, "Expansion Hub 2")
+
+    private val dataState = DataState(hub.getEncoder(2), hardwareMap.getByName("slideLimit"))
+    private val targetingState by persistentState("slidesTargeting") {
+        TargetingState(
+            hardwareMap.getByName("slidesL"),
+            hardwareMap.getByName("slidesR")
+        )
+    }
+
+    /**
+     * Limits max ticks due to horizontal expansion limit
+     *
+     * Assumes no expansion limit if pivot not present
+     */
+    val adjustedMaxTicks: Int
+        get() {
+            val slope = (MAX_TICKS - PIVOT_RESTING_MAX_TICKS).toDouble() / Pivot.MAX_ANGLE.degrees
+            val pivotPercentFromMax =
+                pivot?.let { it.angle.degrees / Pivot.MAX_ANGLE.degrees } ?: 1.0
+            return (PIVOT_RESTING_MAX_TICKS + slope * pivotPercentFromMax).toInt()
         }
-        .action {
-            exHub.refreshBulkData()
-            it.ticks = exHub.getEncoderTicks(2)
 
-            val velocity = (ticks - lastTicks) / it.deltaTime.seconds()
-            lastTicks = ticks
-            velocityMax = max(velocityMax, abs(velocity))
+    //TODO: Change this to use motion profiling
+    fun moveTo(ticks: Number): Command<BaseCommandState> = InstantCommand {
+        //No need to coerce as it's done before power is applied
+        targetingState.targetTicks = ticks.toInt()
+    }
 
-            if (abs(lastVelocity) < abs(velocity))
-                acceleration = (velocity - lastVelocity) / it.deltaTime.seconds()
+    fun adjust(ticks: Number): Command<BaseCommandState> = InstantCommand {
+        //No need to coerce as it's done before power is applied
+        targetingState.targetTicks += ticks.toInt()
+    }
 
-            accelerationMax = max(accelerationMax, abs(acceleration))
-            lastVelocity = velocity
+    fun min(): Command<BaseCommandState> = moveTo(MIN_TICKS)
 
-            if (it.profile != null) {
-                it.targetPosition =
-                    it.profile!!.getPosition(it.timeInScheduler - it.moveStartTime!!).toInt()
+    fun max(): Command<BaseCommandState> = moveTo(adjustedMaxTicks)
+
+    override val beforeRun = Command.create("SlidesData", dataState) {
+        enter {
+            it.encoder.refresh()
+            it.encoder.setJunkTicks(Persistents.slideTicks)
+            it.ticks = it.encoder.ticks
+        }
+
+        action {
+            if (it.isResting) {
+                it.encoder.refresh()
+                it.encoder.setJunkTicks()
+                Persistents.slideTicks = it.encoder.rawTicks
             }
 
-            val slope = if (pivot != null) (max - pivotDownMax) / pivot!!.max else 0
-            val ticksFrom90 = if (pivot != null) pivot!!.max - pivot!!.ticks else 0
-            it.targetPosition = targetPosition.coerceIn(-200, max - slope * ticksFrom90)
+            val lastTicks = it.ticks
+            val lastVelocity = it.velocity
 
-            val direction = if (it.targetPosition >= ticks.toDouble()) -1 else 1
-            if (pivot?.ticks != null && pivot?.ticks!! < 30) {
-                it.gpPid.kP = 7.0
-            } else if (it.targetPosition >= ticks.toDouble()) {
-                it.pid.kP = 18.0
-                it.gpPid.kP = 18.0 // 12
-            } else {
-                it.pid.kP = 14.0
-                it.gpPid.kP = 4.0 // 7
-            }
-
-//            if (pivot?.ticks != null && pivot?.ticks!! < 70){
-//                it.gpPid.pvMin = 1000.0
-//                println("--------------------------------------------------------------------------------------------------------------")
-//            }
-
-            val power = if (it.limitSwitch.state || it.targetPosition > 0) {
-//                it.pid.calculate(it.profile.getPosition(it.timeInScheduler - it.moveStartTime), ticks.toDouble())
-                if (it.profile != null) {
-                    it.pid.calculate(it.targetPosition.toDouble(), ticks.toDouble())
-                } else {
-                    it.gpPid.calculate(it.targetPosition.toDouble(), ticks.toDouble())
-                } //+ .1.withSign(it.targetPosition - ticks)
-            } else {
-                -0.02
-            }
-
-            println(power)
-
-//            println("Target: ${it.profile.getPosition(it.timeInScheduler - it.moveStartTime)}, Time: ${it.timeInScheduler - it.moveStartTime}, Actual: ${it.targetPosition}")
-
-            if (!it.limitSwitch.state) {
-                it.ticks = 0
-                Persistents.slideTicks = exHub.rawGetEncoderTicks(2)
-                exHub.setJunkTicks(2, Persistents.slideTicks)
-            }
-
-//            println(it.limitSwitch.state)
-
-            it.motorR.power = power //+ .15 * power * direction
-            it.motorL.power = power
-
-//            it.setPoint = it.profile.getPosition(it.timeInScheduler - it.moveStartTime).toInt()
-//            it.processValue = ticks
-//            println(Persistents.slideTicks)
+            it.ticks = it.encoder.ticks
+            it.velocity = (it.ticks - lastTicks) / it.deltaTime.seconds
+            it.acceleration = (it.velocity - lastVelocity) / it.deltaTime.seconds
 
             false
         }
-    override val afterRun = null
+    }
 
-    fun setupDriverControl(gamepad: Gamepad) {
-        gamepad.getBooleanButton(Gamepad.Buttons.DPAD_UP).onHold {
-            targetPosition += if (pivot!!.ticks < 500)
-                (max * .7 * Scheduler.loopDeltaTime.seconds()).toInt()
-            else
-                (max * .8 * Scheduler.loopDeltaTime.seconds()).toInt()
-            beforeRun.state.profile = null
-            beforeRun.state.moveStartTime = null
+    override val afterRun = Command.create("SlidesTargeting", targetingState) {
+        enter {
+            it.motorL.apply {
+                mode = DcMotor.RunMode.RUN_USING_ENCODER
+                zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
+                power = 0.0
+            }
+
+            it.motorR.apply {
+                mode = DcMotor.RunMode.RUN_USING_ENCODER
+                zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
+                direction = DcMotorSimple.Direction.REVERSE
+                power = 0.0
+            }
+
+            it.manualPid.reset()
         }
 
-        gamepad.getBooleanButton(Gamepad.Buttons.DPAD_DOWN).onHold {
-            targetPosition -= if (pivot!!.ticks < 500)
-                (max * .7 * Scheduler.loopDeltaTime.seconds()).toInt()
-            else
-                (max * .8 * Scheduler.loopDeltaTime.seconds()).toInt()
-            beforeRun.state.profile = null
-            beforeRun.state.moveStartTime = null
-        }
+        action {
+            it.targetTicks = it.targetTicks.coerceIn(MIN_TICKS, adjustedMaxTicks)
 
-        gamepad.leftJoystick.continuous {
-            targetPosition -= (max * .35 * Scheduler.loopDeltaTime.seconds() * it.y * 1.1).toInt()
-            beforeRun.state.profile = null
-            beforeRun.state.moveStartTime = null
-        }
+            val power = if (dataState.isResting) RESTING_POWER
+            else it.manualPid.calculate(it.targetTicks.toDouble(), dataState.ticks.toDouble())
 
-        gamepad.getBooleanButton(Gamepad.Buttons.DPAD_LEFT).onDown {
-            mpMove(18400) // specimen
-        }
-        gamepad.getBooleanButton(Gamepad.Buttons.DPAD_RIGHT).onDown {
-            mpMove(26400) // hang
+            it.motorL.power = power
+            it.motorR.power = power
+
+            false
         }
     }
 
-    var targetPosition: Int = 0
-        get() = beforeRun.state.targetPosition
-        set(value) {
-//            val sub = 400 - (pivot?.pivotTicks ?: 400)
-            field = value.coerceIn(-2000, max)
-            beforeRun.state.changed = true
-            beforeRun.state.targetPosition = value
+    override fun bindControls(
+        profile: Profile,
+        gamepad: Gamepads,
+        builder: Controls.Builder
+    ): Unit =
+        with(profile.slides) {
+            if (!gamepad.matches(desiredGamepad)) return@with
+
+            //Allow for smart casting
+            val raiseControl = raise
+            when (raiseControl) {
+                is Digital -> builder.register(raiseControl) { adjust(rate * raise.modifier) }
+                is Analog -> builder.register(raiseControl) { adjust(rate * it * raise.modifier) }
+            }
+
+            //Allow for smart casting
+            val lowerControl = lower
+            when (lowerControl) {
+                is Digital -> builder.register(lowerControl) { adjust(-rate * lower.modifier) }
+                is Analog -> builder.register(lowerControl) { adjust(-rate * it * lower.modifier) }
+            }
+
+            min?.let { builder.register(it) { min() } }
+            max?.let { builder.register(it) { max() } }
         }
 
-    var previous = 0
-    fun mpMove(ticks: Int) {
-        if (previous == ticks) return
-        previous = ticks
-        if (ticks > beforeRun.state.ticks)
-            beforeRun.state.profile = generateMotionProfile(beforeRun.state.ticks, ticks, 300000, 1120130, 51000)
-        else
-            beforeRun.state.profile = generateMotionProfile(beforeRun.state.ticks, ticks, 300000, 3692851, 59948)
-        beforeRun.state.moveStartTime = beforeRun.state.timeInScheduler
+
+    data class DataState(
+        val encoder: Encoder,
+        val limitSwitch: DigitalChannel,
+        var ticks: Int = 0,
+        var velocity: Double = 0.0,
+        var acceleration: Double = 0.0
+    ) : BaseCommandState() {
+        val isResting: Boolean
+            get() = limitSwitch.state
     }
 
-    fun log(telemetry: Telemetry) {
-        telemetry.addData("SlidesCurrent", ticks)
-        telemetry.addData("SlidesTarget", targetPosition)
-        telemetry.addData("SlideMaxVelocity", velocityMax)
-        telemetry.addData("SlideMaxAcceleration", accelerationMax)
-    }
+    data class TargetingState(
+        val motorL: DcMotorEx,
+        val motorR: DcMotorEx,
+        @Editable
+        val manualPid: PID = PID(PIDTerms(16.0, 30.0, 0.0), 0.0, MAX_TICKS.toDouble(), -1.0, 1.0),
+        var targetTicks: Int = 0
+    ) : BaseCommandState()
 }

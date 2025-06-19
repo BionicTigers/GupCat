@@ -6,9 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
 import io.github.bionictigers.axiom.commands.Scheduler
 import io.github.bionictigers.axiom.commands.statelessCommand
-import org.firstinspires.ftc.teamcode.utils.assignTracker
 import org.firstinspires.ftc.teamcode.utils.getByName
-import org.firstinspires.ftc.teamcode.utils.getTracker
 
 object PIDCoef {
     @JvmField
@@ -30,7 +28,7 @@ class VelocityTune : LinearOpMode() {
 
         waitForStart()
 
-        Scheduler.add(statelessCommand().setAction {
+        Scheduler.schedule(statelessCommand().setAction {
             motor.power = pid.calculate(1000.0, motor.velocity)
             false
         })

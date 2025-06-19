@@ -6,11 +6,11 @@ import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.tan
 
-class Angle private constructor(val radians: Double) {
+class Angle private constructor(val radians: Double) : Comparable<Angle> {
     companion object {
         fun radians(radians: Number) = Angle(radians.toDouble())
         fun degrees(degrees: Number) = Angle(degrees.toDouble() / 180 * PI)
-        val zero = radians(0)
+        val ZERO = radians(0)
     }
 
     val degrees: Double
@@ -26,6 +26,10 @@ class Angle private constructor(val radians: Double) {
 
     operator fun times(otherRotation: Angle): Angle {
         return radians(radians * otherRotation.radians)
+    }
+
+    operator fun times(other: Number): Angle {
+        return radians(radians * other.toDouble())
     }
 
     operator fun div(otherRotation: Angle): Angle {
@@ -44,7 +48,7 @@ class Angle private constructor(val radians: Double) {
         return radians(radians)
     }
 
-    operator fun compareTo(otherRotation: Angle): Int {
+    override operator fun compareTo(otherRotation: Angle): Int {
         return radians.compareTo(otherRotation.radians)
     }
 

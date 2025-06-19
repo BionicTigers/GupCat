@@ -2,51 +2,68 @@ package org.firstinspires.ftc.teamcode.mechanisms
 
 import com.qualcomm.robotcore.hardware.HardwareMap
 import com.qualcomm.robotcore.hardware.Servo
-import org.firstinspires.ftc.robotcore.external.Telemetry
+import io.github.bionictigers.axiom.commands.InstantCommand
 import io.github.bionictigers.axiom.commands.System
-import org.firstinspires.ftc.teamcode.input.Gamepad
+import org.firstinspires.ftc.teamcode.input.ControlSchema
+import org.firstinspires.ftc.teamcode.input.Controllable
+import org.firstinspires.ftc.teamcode.input.Controls
+import org.firstinspires.ftc.teamcode.input.Gamepads
+import org.firstinspires.ftc.teamcode.input.Profile
+import org.firstinspires.ftc.teamcode.input.types.Digital
 
-class Arm(hardwareMap: HardwareMap) : System {
-    override val name = "Arm"
-    override val dependencies: List<System> = emptyList()
-    override val beforeRun = null
-    override val afterRun = null
-
-    private val arm = hardwareMap.get(Servo::class.java, "arm")
-
+class Arm(hardwareMap: HardwareMap) : System, Controllable {
     enum class Position(val target: Double) {
         Down(1.0),
         Middle(.65),
         Up(.15),
     }
 
+    interface Schema : ControlSchema {
+        /** Toggle between up and down */
+        val toggleUpDown: Digital?
+
+        /** Move to up position */
+        val up: Digital?
+
+        /** Move to middle position */
+        val middle: Digital?
+
+        /** Move to down position */
+        val down: Digital?
+    }
+
+    override val name = "Arm"
+
+    private val arm = hardwareMap.get(Servo::class.java, "arm")
+
     var target = Position.Up
-        set(value) {
-            position = value.target
+        private set(value) {
+            arm.position = value.target
             field = value
         }
 
-    fun setupDriverControl(gp: Gamepad) {
-        gp.getBooleanButton(Gamepad.Buttons.B).onDown {
-            target = if (target != Position.Down) {
-                Position.Down
-            } else {
-                Position.Up
-            }
-        }
+    fun up(): InstantCommand = InstantCommand { target = Position.Up }
 
-        gp.getBooleanButton(Gamepad.Buttons.Y).onDown {
-            target = Position.Middle
+    fun down(): InstantCommand = InstantCommand { target = Position.Down }
+
+    fun middle(): InstantCommand = InstantCommand { target = Position.Middle }
+
+    fun toggle(): InstantCommand = InstantCommand {
+        if (target != Position.Down) {
+            target = Position.Down
+        } else {
+            target = Position.Up
         }
     }
 
-    var position: Double
-        get() = arm.position
-        set(value) {
-            arm.position = value.coerceIn(0.0, 1.0)
-        }
-
-    fun log(telemetry: Telemetry) {
-        telemetry.addData("ArmPosition", position)
+    override fun bindControls(
+        profile: Profile,
+        gamepad: Gamepads,
+        builder: Controls.Builder
+    ): Unit = with(profile.arm) {
+        toggleUpDown?.let { builder.register(it) { toggle() } }
+        up?.let { builder.register(it) { up() } }
+        middle?.let { builder.register(it) { middle() } }
+        down?.let { builder.register(it) { down() } }
     }
 }

@@ -1,55 +1,17 @@
 package org.firstinspires.ftc.teamcode.utils
 
-import com.qualcomm.robotcore.hardware.DcMotorEx
-import com.qualcomm.robotcore.hardware.DigitalChannel
 import com.qualcomm.robotcore.hardware.HardwareDevice
 import com.qualcomm.robotcore.hardware.HardwareMap
-import io.github.bionictigers.axiom.commands.Scheduler
-import io.github.bionictigers.axiom.commands.statelessCommand
+import kotlin.time.Duration
+import kotlin.time.DurationUnit
 
-val dcMotorTrackers = mutableMapOf<DcMotorEx, DcMotorTracker>()
-
-class DcMotorTracker(private val motor: DcMotorEx) {
-
-    private var previousPosition = motor.currentPosition
-    private var previousVelocity = 0.0
-    var acceleration = 0.0
-        private set
-    var velocity = 0.0
-        private set
-    private var accumulativeTime = Time()
-
-    init {
-        val command = statelessCommand("DcMotor Tracker")
-        .setAction {
-            accumulativeTime += it.deltaTime
-            if (motor.currentPosition - previousPosition == 0 || accumulativeTime <= Time.fromMilliseconds(22)) {
-                return@setAction true
-            }
-            velocity = (motor.currentPosition - previousPosition) / accumulativeTime.seconds()
-            acceleration = (velocity - previousVelocity) / accumulativeTime.seconds()
-            previousPosition = motor.currentPosition
-            accumulativeTime = Time()
-            false
-        }
-
-        Scheduler.add(command)
-    }
+inline fun <reified T : HardwareDevice> HardwareMap.getByName(name: String): T {
+    return this.get(T::class.java, name)
 }
 
-fun DcMotorEx.assignTracker() {
-    if (dcMotorTrackers.containsKey(this)) {
-        return
-    }
-
-    dcMotorTrackers[this] = DcMotorTracker(this)
-}
-
-fun DcMotorEx.getTracker(): DcMotorTracker {
-    return dcMotorTrackers[this] ?: throw IllegalArgumentException("This motor does not have a tracker.")
-}
-
-
-        inline fun <reified T : HardwareDevice> HardwareMap.getByName(name: String): T {
-            return this.get(T::class.java, name)
-        }
+val Duration.minutes: Double
+    get() = this.toDouble(DurationUnit.MINUTES)
+val Duration.seconds: Double
+    get() = this.toDouble(DurationUnit.SECONDS)
+val Duration.milliseconds: Double
+    get() = this.toDouble(DurationUnit.MILLISECONDS)

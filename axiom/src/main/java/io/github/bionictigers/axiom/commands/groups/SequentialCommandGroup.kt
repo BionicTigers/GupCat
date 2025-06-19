@@ -5,7 +5,6 @@ import io.github.bionictigers.axiom.commands.Command
 import io.github.bionictigers.axiom.commands.Scheduler
 
 data class SequentialCommandGroupState(
-    override val name: String,
     val commands: List<String>,
     var currentIndex: Int = 0
 ) : BaseCommandState()
@@ -14,7 +13,8 @@ class SequentialCommandGroup(
     name: String = "SequentialCommandGroup",
     val commands: List<Command<*>>
 ) : Command<SequentialCommandGroupState>(
-    SequentialCommandGroupState(name, commands.map { it.state.name })
+    name,
+    SequentialCommandGroupState(commands.map { it.name })
 ) {
     private var currentCommand: Command<*>
 
@@ -23,17 +23,17 @@ class SequentialCommandGroup(
 
         currentCommand = commands.first()
 
-        onEnter {
-            Scheduler.add(currentCommand)
+        enter {
+            Scheduler.schedule(currentCommand)
         }
 
         action {
             if (!currentCommand.running && commands.size > it.currentIndex + 1) {
                 it.currentIndex++
                 currentCommand = commands[it.currentIndex]
-                Scheduler.add(currentCommand)
+                Scheduler.schedule(currentCommand)
             } else if (it.currentIndex == commands.size - 1 && !currentCommand.running) {
-                println("Finished all commands in SequentialCommandGroup: ${it.name}")
+                println("Finished all commands in SequentialCommandGroup: $name")
                 return@action true
             }
 

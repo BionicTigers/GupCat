@@ -36,7 +36,7 @@ class Test : LinearOpMode() {
         val controlHub = ControlHub(hardwareMap, "Control Hub")
         val motor: DcMotorEx = hardwareMap.getByName("motor")
         var oldPosition = motor.currentPosition
-        Scheduler.add(
+        Scheduler.schedule(
             Command(CommandSFRASS.default())
                 .action {
                     motor.power = it.power

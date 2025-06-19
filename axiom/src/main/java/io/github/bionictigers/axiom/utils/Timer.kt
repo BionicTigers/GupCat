@@ -1,22 +1,25 @@
 package io.github.bionictigers.axiom.utils
 
 import io.github.bionictigers.axiom.commands.BaseCommandState
+import kotlin.time.Duration
 
-class Timer(val duration: Time) {
-    private var initialTime: Time? = null
+class Timer(val duration: Duration) {
+    private var initialTime: Duration? = null
     private var calledOnce = false
 
     var isFinished = false
         private set
 
     fun update(state: BaseCommandState): Timer {
+        requireNotNull(state.enteredAt) { "Command must be in scheduler to use timer" }
+
+        val timeInScheduler = state.enteredAt!!.elapsedNow()
+
         if (initialTime == null) {
-            initialTime = state.timeInScheduler
-        } else if (state.timeInScheduler - initialTime!! >= duration) {
+            initialTime = timeInScheduler
+        } else if (timeInScheduler - initialTime!! >= duration) {
             isFinished = true
         }
-
-        println(state.timeInScheduler - initialTime!!)
 
         return this
     }

@@ -1,6 +1,8 @@
 package io.github.bionictigers.axiom.commands
 
 import com.qualcomm.robotcore.util.RobotLog
+import io.github.bionictigers.axiom.commands.Scheduler.getPersistentState
+import io.github.bionictigers.axiom.commands.Scheduler.persistentStates
 import io.github.bionictigers.axiom.web.Editable
 import io.github.bionictigers.axiom.web.Hidden
 import io.github.bionictigers.axiom.web.ObjectType
@@ -12,8 +14,10 @@ import java.lang.reflect.Field
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
-import kotlin.time.TimeSource
+import kotlin.properties.ReadWriteProperty
+import kotlin.reflect.KProperty
+import kotlin.time.Duration
+import kotlin.time.measureTime
 
 typealias GenericCommand = Command<out BaseCommandState>
 
@@ -28,10 +32,12 @@ object Scheduler {
     private val removeQueue: ArrayList<GenericCommand> = ArrayList()
     private val editQueue: ArrayList<Pair<String, Any>> = ArrayList()
 
-    private val persistentStates = ConcurrentHashMap<String, BaseCommandState>()
+    val persistentStates = ConcurrentHashMap<String, BaseCommandState>()
 
     private var changed = false
     private var inUpdateCycle = false
+
+    var loopDeltaTime = Duration.ZERO
 
 //    init {
 //        Server.start()
@@ -45,7 +51,7 @@ object Scheduler {
      * @param command The commands to add.
      * @see Command
      */
-    fun add(vararg command: GenericCommand) {
+    fun schedule(vararg command: GenericCommand) {
         if (inUpdateCycle)
             addQueue.addAll(command)
         else {
@@ -55,11 +61,16 @@ object Scheduler {
         }
     }
 
-    fun add(commands: Collection<GenericCommand>) {
+    fun schedule(commands: Collection<GenericCommand>) {
         commands.forEach {
-            add(it)
+            schedule(it)
         }
     }
+
+    inline fun <reified T : BaseCommandState> getPersistentState(
+        name: String,
+        default: () -> T,
+    ): T = (persistentStates[name] as? T) ?: default().also { persistentStates[name] = it }
 
     private fun serializeVariable(state: Any?, readOnly: Boolean): Any {
         return when (state) {
@@ -101,7 +112,7 @@ object Scheduler {
     fun serialize(): ArrayList<Map<String, Any>> {
         val array = ArrayList<Map<String, Any>>()
         commands.values.forEach {
-            array += mapOf("name" to it.state.name, "hash" to it.hashCode(), "state" to (serializeState(it.state) ?: mapOf()), "type" to ObjectType.Command)
+            array += mapOf("name" to it.name, "hash" to it.hashCode(), "state" to (serializeState(it.state) ?: mapOf()), "type" to ObjectType.Command)
         }
         systems.values.forEach {
             array += mapOf("name" to it.name, "hash" to it.hashCode(), "state" to (serializeState(it) ?: mapOf()), "type" to ObjectType.System)
@@ -113,21 +124,7 @@ object Scheduler {
     private fun internalAdd(command: GenericCommand) {
         changed = true
         commands[command.hashCode()] = command
-        command.enter()
-    }
-
-    fun <T: BaseCommandState> getPersistentState(name: String, default: T, onGet: T.() -> Unit = {}): T {
-        @Suppress("UNCHECKED_CAST")
-        //Default is unreachable but required to satisfy the compiler
-        if (persistentStates.containsKey(name) && persistentStates[name] as? T != null) {
-            val state = persistentStates[name] as? T ?: default
-            onGet(state)
-            persistentStates[name] = state
-            return state
-        }
-
-        persistentStates[name] = default
-        return default
+        command.internalEnter()
     }
 
     /**
@@ -139,8 +136,8 @@ object Scheduler {
      * @see System
      */
     fun addSystem(vararg system: System) {
-        add(system.mapNotNull { it.beforeRun })
-        add(system.mapNotNull { it.afterRun })
+        schedule(system.mapNotNull { it.beforeRun })
+        schedule(system.mapNotNull { it.afterRun })
         system.forEach {
             systems[it.hashCode()] = it
         }
@@ -173,8 +170,7 @@ object Scheduler {
             }
             dep.dependencies.remove(command)
         }
-        command.exit()
-        command.reset()
+        command.internalExit()
     }
 
     private fun sort() {
@@ -252,25 +248,24 @@ object Scheduler {
      */
     fun update() {
         inUpdateCycle = true
-        val startTime = java.lang.System.currentTimeMillis()
 
-        editQueue.forEach(this::internalEdit)
-        editQueue.clear()
+        loopDeltaTime = measureTime {
+            editQueue.forEach(this::internalEdit)
+            editQueue.clear()
 
-        addQueue.forEach(this::internalAdd)
-        addQueue.clear()
+            addQueue.forEach(this::internalAdd)
+            addQueue.clear()
 
-        if (changed) {
-            sort()
-            changed = false
+            if (changed) {
+                sort()
+                changed = false
+            }
+
+            sortedCommands.forEach(GenericCommand::execute)
+
+            removeQueue.forEach(this::internalRemove)
+            removeQueue.clear()
         }
-
-        sortedCommands.forEach(GenericCommand::execute)
-
-        removeQueue.forEach(this::internalRemove)
-        removeQueue.clear()
-
-        loopDeltaTime = (java.lang.System.currentTimeMillis() - startTime).milliseconds
 
         inUpdateCycle = false
     }
@@ -280,5 +275,25 @@ object Scheduler {
         sortedCommands.clear()
         addQueue.clear()
         removeQueue.clear()
+    }
+}
+
+inline fun <reified T : BaseCommandState> persistentState(
+    name: String,
+    noinline default: () -> T
+): ReadWriteProperty<Any?, T> = object : ReadWriteProperty<Any?, T> {
+
+    private var cache: T? = null
+
+    override fun getValue(thisRef: Any?, property: KProperty<*>): T {
+        if (cache == null) {
+            cache = getPersistentState(name, default)
+        }
+        return cache!!
+    }
+
+    override fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
+        cache = value
+        persistentStates[name] = value
     }
 }

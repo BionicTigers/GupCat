@@ -5,6 +5,7 @@ import com.qualcomm.hardware.lynx.LynxModule
 import com.qualcomm.robotcore.hardware.HardwareMap
 import org.firstinspires.ftc.robotcore.external.navigation.VoltageUnit
 
+//TODO: Make hubs global to further increase performance
 class ControlHub(hardware: HardwareMap, hubName: String) {
     private var bulkDataCache: IntArray
     private var junkTicks = IntArray(4)
