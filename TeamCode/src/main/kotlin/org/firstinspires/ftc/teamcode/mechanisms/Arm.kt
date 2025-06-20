@@ -2,8 +2,11 @@ package org.firstinspires.ftc.teamcode.mechanisms
 
 import com.qualcomm.robotcore.hardware.HardwareMap
 import com.qualcomm.robotcore.hardware.Servo
-import io.github.bionictigers.axiom.commands.InstantCommand
+import io.github.bionictigers.axiom.commands.BaseCommand
+import io.github.bionictigers.axiom.commands.Command
+import io.github.bionictigers.axiom.commands.Scheduler
 import io.github.bionictigers.axiom.commands.System
+import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.teamcode.input.ControlSchema
 import org.firstinspires.ftc.teamcode.input.Controllable
 import org.firstinspires.ftc.teamcode.input.Controls
@@ -11,7 +14,7 @@ import org.firstinspires.ftc.teamcode.input.Gamepads
 import org.firstinspires.ftc.teamcode.input.Profile
 import org.firstinspires.ftc.teamcode.input.types.Digital
 
-class Arm(hardwareMap: HardwareMap) : System, Controllable {
+class Arm(hardwareMap: HardwareMap, telemetry: Telemetry? = null) : System, Controllable {
     enum class Position(val target: Double) {
         Down(1.0),
         Middle(.65),
@@ -42,17 +45,25 @@ class Arm(hardwareMap: HardwareMap) : System, Controllable {
             field = value
         }
 
-    fun up(): InstantCommand = InstantCommand { target = Position.Up }
+    fun up(): BaseCommand = Command.instant("Arm Up") { target = Position.Up }
 
-    fun down(): InstantCommand = InstantCommand { target = Position.Down }
+    fun down(): BaseCommand = Command.instant("Arm Down") { target = Position.Down }
 
-    fun middle(): InstantCommand = InstantCommand { target = Position.Middle }
+    fun middle(): BaseCommand = Command.instant("Arm Middle") { target = Position.Middle }
 
-    fun toggle(): InstantCommand = InstantCommand {
-        if (target != Position.Down) {
-            target = Position.Down
+    fun toggle(): BaseCommand = Command.instant("Arm Toggle") {
+        target = if (target != Position.Down) {
+            Position.Down
         } else {
-            target = Position.Up
+            Position.Up
+        }
+    }
+
+    init {
+        if (telemetry != null) {
+            Scheduler.schedule(Command.continuous("Arm Log") {
+                telemetry.addData("Arm Position", target.name)
+            })
         }
     }
 

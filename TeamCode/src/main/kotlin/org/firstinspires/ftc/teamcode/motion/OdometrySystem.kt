@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.localization
+package org.firstinspires.ftc.teamcode.motion
 
 import com.qualcomm.robotcore.hardware.HardwareMap
 import com.pedropathing.localization.Localizer
@@ -8,12 +8,15 @@ import com.pedropathing.localization.Pose as PathPose
 import org.firstinspires.ftc.teamcode.utils.Pose
 import org.firstinspires.ftc.teamcode.utils.Vector2
 import org.firstinspires.ftc.teamcode.utils.Angle
+import org.firstinspires.ftc.teamcode.utils.ControlHub
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.abs
 import org.firstinspires.ftc.teamcode.utils.Distance
 import org.firstinspires.ftc.teamcode.utils.NewRollingAverage
+import org.firstinspires.ftc.teamcode.utils.seconds
+import kotlin.time.Duration
 
 interface RobotConfig {
     val leftOffset: Distance
@@ -49,14 +52,14 @@ class CustomPedroLocalizer(
     private val config: RobotConfig = Configs.Main
 ) : Localizer() {
     // re-use your existing hubs & config
-    private val hub = org.firstinspires.ftc.teamcode.utils.ControlHub(hardwareMap, "Control Hub")
-    private val exHub = org.firstinspires.ftc.teamcode.utils.ControlHub(hardwareMap, "Expansion Hub 2")
+    private val hub = ControlHub(hardwareMap, "Control Hub")
+    private val exHub = ControlHub(hardwareMap, "Expansion Hub 2")
 
     private val ticksPerRev = 2000.0
     private var ticksL = 0
     private var ticksR = 0
     private var ticksB = 0
-    private var dt = Time.fromSeconds(1.0)
+    private var dt = Duration.ZERO
 
     // state mirrors your OdometrySystemState
     private var virtualPose = computeVirtual(startPose)
@@ -79,8 +82,8 @@ class CustomPedroLocalizer(
         // exactly the same startup you had
         hub.setJunkTicks()
         exHub.setJunkTicks()
-        hub.setEncoderDirection(0, org.firstinspires.ftc.teamcode.utils.ControlHub.Direction.Backward)
-        hub.setEncoderDirection(3, org.firstinspires.ftc.teamcode.utils.ControlHub.Direction.Backward)
+        hub.setEncoderDirection(0, ControlHub.Direction.Backward)
+        hub.setEncoderDirection(3, ControlHub.Direction.Backward)
     }
 
     /** Copy of your OdometrySystem setAction body, run once per loop. */
@@ -128,11 +131,11 @@ class CustomPedroLocalizer(
 
         // compute velocity / accel
         val oldVel = localVelocity
-        localVelocity = Vector2((deltaX.mm + deltaY.mm) / dt.seconds(), (deltaY.mm + deltaY.mm) / dt.seconds())
+        localVelocity = Vector2((deltaX.mm + deltaY.mm) / dt.seconds, (deltaY.mm + deltaY.mm) / dt.seconds)
         if (abs(localVelocity.x) > abs(oldVel.x))
-            localAcceleration.x = (localVelocity.x - oldVel.x) / dt.seconds()
+            localAcceleration.x = (localVelocity.x - oldVel.x) / dt.seconds
         if (abs(localVelocity.y) > abs(oldVel.y))
-            localAcceleration.y = (localVelocity.y - oldVel.y) / dt.seconds()
+            localAcceleration.y = (localVelocity.y - oldVel.y) / dt.seconds
 
         xAvg += globalVelocity.first.x
         yAvg += globalVelocity.first.y
@@ -146,15 +149,15 @@ class CustomPedroLocalizer(
         pose = Pose(finalX, finalY, virtualPose.rotation)
 
         globalVelocity = Pair(
-            Vector2((pose.x - oldGlobal.first.x) / dt.seconds(), (pose.y - oldGlobal.first.y) / dt.seconds()),
-            Angle.degrees(dTheta.degrees / dt.seconds())
+            Vector2((pose.x - oldGlobal.first.x) / dt.seconds, (pose.y - oldGlobal.first.y) / dt.seconds),
+            Angle.degrees(dTheta.degrees / dt.seconds)
         )
         globalAcceleration = Pair(
-            (globalVelocity.first  - oldGlobal.first) / dt.seconds(),
-            (globalVelocity.second - oldGlobal.second) / dt.seconds()
+            (globalVelocity.first  - oldGlobal.first) / dt.seconds,
+            (globalVelocity.second - oldGlobal.second) / dt.seconds
         )
 
-        dt = Time.fromSeconds(0.0)
+        dt = Duration.ZERO
     }
 
     // ---- Pedro Localizer interface ----

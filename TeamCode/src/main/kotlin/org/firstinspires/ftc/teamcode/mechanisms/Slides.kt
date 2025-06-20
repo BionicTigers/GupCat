@@ -7,10 +7,11 @@ import com.qualcomm.robotcore.hardware.DigitalChannel
 import com.qualcomm.robotcore.hardware.HardwareMap
 import io.github.bionictigers.axiom.commands.BaseCommandState
 import io.github.bionictigers.axiom.commands.Command
-import io.github.bionictigers.axiom.commands.InstantCommand
+import io.github.bionictigers.axiom.commands.Scheduler
 import io.github.bionictigers.axiom.commands.System
 import io.github.bionictigers.axiom.commands.persistentState
 import io.github.bionictigers.axiom.web.Editable
+import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.teamcode.input.ControlSchema
 import org.firstinspires.ftc.teamcode.input.Controllable
 import org.firstinspires.ftc.teamcode.input.Controls
@@ -20,6 +21,8 @@ import org.firstinspires.ftc.teamcode.input.matches
 import org.firstinspires.ftc.teamcode.input.types.Analog
 import org.firstinspires.ftc.teamcode.input.types.Control
 import org.firstinspires.ftc.teamcode.input.types.Digital
+import org.firstinspires.ftc.teamcode.motion.MotionProfile
+import org.firstinspires.ftc.teamcode.motion.MotionResult
 import org.firstinspires.ftc.teamcode.motion.PID
 import org.firstinspires.ftc.teamcode.motion.PIDTerms
 import org.firstinspires.ftc.teamcode.utils.ControlHub
@@ -28,7 +31,7 @@ import org.firstinspires.ftc.teamcode.utils.Persistents
 import org.firstinspires.ftc.teamcode.utils.getByName
 import org.firstinspires.ftc.teamcode.utils.seconds
 
-class Slides(hardwareMap: HardwareMap, val pivot: Pivot? = null) : System, Controllable {
+class Slides(hardwareMap: HardwareMap, val pivot: Pivot? = null, telemetry: Telemetry? = null) : System, Controllable {
     companion object {
         /** Max Ticks for the slide encoder */
         const val MAX_TICKS = 47000
@@ -41,6 +44,12 @@ class Slides(hardwareMap: HardwareMap, val pivot: Pivot? = null) : System, Contr
 
         /** Power applied when limit switch is active */
         const val RESTING_POWER = -0.02
+
+        /** Motion profile for raising the slides */
+        val raiseProfile = MotionProfile(300_000, 1_120_130, 51_000)
+
+        /** Motion profile for lowering the slides */
+        val lowerProfile = MotionProfile(300_000, 3_692_851, 59_948)
     }
 
     interface Schema : ControlSchema {
@@ -85,22 +94,51 @@ class Slides(hardwareMap: HardwareMap, val pivot: Pivot? = null) : System, Contr
             return (PIVOT_RESTING_MAX_TICKS + slope * pivotPercentFromMax).toInt()
         }
 
-    //TODO: Change this to use motion profiling
-    fun moveTo(ticks: Number): Command<BaseCommandState> = InstantCommand {
-        //No need to coerce as it's done before power is applied
-        targetingState.targetTicks = ticks.toInt()
+    /** Current ticks of the slide encoder */
+    val ticks: Int
+        get() = dataState.ticks
+
+    fun moveTo(ticks: Number): Command<TargetingState> = Command.create("Slides Move To", targetingState) {
+        require(ticks.toInt() in MIN_TICKS..MAX_TICKS) { "Ticks must be between $MIN_TICKS and $adjustedMaxTicks" }
+
+        dependencies += beforeRun
+
+        lateinit var motionResult: MotionResult
+
+        enter {
+            motionResult = if (ticks.toInt() > dataState.ticks)
+                raiseProfile.generate(dataState.ticks, ticks/*, dataState.velocity*/)
+            else
+                lowerProfile.generate(dataState.ticks, ticks/*, dataState.velocity*/)
+        }
+
+        action {
+            //No need to coerce as it's done before power is applied
+            it.targetTicks = motionResult.getPosition(it.enteredAt?.elapsedNow() ?: return@action false).toInt()
+            it.targetTicks == motionResult.position.last().toInt()
+        }
     }
 
-    fun adjust(ticks: Number): Command<BaseCommandState> = InstantCommand {
+    fun adjust(ticks: Number): Command<TargetingState> = Command.instant("Slides Adjust", targetingState) {
         //No need to coerce as it's done before power is applied
         targetingState.targetTicks += ticks.toInt()
     }
 
-    fun min(): Command<BaseCommandState> = moveTo(MIN_TICKS)
+    fun min(): Command<TargetingState> = moveTo(MIN_TICKS)
 
-    fun max(): Command<BaseCommandState> = moveTo(adjustedMaxTicks)
+    fun max(): Command<TargetingState> = moveTo(adjustedMaxTicks)
 
-    override val beforeRun = Command.create("SlidesData", dataState) {
+    init {
+        if (telemetry != null) {
+            Scheduler.schedule(Command.continuous("Slides Log") {
+                telemetry.addData("Slide Ticks", dataState.ticks)
+                telemetry.addData("Slide Target", targetingState.targetTicks)
+                telemetry.addData("Slide Resting", dataState.isResting)
+            })
+        }
+    }
+
+    override val beforeRun = Command.create("Slides Data", dataState) {
         enter {
             it.encoder.refresh()
             it.encoder.setJunkTicks(Persistents.slideTicks)
@@ -108,6 +146,8 @@ class Slides(hardwareMap: HardwareMap, val pivot: Pivot? = null) : System, Contr
         }
 
         action {
+            it.isResting = it.limitSwitch.state
+
             if (it.isResting) {
                 it.encoder.refresh()
                 it.encoder.setJunkTicks()
@@ -125,7 +165,7 @@ class Slides(hardwareMap: HardwareMap, val pivot: Pivot? = null) : System, Contr
         }
     }
 
-    override val afterRun = Command.create("SlidesTargeting", targetingState) {
+    override val afterRun = Command.create("Slides Targeting", targetingState) {
         enter {
             it.motorL.apply {
                 mode = DcMotor.RunMode.RUN_USING_ENCODER
@@ -188,17 +228,17 @@ class Slides(hardwareMap: HardwareMap, val pivot: Pivot? = null) : System, Contr
         val limitSwitch: DigitalChannel,
         var ticks: Int = 0,
         var velocity: Double = 0.0,
-        var acceleration: Double = 0.0
-    ) : BaseCommandState() {
-        val isResting: Boolean
-            get() = limitSwitch.state
-    }
+        var acceleration: Double = 0.0,
+        var isResting: Boolean = false
+    ) : BaseCommandState()
 
     data class TargetingState(
         val motorL: DcMotorEx,
         val motorR: DcMotorEx,
+        var targetTicks: Int = 0,
         @Editable
         val manualPid: PID = PID(PIDTerms(16.0, 30.0, 0.0), 0.0, MAX_TICKS.toDouble(), -1.0, 1.0),
-        var targetTicks: Int = 0
+        @Editable
+        val motionPid: PID = PID(PIDTerms(18.0, 30.0, 0.0), 0.0, MAX_TICKS.toDouble(), -1.0, 1.0)
     ) : BaseCommandState()
 }

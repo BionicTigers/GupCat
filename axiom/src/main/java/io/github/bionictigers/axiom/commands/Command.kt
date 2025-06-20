@@ -3,6 +3,8 @@ package io.github.bionictigers.axiom.commands
 import kotlin.time.Duration
 import kotlin.time.TimeSource
 
+typealias BaseCommand = Command<BaseCommandState>
+
 /**
  * Commands are used to execute functions in the scheduler.
  *
@@ -147,47 +149,32 @@ open class Command<T: BaseCommandState> internal constructor(
     }
 
     companion object {
-        fun create(name: String = "Unnamed Command", interval: Duration? = null): Command<BaseCommandState> {
-            return Command(name, BaseCommandState(), interval)
-        }
-
-        fun <T: BaseCommandState> create(state: T, interval: Duration? = null): Command<T> {
-            return Command(state = state, interval = interval)
-        }
-        fun <T: BaseCommandState> create(name: String = "Unnamed Command", state: T, interval: Duration? = null): Command<T> {
-            return Command(name, state, interval)
-        }
-
-        fun create(name: String = "Unnamed Command", interval: Duration? = null, block: Command<BaseCommandState>.() -> Unit = {}): Command<BaseCommandState> {
-            return Command(name, BaseCommandState(), interval).apply(block)
-        }
-
-        fun <T: BaseCommandState> create(state: T, interval: Duration? = null, block: Command<T>.() -> Unit = {}): Command<T> {
-            return Command(state = state, interval = interval).apply(block)
+        fun create(name: String = "Unnamed Command", interval: Duration? = null, block: BaseCommand.() -> Unit = {}): BaseCommand {
+            return create(name, BaseCommandState(), interval, block)
         }
 
         fun <T: BaseCommandState> create(name: String = "Unnamed Command", state: T, interval: Duration? = null, block: Command<T>.() -> Unit = {}): Command<T> {
             return Command(name, state, interval).apply(block)
         }
 
-        fun continuous(name: String = "Continuous Command", interval: Duration? = null, action: (BaseCommandState) -> Unit): Command<BaseCommandState> {
-            return Command(name, BaseCommandState(), interval).action { action(it); false }
-        }
-
-        fun <T: BaseCommandState> continuous(state: T, interval: Duration? = null, action: (T) -> Unit): Command<T> {
-            return Command(state = state, interval = interval).action { action(it); false }
+        fun continuous(name: String = "Continuous Command", interval: Duration? = null, action: (BaseCommandState) -> Unit): BaseCommand {
+            return continuous(name, BaseCommandState(), interval, action)
         }
 
         fun <T: BaseCommandState> continuous(name: String = "Continuous Command", state: T, interval: Duration? = null, action: (T) -> Unit): Command<T> {
             return Command(name, state, interval).action { action(it); false }
         }
+
+        fun instant(name: String = "Instant command", actionToRun: (BaseCommandState) -> Unit): BaseCommand {
+            return instant(name, BaseCommandState(), actionToRun)
+        }
+
+        fun <T: BaseCommandState> instant(name: String = "Instant command", state: T, actionToRun: (T) -> Unit): Command<T> {
+            return Command(name, state).action { actionToRun(it); true }
+        }
+
+        fun wait(name: String = "Wait Command", duration: Duration): BaseCommand {
+            return create(name) { action { it.enteredAt!!.elapsedNow() >= duration } }
+        }
     }
-}
-
-class WaitCommand(name: String = "Wait Command", private val duration: Duration) : Command<BaseCommandState>(name, BaseCommandState(), duration) {
-    init { action { it.enteredAt!!.elapsedNow() >= duration } }
-}
-
-class InstantCommand(name: String = "Instant Command", private val actionToRun: (BaseCommandState) -> Unit) : Command<BaseCommandState>(name, BaseCommandState()) {
-    init { action { actionToRun(it); true } }
 }

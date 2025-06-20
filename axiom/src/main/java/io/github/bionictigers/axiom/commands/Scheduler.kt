@@ -10,6 +10,7 @@ import io.github.bionictigers.axiom.web.Value
 import io.github.bionictigers.io.github.bionictigers.axiom.utils.convertTo
 import io.github.bionictigers.io.github.bionictigers.axiom.utils.hasAnnotationOnProperty
 import io.github.bionictigers.io.github.bionictigers.axiom.web.Display
+import org.firstinspires.ftc.robotcore.external.Telemetry
 import java.lang.reflect.Field
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -33,6 +34,8 @@ object Scheduler {
     private val editQueue: ArrayList<Pair<String, Any>> = ArrayList()
 
     val persistentStates = ConcurrentHashMap<String, BaseCommandState>()
+
+    var telemetry: Telemetry? = null
 
     private var changed = false
     private var inUpdateCycle = false
@@ -267,14 +270,19 @@ object Scheduler {
             removeQueue.clear()
         }
 
+        if (telemetry != null) {
+            telemetry!!.addData("Scheduler Loop Time", loopDeltaTime)
+        }
+
         inUpdateCycle = false
     }
 
-    fun clear() {
+    fun reset() {
         commands.clear()
         sortedCommands.clear()
         addQueue.clear()
         removeQueue.clear()
+        telemetry = null
     }
 }
 

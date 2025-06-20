@@ -2,8 +2,6 @@ package io.github.bionictigers.axiom.commands.groups
 
 import io.github.bionictigers.axiom.commands.BaseCommandState
 import io.github.bionictigers.axiom.commands.Command
-import io.github.bionictigers.axiom.commands.InstantCommand
-import io.github.bionictigers.axiom.commands.WaitCommand
 import kotlin.time.Duration
 
 @DslMarker
@@ -25,7 +23,7 @@ internal class CommandGroupBuilderImpl : CommandGroupBuilder {
     }
 
     override fun run(name: String?, block: (BaseCommandState) -> Unit) {
-        commands.add(InstantCommand(name ?: "Instant Command", actionToRun = block))
+        add(Command.instant(name ?: "Instant Command", block))
     }
 
     override fun continuous(name: String?, block: (BaseCommandState) -> Unit) {
@@ -33,6 +31,6 @@ internal class CommandGroupBuilderImpl : CommandGroupBuilder {
     }
 
     override fun wait(duration: Duration, name: String?) {
-        commands.add(WaitCommand(name ?: "Wait Command", duration = duration))
+        add(Command.wait(name ?: "Wait Command", duration))
     }
 }

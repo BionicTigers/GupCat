@@ -1,10 +1,38 @@
 package org.firstinspires.ftc.teamcode.motion
 
+import org.firstinspires.ftc.teamcode.utils.seconds
 import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.math.sign
 import kotlin.math.sqrt
+import kotlin.time.Duration
 
+/**
+ * Motion Profile
+ *
+ * x represents any unit of measurement
+ * @param jerk x/s^3
+ * @param maxAcceleration x/s^2
+ * @param maxVelocity x/s
+ * @param voltageConstant Voltage measurements were taken at
+ */
+data class MotionProfile(
+    val jerk: Number,
+    val maxAcceleration: Number,
+    val maxVelocity: Number,
+    val voltageConstant: Number? = null,
+    val points: Int = 600
+) {
+    fun generate(start: Number, final: Number, startingVelocity: Number? = null) = generateMotionProfile(start, final, jerk, maxAcceleration, maxVelocity, startingVelocity, points)
+
+    fun generate(start: Number, final: Number, startingVelocity: Number? = null, voltage: Number): MotionResult {
+        requireNotNull(voltageConstant) { "Adjusted voltage needs the voltage measurements were taken at" }
+
+        return generateMotionProfile(start, final, adjustForVoltage(jerk, voltage), adjustForVoltage(maxAcceleration, voltage), adjustForVoltage(maxVelocity, voltage), startingVelocity, points)
+    }
+
+    private fun adjustForVoltage(value: Number, voltage: Number): Double = value.toDouble() * voltageConstant!!.toDouble() / voltage.toDouble()
+}
 
 data class MotionResult(
     val acceleration: List<Double>,
@@ -14,16 +42,16 @@ data class MotionResult(
     val deltaTime: Double,
     private val target: Double
 ) {
-    fun getPosition(time: Time): Double {
-        return position.getOrElse((time.seconds() / deltaTime).toInt()) {position.last()}
+    fun getPosition(time: Duration): Double {
+        return position.getOrElse((time.seconds / deltaTime).toInt()) {position.last()}
     }
 
-    fun getAcceleration(time: Time): Double {
-        return acceleration.getOrElse((time.seconds() / deltaTime).toInt()) {acceleration.last()}
+    fun getAcceleration(time: Duration): Double {
+        return acceleration.getOrElse((time.seconds / deltaTime).toInt()) {acceleration.last()}
     }
 
-    fun getVelocity(time: Time): Double {
-        return velocity.getOrElse((time.seconds() / deltaTime).toInt()) {velocity.last()}
+    fun getVelocity(time: Duration): Double {
+        return velocity.getOrElse((time.seconds / deltaTime).toInt()) {velocity.last()}
     }
 }
 
