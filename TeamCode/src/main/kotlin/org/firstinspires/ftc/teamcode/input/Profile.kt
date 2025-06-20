@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.input
 
 import org.firstinspires.ftc.teamcode.mechanisms.Arm
 import org.firstinspires.ftc.teamcode.mechanisms.Claw
+import org.firstinspires.ftc.teamcode.mechanisms.Drivetrain
 import org.firstinspires.ftc.teamcode.mechanisms.Pivot
 import org.firstinspires.ftc.teamcode.mechanisms.Slides
 
@@ -11,4 +12,5 @@ interface Profile {
     val slides: Slides.Schema
     val arm: Arm.Schema
     val claw: Claw.Schema
+    val drivetrain: Drivetrain.Schema
 }

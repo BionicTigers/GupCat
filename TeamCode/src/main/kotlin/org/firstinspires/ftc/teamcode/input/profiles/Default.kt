@@ -4,8 +4,10 @@ import org.firstinspires.ftc.teamcode.input.types.Control
 import org.firstinspires.ftc.teamcode.input.types.Digital
 import org.firstinspires.ftc.teamcode.input.Gamepads
 import org.firstinspires.ftc.teamcode.input.Profile
+import org.firstinspires.ftc.teamcode.input.types.Analog
 import org.firstinspires.ftc.teamcode.mechanisms.Arm
 import org.firstinspires.ftc.teamcode.mechanisms.Claw
+import org.firstinspires.ftc.teamcode.mechanisms.Drivetrain
 import org.firstinspires.ftc.teamcode.mechanisms.Pivot
 import org.firstinspires.ftc.teamcode.mechanisms.Slides
 import org.firstinspires.ftc.teamcode.utils.Angle
@@ -42,5 +44,13 @@ open class Default : Profile {
         override val open = null
         override val close = null
         override val toggle = Digital.A.hold()
+    }
+
+    override val drivetrain = object : Drivetrain.Schema {
+        override val desiredGamepad = Gamepads.GAMEPAD_1
+        override val orientation = Drivetrain.DriveOrientation.ROBOT
+        override val x = Analog.LEFT_STICK_X
+        override val y = Analog.LEFT_STICK_Y
+        override val rot = Analog.RIGHT_STICK_X
     }
 }

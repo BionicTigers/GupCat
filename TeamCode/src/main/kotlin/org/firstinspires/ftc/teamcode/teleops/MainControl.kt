@@ -8,8 +8,10 @@ import org.firstinspires.ftc.teamcode.input.profiles.Alex
 import org.firstinspires.ftc.teamcode.input.profiles.Erin
 import org.firstinspires.ftc.teamcode.mechanisms.Arm
 import org.firstinspires.ftc.teamcode.mechanisms.Claw
+import org.firstinspires.ftc.teamcode.mechanisms.Drivetrain
 import org.firstinspires.ftc.teamcode.mechanisms.Pivot
 import org.firstinspires.ftc.teamcode.mechanisms.Slides
+import org.firstinspires.ftc.teamcode.motion.CustomPedroLocalizer
 import org.firstinspires.ftc.teamcode.pedro.FConstants
 import org.firstinspires.ftc.teamcode.pedro.LConstants
 
@@ -24,12 +26,11 @@ class MainControl : LinearOpMode() {
         val claw = Claw(hardwareMap, telemetry)
         val pivot = Pivot(hardwareMap, telemetry)
         val slides = Slides(hardwareMap, pivot, telemetry)
+        val drivetrain = Drivetrain(hardwareMap, telemetry)
 
-        val controls = Controls(gamepad1, gamepad2, profileGP1, profileGP2, listOf(arm, claw, pivot, slides))
+        val controls = Controls(gamepad1, gamepad2, profileGP1, profileGP2, listOf(arm, claw, pivot, slides, drivetrain))
 
-//        val poseUpdater = PoseUpdater(hardwareMap, localizer, FConstants::class.java, LConstants::class.java)
-
-        Scheduler.addSystem(arm, claw, pivot, slides, controls)
+        Scheduler.addSystem(arm, claw, pivot, slides, controls, drivetrain)
 
         Scheduler.schedule(claw.open(), arm.down())
 
