@@ -43,7 +43,7 @@ class SequentialCommandGroup(
 }
 
 fun sequential(name: String = "SequentialCommandGroup", block: CommandGroupBuilder.() -> Unit): SequentialCommandGroup {
-    val builder = CommandGroupBuilderImpl()
+    val builder = CommandGroupBuilder()
     builder.block()
     return SequentialCommandGroup(name, builder.commands)
 }

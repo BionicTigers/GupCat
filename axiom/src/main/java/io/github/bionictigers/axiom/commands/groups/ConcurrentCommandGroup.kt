@@ -51,7 +51,7 @@ fun concurrent(
     mode: ConcurrentFinishMode = ConcurrentFinishMode.ALL,
     block: CommandGroupBuilder.() -> Unit
 ): ConcurrentCommandGroup {
-    val builder = CommandGroupBuilderImpl()
+    val builder = CommandGroupBuilder()
     builder.block()
     return ConcurrentCommandGroup(name, builder.commands, mode)
 }

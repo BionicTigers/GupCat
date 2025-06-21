@@ -48,8 +48,8 @@ class Angle private constructor(val radians: Double) : Comparable<Angle> {
         return radians(radians)
     }
 
-    override operator fun compareTo(otherRotation: Angle): Int {
-        return radians.compareTo(otherRotation.radians)
+    override operator fun compareTo(other: Angle): Int {
+        return radians.compareTo(other.radians)
     }
 
     val abs: Angle

@@ -7,30 +7,32 @@ import kotlin.time.Duration
 @DslMarker
 annotation class CommandGroupDsl
 
-@CommandGroupDsl
-interface CommandGroupBuilder {
-    fun add(command: Command<*>)
-    fun run(name: String? = null, block: (BaseCommandState) -> Unit)
-    fun continuous(name: String? = null, block: (BaseCommandState) -> Unit)
-    fun wait(duration: Duration, name: String? = null)
-}
-
-internal class CommandGroupBuilderImpl : CommandGroupBuilder {
+class CommandGroupBuilder {
     val commands = mutableListOf<Command<*>>()
 
-    override fun add(command: Command<*>) {
+    fun add(command: Command<*>) {
         commands.add(command)
     }
 
-    override fun run(name: String?, block: (BaseCommandState) -> Unit) {
+    fun instant(name: String? = null, block: (BaseCommandState) -> Unit) {
         add(Command.instant(name ?: "Instant Command", block))
     }
 
-    override fun continuous(name: String?, block: (BaseCommandState) -> Unit) {
+    fun continuous(name: String? = null, block: (BaseCommandState) -> Unit) {
         add(Command.continuous(name ?: "Continuous Command", action = block))
     }
 
-    override fun wait(duration: Duration, name: String?) {
+    fun wait(duration: Duration, name: String? = null) {
         add(Command.wait(name ?: "Wait Command", duration))
+    }
+
+    fun waitUntil(name: String? = null, predicate: (BaseCommandState) -> Boolean) {
+        add(Command.create(name ?: "Wait Until") {
+            requires {
+                predicate(it)
+            }
+
+            action { true }
+        })
     }
 }

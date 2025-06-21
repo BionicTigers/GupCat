@@ -4,12 +4,14 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.Exposur
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.FocusControl
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.PtzControl.PanTiltHolder
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.WhiteBalanceControl
+import org.firstinspires.ftc.teamcode.utils.seconds
 import org.openftc.easyopencv.OpenCvWebcam
 import java.util.concurrent.TimeUnit
+import kotlin.time.Duration
 
 data class Calibration(
     val exposureMode: ExposureControl.Mode = ExposureControl.Mode.Auto,
-    val exposureDuration: Time? = null,
+    val exposureDuration: Duration? = null,
 
     val gain: Int? = null,
 
@@ -52,7 +54,7 @@ data class Calibration(
 
     internal fun apply(camera: OpenCvWebcam) {
         camera.exposureControl.mode = exposureMode
-        exposureDuration?.let { camera.exposureControl.setExposure(it.seconds().toLong(), TimeUnit.SECONDS) }
+        exposureDuration?.let { camera.exposureControl.setExposure(it.seconds.toLong(), TimeUnit.SECONDS) }
 
         gain?.let { camera.gainControl.gain = it }
 

@@ -1,8 +1,10 @@
 package org.firstinspires.ftc.teamcode.utils
 
+import com.sun.tools.doclint.Entity.theta
 import io.github.bionictigers.axiom.web.Editable
 import io.github.bionictigers.io.github.bionictigers.axiom.web.Display
 import kotlin.math.absoluteValue
+import com.pedropathing.localization.Pose as PedroPose
 
 class Pose(@Editable @Display val x: Double, @Editable @Display val y: Double, @Editable @Display private val rot: Double) {
     constructor(x: Number, y: Number, rot: Number) : this(x.toDouble(), y.toDouble(), rot.toDouble())
@@ -58,4 +60,8 @@ class Pose(@Editable @Display val x: Double, @Editable @Display val y: Double, @
     operator fun div(scalar: Double): Pose {
         return Pose(x / scalar, y / scalar, rot / scalar)
     }
+
+    fun toPedro(): PedroPose = PedroPose(x, y, radians)
 }
+
+fun PedroPose.toPose() = Pose(x, y, Math.toDegrees(heading))
