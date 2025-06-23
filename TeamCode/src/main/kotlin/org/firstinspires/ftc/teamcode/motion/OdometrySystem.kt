@@ -92,12 +92,16 @@ class CustomPedroLocalizer(
 
         val circumference = odoDiameter * gearRatio * PI
 
-        hub.refreshBulkData();  exHub.refreshBulkData()
+        hub.refreshBulkData();
+        exHub.refreshBulkData()
 
         // accumulate total ticks
         ticksL += exHub.getEncoderTicks(0)
         ticksR += hub.getEncoderTicks(3)
         ticksB += hub.getEncoderTicks(0)
+
+        hub.setJunkTicks()
+        exHub.setJunkTicks()
 
         // convert to mm
         val dL = Distance.mm(circumference * exHub.getEncoderTicks(0) / ticksPerRev)
@@ -142,8 +146,8 @@ class CustomPedroLocalizer(
         angAvg += globalVelocity.second.degrees
 
         // final pose in robot frame
-        val finalX = virtualPose.x - (config.virtualOffsetY * virtualPose.rotation.cos).mm + (config.virtualOffsetX * virtualPose.rotation.sin).mm
-        val finalY = virtualPose.y - (config.virtualOffsetY * virtualPose.rotation.sin).mm - (config.virtualOffsetX * virtualPose.rotation.cos).mm
+        val finalY = virtualPose.y - (config.virtualOffsetY * virtualPose.rotation.cos).mm + (config.virtualOffsetX * virtualPose.rotation.sin).mm
+        val finalX = virtualPose.x - (config.virtualOffsetY * virtualPose.rotation.sin).mm - (config.virtualOffsetX * virtualPose.rotation.cos).mm
 
         val oldGlobal = Pair(Vector2(pose.x, pose.y), virtualPose.rotation)
         pose = Pose(finalX, finalY, virtualPose.rotation)
