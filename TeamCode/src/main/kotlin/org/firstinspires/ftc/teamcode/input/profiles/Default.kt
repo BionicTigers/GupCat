@@ -16,8 +16,8 @@ open class Default : Profile {
     override val pivot = object : Pivot.Schema {
         override val desiredGamepad = Gamepads.GAMEPAD_2
         override val rate = Angle.degrees(72.5)
-        override val up = Digital.RIGHT_BUMPER.hold()
-        override val down = Digital.LEFT_BUMPER.hold()
+        override val up = Analog.RIGHT_TRIGGER.continuous()
+        override val down = Analog.LEFT_TRIGGER.continuous()
         override val min = null
         override val max = null
     }
@@ -33,9 +33,9 @@ open class Default : Profile {
 
     override val arm = object : Arm.Schema {
         override val desiredGamepad = Gamepads.GAMEPAD_2
-        override val toggleUpDown = Digital.B.hold()
+        override val toggleUpDown = Digital.B.press()
         override val up = null
-        override val middle = Digital.Y.hold()
+        override val middle = Digital.Y.press()
         override val down = null
     }
 
@@ -43,7 +43,7 @@ open class Default : Profile {
         override val desiredGamepad = Gamepads.GAMEPAD_2
         override val open = null
         override val close = null
-        override val toggle = Digital.A.hold()
+        override val toggle = Digital.A.press()
     }
 
     override val drivetrain = object : Drivetrain.Schema {

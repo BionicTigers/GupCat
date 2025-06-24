@@ -2,8 +2,10 @@ package org.firstinspires.ftc.teamcode.motion
 
 import com.qualcomm.robotcore.hardware.HardwareMap
 import com.pedropathing.localization.Localizer
+import io.github.bionictigers.axiom.commands.Command
 import com.pedropathing.pathgen.Vector as PathVector
 import io.github.bionictigers.axiom.commands.Scheduler
+import org.firstinspires.ftc.robotcore.external.Telemetry
 import com.pedropathing.localization.Pose as PathPose
 import org.firstinspires.ftc.teamcode.utils.Pose
 import org.firstinspires.ftc.teamcode.utils.Vector2
@@ -49,6 +51,7 @@ private object Configs {
 class CustomPedroLocalizer(
     hardwareMap: HardwareMap,
     startPose: Pose = Pose(0.0, 0.0, 0.0),
+    telemetry: Telemetry? = null,
     private val config: RobotConfig = Configs.Main
 ) : Localizer() {
     // re-use your existing hubs & config
@@ -84,6 +87,17 @@ class CustomPedroLocalizer(
         exHub.setJunkTicks()
         hub.setEncoderDirection(0, ControlHub.Direction.Backward)
         hub.setEncoderDirection(3, ControlHub.Direction.Backward)
+
+        if (telemetry != null) {
+            Scheduler.schedule(Command.continuous {
+                telemetry.addData("X Pos", pose.x)
+                telemetry.addData("Y Pos", pose.y)
+                telemetry.addData("Rot Pos", pose.rotation.degrees)
+                telemetry.addData("v X Pos", virtualPose.x)
+                telemetry.addData("v Y Pos", virtualPose.y)
+                telemetry.addData("v Rot Pos", virtualPose.rotation.degrees)
+            })
+        }
     }
 
     /** Copy of your OdometrySystem setAction body, run once per loop. */
@@ -92,7 +106,7 @@ class CustomPedroLocalizer(
 
         val circumference = odoDiameter * gearRatio * PI
 
-        hub.refreshBulkData();
+        hub.refreshBulkData()
         exHub.refreshBulkData()
 
         // accumulate total ticks
@@ -100,13 +114,13 @@ class CustomPedroLocalizer(
         ticksR += hub.getEncoderTicks(3)
         ticksB += hub.getEncoderTicks(0)
 
-        hub.setJunkTicks()
-        exHub.setJunkTicks()
-
         // convert to mm
         val dL = Distance.mm(circumference * exHub.getEncoderTicks(0) / ticksPerRev)
         val dR = Distance.mm(circumference * hub.getEncoderTicks(3) / ticksPerRev)
         val dB = Distance.mm(circumference * hub.getEncoderTicks(0) / ticksPerRev)
+
+        hub.setJunkTicks()
+        exHub.setJunkTicks()
 
         // three-wheel odometry
         val dTheta = Angle.radians((dL.mm - dR.mm) / (config.leftOffset.mm + config.rightOffset.mm))

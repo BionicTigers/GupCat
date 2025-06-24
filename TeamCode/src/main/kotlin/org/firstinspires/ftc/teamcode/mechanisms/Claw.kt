@@ -12,6 +12,7 @@ import org.firstinspires.ftc.teamcode.input.Controllable
 import org.firstinspires.ftc.teamcode.input.Controls
 import org.firstinspires.ftc.teamcode.input.Gamepads
 import org.firstinspires.ftc.teamcode.input.Profile
+import org.firstinspires.ftc.teamcode.input.matches
 import org.firstinspires.ftc.teamcode.input.types.Digital
 import org.firstinspires.ftc.teamcode.utils.getByName
 
@@ -38,11 +39,21 @@ class Claw(hardwareMap: HardwareMap, telemetry: Telemetry? = null) : System, Con
     override val name = "Claw"
 
     private val claw = hardwareMap.getByName<Servo>("claw")
+    private var open = false
 
-    fun open(): BaseCommand = Command.instant("Claw Open") { claw.position = OPEN_POSITION }
-    fun close(): BaseCommand = Command.instant("Claw Close") { claw.position = CLOSE_POSITION }
+    fun open(): BaseCommand = Command.instant("Claw Open") {
+        open = true
+        claw.position = OPEN_POSITION
+    }
+
+    fun close(): BaseCommand = Command.instant("Claw Close") {
+        open = false
+        claw.position = CLOSE_POSITION
+    }
+
     fun toggle(): BaseCommand = Command.instant("Claw Toggle") {
-        claw.position = if (claw.position == OPEN_POSITION) CLOSE_POSITION else OPEN_POSITION
+        open = !open
+        claw.position = if (open) OPEN_POSITION else CLOSE_POSITION
     }
 
     init {
@@ -59,6 +70,8 @@ class Claw(hardwareMap: HardwareMap, telemetry: Telemetry? = null) : System, Con
         builder: Controls.Builder
     ): Unit =
         with(profile.claw) {
+            if (!gamepad.matches(desiredGamepad)) return@with
+
             open?.let { builder.register(it) { open() } }
             close?.let { builder.register(it) { close() } }
             toggle?.let { builder.register(it) { toggle() } }

@@ -34,7 +34,7 @@ import org.firstinspires.ftc.teamcode.utils.seconds
 class Slides(hardwareMap: HardwareMap, val pivot: Pivot? = null, telemetry: Telemetry? = null) : System, Controllable {
     companion object {
         /** Max Ticks for the slide encoder */
-        const val MAX_TICKS = 47000
+        const val MAX_TICKS = 52500
 
         /** Max Ticks for the slide encoder */
         const val MIN_TICKS = -3000
@@ -88,9 +88,10 @@ class Slides(hardwareMap: HardwareMap, val pivot: Pivot? = null, telemetry: Tele
      */
     val adjustedMaxTicks: Int
         get() {
-            val slope = (MAX_TICKS - PIVOT_RESTING_MAX_TICKS).toDouble() / Pivot.MAX_ANGLE.degrees
+            val slope = (MAX_TICKS - PIVOT_RESTING_MAX_TICKS).toDouble()
             val pivotPercentFromMax =
                 pivot?.let { it.angle.degrees / Pivot.MAX_ANGLE.degrees } ?: 1.0
+//            println("s: $slope, p: ${pivotPercentFromMax * 100}, c: ${slope * pivotPercentFromMax}")
             return (PIVOT_RESTING_MAX_TICKS + slope * pivotPercentFromMax).toInt()
         }
 
@@ -146,7 +147,7 @@ class Slides(hardwareMap: HardwareMap, val pivot: Pivot? = null, telemetry: Tele
         }
 
         action {
-            it.isResting = it.limitSwitch.state
+            it.isResting = !it.limitSwitch.state && targetingState.targetTicks <= 0
 
             if (it.isResting) {
                 it.encoder.refresh()
@@ -168,13 +169,13 @@ class Slides(hardwareMap: HardwareMap, val pivot: Pivot? = null, telemetry: Tele
     override val afterRun = Command.create("Slides Targeting", targetingState) {
         enter {
             it.motorL.apply {
-                mode = DcMotor.RunMode.RUN_USING_ENCODER
+                mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
                 zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
                 power = 0.0
             }
 
             it.motorR.apply {
-                mode = DcMotor.RunMode.RUN_USING_ENCODER
+                mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
                 zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
                 direction = DcMotorSimple.Direction.REVERSE
                 power = 0.0
@@ -205,17 +206,15 @@ class Slides(hardwareMap: HardwareMap, val pivot: Pivot? = null, telemetry: Tele
             if (!gamepad.matches(desiredGamepad)) return@with
 
             //Allow for smart casting
-            val raiseControl = raise
-            when (raiseControl) {
-                is Digital -> builder.register(raiseControl) { adjust(rate * raise.modifier) }
-                is Analog -> builder.register(raiseControl) { adjust(rate * it * raise.modifier) }
+            when (val raiseControl = raise) {
+                is Digital -> builder.register(raiseControl) { adjust(rate * raise.modifier * Scheduler.loopDeltaTime.seconds) }
+                is Analog -> builder.register(raiseControl) { adjust(rate * it * raise.modifier * Scheduler.loopDeltaTime.seconds) }
             }
 
             //Allow for smart casting
-            val lowerControl = lower
-            when (lowerControl) {
-                is Digital -> builder.register(lowerControl) { adjust(-rate * lower.modifier) }
-                is Analog -> builder.register(lowerControl) { adjust(-rate * it * lower.modifier) }
+            when (val lowerControl = lower) {
+                is Digital -> builder.register(lowerControl) { adjust(-rate * lower.modifier * Scheduler.loopDeltaTime.seconds) }
+                is Analog -> builder.register(lowerControl) { adjust(-rate * it * lower.modifier * Scheduler.loopDeltaTime.seconds) }
             }
 
             min?.let { builder.register(it) { min() } }
@@ -237,7 +236,7 @@ class Slides(hardwareMap: HardwareMap, val pivot: Pivot? = null, telemetry: Tele
         val motorR: DcMotorEx,
         var targetTicks: Int = 0,
         @Editable
-        val manualPid: PID = PID(PIDTerms(16.0, 30.0, 0.0), 0.0, MAX_TICKS.toDouble(), -1.0, 1.0),
+        val manualPid: PID = PID(PIDTerms(7.0, 50.0, 0.0), 0.0, MAX_TICKS.toDouble(), -1.0, 1.0),
         @Editable
         val motionPid: PID = PID(PIDTerms(18.0, 30.0, 0.0), 0.0, MAX_TICKS.toDouble(), -1.0, 1.0)
     ) : BaseCommandState()

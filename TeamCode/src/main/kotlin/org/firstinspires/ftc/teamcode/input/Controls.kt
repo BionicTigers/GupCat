@@ -40,19 +40,23 @@ class Controls(
     }
 
     private fun updateDigitalControls(gamepad: Gamepad, controls: Map<Digital, DigitalCommand>) {
-        controls.forEach { control, command ->
+        controls.forEach { (control, command) ->
             val value = control.get(gamepad)
 
             when (control.type) {
                 Digital.ControlType.PRESS ->
-                    if (value && !control.previousValue)
+                    if (value && !control.previousValue) {
                         Scheduler.schedule(command(true))
+                        println("press")
+                    }
                 Digital.ControlType.RELEASE ->
-                    if (!value && control.previousValue)
+                    if (!value && control.previousValue) {
                         Scheduler.schedule(command(false))
+                    }
                 Digital.ControlType.HOLD ->
-                    if (value)
+                    if (value) {
                         Scheduler.schedule(command(true))
+                    }
             }
 
             control.previousValue = value
@@ -60,16 +64,19 @@ class Controls(
     }
 
     private fun updateAnalogControls(gamepad: Gamepad, controls: Map<Analog, AnalogCommand>) {
-        controls.forEach { control, command ->
+        controls.forEach { (control, command) ->
             val value = control.get(gamepad)
             val deadZone = -control.deadZone..control.deadZone
 
             when (control.type) {
                 Analog.ControlType.CONTINUOUS -> {
-                    if (value !in deadZone)
+                    if (value !in deadZone) {
                         Scheduler.schedule(command(value))
-                    else
+//                        println("Not in deadZone: $value")
+                    } else {
                         Scheduler.schedule(command(0.0))
+//                        println("In deadZone: $value")
+                    }
                 }
                 Analog.ControlType.REST ->
                     if (value in deadZone && control.previousValue !in deadZone)

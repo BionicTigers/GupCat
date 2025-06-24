@@ -6,6 +6,7 @@ import com.pedropathing.util.Constants
 import com.qualcomm.robotcore.hardware.HardwareMap
 import io.github.bionictigers.axiom.commands.BaseCommandState
 import io.github.bionictigers.axiom.commands.Command
+import io.github.bionictigers.axiom.commands.Scheduler
 import io.github.bionictigers.axiom.commands.System
 import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.teamcode.input.ControlSchema
@@ -13,6 +14,7 @@ import org.firstinspires.ftc.teamcode.input.Controllable
 import org.firstinspires.ftc.teamcode.input.Controls
 import org.firstinspires.ftc.teamcode.input.Gamepads
 import org.firstinspires.ftc.teamcode.input.Profile
+import org.firstinspires.ftc.teamcode.input.matches
 import org.firstinspires.ftc.teamcode.input.types.Analog
 import org.firstinspires.ftc.teamcode.input.types.Control
 import org.firstinspires.ftc.teamcode.motion.CustomPedroLocalizer
@@ -41,9 +43,15 @@ class Drivetrain(hardwareMap: HardwareMap, telemetry: Telemetry? = null) : Syste
         val rot: Analog
     }
 
+    companion object {
+        init {
+            Constants.setConstants(FConstants::class.java, LConstants::class.java)
+        }
+    }
+
     override val name = "drivetrain"
 
-    val localizer = CustomPedroLocalizer(hardwareMap)
+    val localizer = CustomPedroLocalizer(hardwareMap, telemetry = telemetry)
     val follower = Follower(hardwareMap, localizer, FConstants::class.java, LConstants::class.java)
 
     val data = DrivetrainData()
@@ -61,18 +69,18 @@ class Drivetrain(hardwareMap: HardwareMap, telemetry: Telemetry? = null) : Syste
     }
 
     init {
-        Constants.setConstants(FConstants::class.java, LConstants::class.java)
-
         if (telemetry != null) {
-            telemetry.addData("Drivetrain X", follower.pose.x);
-            telemetry.addData("Drivetrain Y", follower.pose.y);
-            telemetry.addData("Drivetrain Rot", Math.toDegrees(follower.pose.heading));
+            Scheduler.schedule(Command.continuous("Drivetrain Log") {
+                telemetry.addData("Drivetrain X", data.xControl)
+                telemetry.addData("Drivetrain Y", data.yControl)
+                telemetry.addData("Drivetrain Rot", data.rotControl)
+            })
         }
     }
 
     override val afterRun = Command.continuous("Drivetrain Update", data) {
         if (it.driveOrientation != null) {
-            follower.setTeleOpMovementVectors(it.xControl, it.yControl, it.rotControl, it.driveOrientation == DriveOrientation.ROBOT)
+            follower.setTeleOpMovementVectors(it.yControl, it.xControl, it.rotControl, it.driveOrientation == DriveOrientation.ROBOT)
         }
 
         follower.update()
@@ -84,6 +92,7 @@ class Drivetrain(hardwareMap: HardwareMap, telemetry: Telemetry? = null) : Syste
         builder: Controls.Builder
     ): Unit =
         with(profile.drivetrain) {
+            if (!gamepad.matches(desiredGamepad)) return@with
             follower.startTeleopDrive()
             data.driveOrientation = orientation
 
