@@ -22,8 +22,8 @@ interface RobotConfig {
     val leftOffset: Distance
     val rightOffset: Distance
     val backOffset: Distance
-    val virtualOffsetY: Distance
     val virtualOffsetX: Distance
+    val virtualOffsetY: Distance
 }
 
 private object Configs {
@@ -31,37 +31,34 @@ private object Configs {
         override val leftOffset: Distance = Distance.mm(204.0) - Distance.mm(5.0) //Distance.mm( 173.83125) + Distance.mm(10)
         override val rightOffset: Distance = Distance.mm(142.0) - Distance.mm(5.0) // Distance.mm(165.1) + Distance.mm(10) //152.4 //169.0
         override val backOffset: Distance = Distance.mm(82.0)  //Distance.mm(3/4 + 3/32) //152.4 //152.4 //95.25
-        override val virtualOffsetY: Distance = Distance.mm(-68.92)  //Distance.mm(-68.97)
-        override val virtualOffsetX: Distance = Distance.mm(31.0)  //Distance.mm(5.45)
+        override val virtualOffsetX: Distance = Distance.mm(-68.92)  //Distance.mm(-68.97)
+        override val virtualOffsetY: Distance = Distance.mm(31.0)  //Distance.mm(5.45)
     }
 
     object Main: RobotConfig {
         override val leftOffset: Distance = Distance.mm(171)
         override val rightOffset: Distance = Distance.mm(171)
         override val backOffset: Distance = Distance.mm(22.86)
-        override val virtualOffsetY: Distance = Distance.mm(-83.82)
-        override val virtualOffsetX: Distance = Distance.mm(0)
+        override val virtualOffsetX: Distance = Distance.mm(-83.82)
+        override val virtualOffsetY: Distance = Distance.mm(0)
     }
 }
-/**
- * A Pedro-Pathing Localizer that internally uses your OdometrySystem logic.
- */
+
 class CustomPedroLocalizer(
     hardwareMap: HardwareMap,
     startPose: Pose = Pose(0.0, 0.0, 0.0),
     private val config: RobotConfig = Configs.Main
 ) : Localizer() {
-    // re-use your existing hubs & config
+
     private val hub = ControlHub(hardwareMap, "Control Hub")
     private val exHub = ControlHub(hardwareMap, "Expansion Hub 2")
 
-    private val ticksPerRev = 2000.0
     private var ticksL = 0
     private var ticksR = 0
     private var ticksB = 0
     private var dt = Duration.ZERO
 
-    // state mirrors your OdometrySystemState
+    // state
     private var virtualPose = computeVirtual(startPose)
     private var pose = startPose
 
@@ -70,98 +67,135 @@ class CustomPedroLocalizer(
     private var globalVelocity = Pair(Vector2(), Angle.degrees(0.0))
     private var globalAcceleration = Pair(Vector2(), Angle.degrees(0.0))
 
-    private val xAvg = NewRollingAverage(3)
-    private val yAvg = NewRollingAverage(3)
-    private val angAvg = NewRollingAverage(3)
+    private val xAverage = NewRollingAverage(3)
+    private val yAverage = NewRollingAverage(3)
+    private val angularAverage = NewRollingAverage(3)
 
     // hardware-specific constants
     private val gearRatio = 1.0
     private val odoDiameter = 47.3
+    private val ticksPerRev = 2000.0
 
     init {
-        // exactly the same startup you had
         hub.setJunkTicks()
         exHub.setJunkTicks()
-        hub.setEncoderDirection(0, ControlHub.Direction.Backward)
-        hub.setEncoderDirection(3, ControlHub.Direction.Backward)
+        hub.setEncoderDirection(0, ControlHub.Direction.Backward) // back pod
+        hub.setEncoderDirection(3, ControlHub.Direction.Backward) // right pod
     }
 
-    /** Copy of your OdometrySystem setAction body, run once per loop. */
     override fun update() {
         dt += Scheduler.loopDeltaTime
 
         val circumference = odoDiameter * gearRatio * PI
 
-        hub.refreshBulkData();
+        // Find Local Updates
+        hub.refreshBulkData()
         exHub.refreshBulkData()
 
-        // accumulate total ticks
+        // Update total ticks
         ticksL += exHub.getEncoderTicks(0)
         ticksR += hub.getEncoderTicks(3)
         ticksB += hub.getEncoderTicks(0)
 
-        hub.setJunkTicks()
-        exHub.setJunkTicks()
+        // Ticks to mm
+        val deltaLeft = Distance.mm(circumference * exHub.getEncoderTicks(0) / ticksPerRev)
+        val deltaRight = Distance.mm(circumference * hub.getEncoderTicks(3) / ticksPerRev)
+        val deltaBack = Distance.mm(circumference * hub.getEncoderTicks(0) / ticksPerRev)
 
-        // convert to mm
-        val dL = Distance.mm(circumference * exHub.getEncoderTicks(0) / ticksPerRev)
-        val dR = Distance.mm(circumference * hub.getEncoderTicks(3) / ticksPerRev)
-        val dB = Distance.mm(circumference * hub.getEncoderTicks(0) / ticksPerRev)
+        // Calculate theta
+        val localRotation = Angle.radians((deltaLeft.mm - deltaRight.mm) / (config.leftOffset.mm + config.rightOffset.mm))
 
-        // three-wheel odometry
-        val dTheta = Angle.radians((dL.mm - dR.mm) / (config.leftOffset.mm + config.rightOffset.mm))
+        // Calculate forward arc
+        val rT = Distance.mm( (deltaLeft.mm / localRotation.radians) - config.leftOffset.mm)
 
-        val rT = Distance.mm(dL.mm / dTheta.radians - config.leftOffset.mm)
-        val dxL = if (dTheta.radians != 0.0) rT * (1 - cos(dTheta.radians)) else Distance.mm(0.0)
-        val dyL = if (dTheta.radians != 0.0) rT * sin(dTheta.radians) else dL
+        val deltaLocalY =
+            if (localRotation.radians != 0.0)
+                rT * (1 - cos(localRotation.radians))
+            else
+                Distance.mm(0.0)
 
-        val rS = Distance.mm(dB.mm / dTheta.radians - config.backOffset.mm)
-        val dxS = if (dTheta.radians != 0.0) rS * sin(dTheta.radians) else dB
-        val dyS = if (dTheta.radians != 0.0) -rS * (1 - cos(dTheta.radians)) else Distance.mm(0.0)
+        val deltaLocalX =
+            if (localRotation.radians != 0.0)
+                rT * sin(localRotation.radians)
+            else
+                deltaLeft
 
-        // world update
-        val worldHeading = virtualPose.rotation
-        val deltaX = dxL + dxS
-        val deltaY = dyL - dyS
+        // Calculate strafe arc
+        val rS = Distance.mm(deltaBack.mm / localRotation.radians - config.backOffset.mm)
 
-        val globDX = Distance.mm(deltaX.mm * cos(worldHeading.radians) + deltaY.mm * sin(worldHeading.radians))
-        val globDY = Distance.mm(deltaY.mm * cos(worldHeading.radians) - deltaX.mm * sin(worldHeading.radians))
+        val deltaStrafeY =
+            if (localRotation.radians != 0.0)
+                rS * sin(localRotation.radians)
+            else
+                deltaBack
 
+        val deltaStrafeX =
+            if (localRotation.radians != 0.0)
+                -rS * (1 - cos(localRotation.radians))
+            else
+                Distance.mm(0.0)
+
+        // Update global rotation
+        val globalRotation = virtualPose.rotation
+
+        // Calculate VIRTUAL global position
+        val deltaXFinal = deltaLocalY + deltaStrafeY
+        val deltaYFinal = deltaLocalX - deltaStrafeX
+
+//        val virtualGlobalDeltaX = Distance.mm(deltaXFinal.mm * cos(globalRotation.radians) + deltaYFinal.mm * sin(globalRotation.radians))
+//        val virtualGlobalDeltaY = Distance.mm(deltaYFinal.mm * cos(globalRotation.radians) - deltaXFinal.mm * sin(globalRotation.radians))
+
+        val virtualGlobalX = Distance.mm(virtualPose.x + (deltaXFinal.mm * cos(globalRotation.radians)) + (deltaYFinal.mm * sin(globalRotation.radians)))
+        val virtualGlobalY = Distance.mm(virtualPose.y + (deltaYFinal.mm * cos(globalRotation.radians)) - (deltaXFinal.mm * sin(globalRotation.radians)))
+
+        // Update current virtual pose
         virtualPose = Pose(
-            virtualPose.x + globDX.mm,
-            virtualPose.y + globDY.mm,
-            worldHeading + dTheta
+            virtualGlobalX.mm,
+            virtualGlobalY.mm,
+            globalRotation + localRotation
         )
 
-        // compute velocity / accel
+        // Update velocity and acceleration
         val oldVel = localVelocity
-        localVelocity = Vector2((deltaX.mm + deltaY.mm) / dt.seconds, (deltaY.mm + deltaY.mm) / dt.seconds)
+        localVelocity = Vector2((deltaLocalX + deltaStrafeX).mm / dt.seconds, (deltaLocalY + deltaStrafeY).mm / dt.seconds)
+
         if (abs(localVelocity.x) > abs(oldVel.x))
             localAcceleration.x = (localVelocity.x - oldVel.x) / dt.seconds
+
         if (abs(localVelocity.y) > abs(oldVel.y))
             localAcceleration.y = (localVelocity.y - oldVel.y) / dt.seconds
 
-        xAvg += globalVelocity.first.x
-        yAvg += globalVelocity.first.y
-        angAvg += globalVelocity.second.degrees
+        val oldGlobalVel = globalVelocity
 
-        // final pose in robot frame
-        val finalY = virtualPose.y - (config.virtualOffsetY * virtualPose.rotation.cos).mm + (config.virtualOffsetX * virtualPose.rotation.sin).mm
-        val finalX = virtualPose.x - (config.virtualOffsetY * virtualPose.rotation.sin).mm - (config.virtualOffsetX * virtualPose.rotation.cos).mm
+        xAverage += globalVelocity.first.x
+        yAverage += globalVelocity.first.y
+        angularAverage += globalVelocity.second.degrees
 
-        val oldGlobal = Pair(Vector2(pose.x, pose.y), virtualPose.rotation)
-        pose = Pose(finalX, finalY, virtualPose.rotation)
+        val oldY = pose.y
+        val oldX = pose.x
+
+        // Convert virtual pose to final pose
+        val y = Distance.mm(virtualPose.y - (config.virtualOffsetY * virtualPose.rotation.cos).mm + (config.virtualOffsetX * virtualPose.rotation.sin).mm)
+        val x = Distance.mm(virtualPose.x - (config.virtualOffsetY * virtualPose.rotation.sin).mm - (config.virtualOffsetX * virtualPose.rotation.cos).mm)
+
+//        val oldGlobal = Pair(Vector2(pose.x, pose.y), virtualPose.rotation)
 
         globalVelocity = Pair(
-            Vector2((pose.x - oldGlobal.first.x) / dt.seconds, (pose.y - oldGlobal.first.y) / dt.seconds),
-            Angle.degrees(dTheta.degrees / dt.seconds)
-        )
-        globalAcceleration = Pair(
-            (globalVelocity.first  - oldGlobal.first) / dt.seconds,
-            (globalVelocity.second - oldGlobal.second) / dt.seconds
+            Vector2( (x.inch - oldX), (y.inch - oldY) ) / dt.seconds,
+            Angle.degrees(localRotation.degrees / dt.seconds)
         )
 
+        globalAcceleration = Pair(
+            (globalVelocity.first  - oldGlobalVel.first) / dt.seconds,
+            (globalVelocity.second - oldGlobalVel.second) / dt.seconds
+        )
+
+        pose = Pose(x.inch, y.inch, virtualPose.rotation)
+
         dt = Duration.ZERO
+
+        hub.setJunkTicks()
+        exHub.setJunkTicks()
     }
 
     // ---- Pedro Localizer interface ----
@@ -185,7 +219,13 @@ class CustomPedroLocalizer(
 
     override fun setPose(setPose: PathPose) {
         pose = Pose(setPose.x, setPose.y, Angle.radians(setPose.heading))
-        virtualPose = computeVirtual(pose)
+
+        val poseMM = Pose(
+            Distance.inch(pose.x).mm,
+            Distance.inch(pose.y).mm,
+            pose.rotation,
+        )
+        virtualPose = computeVirtual(poseMM)
     }
 
     override fun setStartPose(start: PathPose) = setPose(start)
@@ -194,9 +234,9 @@ class CustomPedroLocalizer(
     override fun getLateralMultiplier(): Double = 1.0
     override fun getTurningMultiplier(): Double = 1.0
 
-    private fun computeVirtual(p: Pose) = Pose(
-        p.y + (config.virtualOffsetY * p.rotation.cos).mm - (config.virtualOffsetX * p.rotation.sin).mm,
-        p.x + (config.virtualOffsetY * p.rotation.sin).mm + (config.virtualOffsetX * p.rotation.cos).mm,
-        p.rotation
+    private fun computeVirtual(globalPose: Pose) = Pose(
+        globalPose.y + (config.virtualOffsetX * globalPose.rotation.cos).mm - (config.virtualOffsetY * globalPose.rotation.sin).mm,
+        globalPose.x + (config.virtualOffsetX * globalPose.rotation.sin).mm + (config.virtualOffsetY * globalPose.rotation.cos).mm,
+        globalPose.rotation
     )
 }
