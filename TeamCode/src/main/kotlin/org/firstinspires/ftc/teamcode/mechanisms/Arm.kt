@@ -12,6 +12,7 @@ import org.firstinspires.ftc.teamcode.input.Controllable
 import org.firstinspires.ftc.teamcode.input.Controls
 import org.firstinspires.ftc.teamcode.input.Gamepads
 import org.firstinspires.ftc.teamcode.input.Profile
+import org.firstinspires.ftc.teamcode.input.matches
 import org.firstinspires.ftc.teamcode.input.types.Digital
 
 class Arm(hardwareMap: HardwareMap, telemetry: Telemetry? = null) : System, Controllable {
@@ -72,6 +73,8 @@ class Arm(hardwareMap: HardwareMap, telemetry: Telemetry? = null) : System, Cont
         gamepad: Gamepads,
         builder: Controls.Builder
     ): Unit = with(profile.arm) {
+        if (!gamepad.matches(desiredGamepad)) return@with
+
         toggleUpDown?.let { builder.register(it) { toggle() } }
         up?.let { builder.register(it) { up() } }
         middle?.let { builder.register(it) { middle() } }

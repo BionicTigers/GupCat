@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.teleops
 
 import com.pedropathing.localization.PoseUpdater
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import io.github.bionictigers.axiom.commands.Scheduler
 import org.firstinspires.ftc.teamcode.input.Controls
 import org.firstinspires.ftc.teamcode.input.profiles.Alex
@@ -15,9 +16,10 @@ import org.firstinspires.ftc.teamcode.motion.CustomPedroLocalizer
 import org.firstinspires.ftc.teamcode.pedro.FConstants
 import org.firstinspires.ftc.teamcode.pedro.LConstants
 
+@TeleOp()
 class MainControl : LinearOpMode() {
-    val profileGP1 = Alex
-    val profileGP2 = Erin
+    private val profileGP1 = Alex
+    private val profileGP2 = Erin
 
     override fun runOpMode() {
         Scheduler.telemetry = telemetry

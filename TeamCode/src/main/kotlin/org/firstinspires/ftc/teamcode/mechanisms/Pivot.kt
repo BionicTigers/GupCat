@@ -77,7 +77,7 @@ class Pivot(hardwareMap: HardwareMap, telemetry: Telemetry? = null) : System, Co
 
     private val hub = ControlHub(hardwareMap, "Expansion Hub 2")
 
-    private val dataState = DataState(hub.getEncoder(1), hardwareMap.getByName("pivotSwitch"))
+    private val dataState = DataState(hub.getEncoder(3), hardwareMap.getByName("pivotSwitch"))
     private val targetingState by persistentState("pivotTargeting") {
         TargetingState(
             hardwareMap.getByName("pivot"),
@@ -141,6 +141,8 @@ class Pivot(hardwareMap: HardwareMap, telemetry: Telemetry? = null) : System, Co
         }
 
         action {
+            it.isResting = !it.limitSwitch.state && targetingState.targetAngle <= Angle.degrees(0)
+
             if (it.isResting) {
                 it.encoder.refresh()
                 it.encoder.setJunkTicks()
@@ -163,14 +165,14 @@ class Pivot(hardwareMap: HardwareMap, telemetry: Telemetry? = null) : System, Co
             it.targetAngle = Angle.ZERO
 
             it.motor1.apply {
-                mode = DcMotor.RunMode.RUN_USING_ENCODER
+                mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
                 zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
                 power = 0.0
                 direction = DcMotorSimple.Direction.REVERSE
             }
 
             it.motor2.apply {
-                mode = DcMotor.RunMode.RUN_USING_ENCODER
+                mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
                 zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
                 power = 0.0
             }
@@ -198,17 +200,15 @@ class Pivot(hardwareMap: HardwareMap, telemetry: Telemetry? = null) : System, Co
             if (!gamepad.matches(desiredGamepad)) return@with
 
             //Allow for smart casting
-            val upControl = up
-            when (upControl) {
-                is Digital -> builder.register(upControl) { adjust(rate * up.modifier) }
-                is Analog -> builder.register(upControl) { adjust(rate * it * up.modifier) }
+            when (val upControl = up) {
+                is Digital -> builder.register(upControl) { adjust(rate * up.modifier * Scheduler.loopDeltaTime.seconds) }
+                is Analog -> builder.register(upControl) { adjust(rate * it * up.modifier * Scheduler.loopDeltaTime.seconds) }
             }
 
             //Allow for smart casting
-            val downControl = down
-            when (downControl) {
-                is Digital -> builder.register(downControl) { adjust(-rate * up.modifier) }
-                is Analog -> builder.register(downControl) { adjust(-rate * it * up.modifier) }
+            when (val downControl = down) {
+                is Digital -> builder.register(downControl) { adjust(-rate * up.modifier * Scheduler.loopDeltaTime.seconds) }
+                is Analog -> builder.register(downControl) { adjust(-rate * it * up.modifier * Scheduler.loopDeltaTime.seconds) }
             }
 
             min?.let { builder.register(it) { min() } }
@@ -220,11 +220,9 @@ class Pivot(hardwareMap: HardwareMap, telemetry: Telemetry? = null) : System, Co
         val limitSwitch: DigitalChannel,
         var angle: Angle = Angle.radians(0),
         var velocity: Angle = Angle.radians(0),
-        var acceleration: Angle = Angle.radians(0)
-    ) : BaseCommandState() {
-        val isResting: Boolean
-            get() = limitSwitch.state
-    }
+        var acceleration: Angle = Angle.radians(0),
+        var isResting: Boolean = false
+    ) : BaseCommandState()
 
     data class TargetingState(
         val motor1: DcMotorEx,
