@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.motion
 
 import com.qualcomm.robotcore.hardware.HardwareMap
 import com.pedropathing.localization.Localizer
+import com.pedropathing.pathgen.Point
 import com.pedropathing.pathgen.Vector as PathVector
 import io.github.bionictigers.axiom.commands.Scheduler
 import com.pedropathing.localization.Pose as PathPose
@@ -16,6 +17,7 @@ import kotlin.math.abs
 import org.firstinspires.ftc.teamcode.utils.Distance
 import org.firstinspires.ftc.teamcode.utils.NewRollingAverage
 import org.firstinspires.ftc.teamcode.utils.seconds
+import kotlin.math.atan2
 import kotlin.time.Duration
 
 interface RobotConfig {
@@ -26,7 +28,7 @@ interface RobotConfig {
     val virtualOffsetY: Distance
 }
 
-private object Configs {
+object Configs {
     object Test: RobotConfig {
         override val leftOffset: Distance = Distance.mm(204.0) - Distance.mm(5.0) //Distance.mm( 173.83125) + Distance.mm(10)
         override val rightOffset: Distance = Distance.mm(142.0) - Distance.mm(5.0) // Distance.mm(165.1) + Distance.mm(10) //152.4 //169.0
@@ -181,12 +183,12 @@ class CustomPedroLocalizer(
 //        val oldGlobal = Pair(Vector2(pose.x, pose.y), virtualPose.rotation)
 
         globalVelocity = Pair(
-            Vector2( (x.inch - oldX), (y.inch - oldY) ) / dt.seconds,
+            Vector2((x.inch - oldX), (y.inch - oldY)) / dt.seconds,
             Angle.degrees(localRotation.degrees / dt.seconds)
         )
 
         globalAcceleration = Pair(
-            (globalVelocity.first  - oldGlobalVel.first) / dt.seconds,
+            (globalVelocity.first - oldGlobalVel.first) / dt.seconds,
             (globalVelocity.second - oldGlobalVel.second) / dt.seconds
         )
 
@@ -201,16 +203,16 @@ class CustomPedroLocalizer(
     // ---- Pedro Localizer interface ----
 
     override fun getPose(): PathPose =
-        PathPose(pose.x, pose.y, pose.rotation.radians)
+        PathPose(pose.y, pose.x, pose.rotation.radians)
 
     override fun getTotalHeading(): Double =
         pose.rotation.radians
 
     override fun getVelocity(): PathPose =
-        PathPose(globalVelocity.first.x, globalVelocity.first.y, globalVelocity.second.radians)
+        PathPose(globalVelocity.first.y, globalVelocity.first.x, totalHeading)
 
     override fun getVelocityVector(): PathVector =
-        PathVector(globalVelocity.first.x, globalVelocity.first.y)
+        PathVector(Point(globalVelocity.first.y, globalVelocity.first.x))
 
     override fun isNAN(): Boolean =
         pose.x.isNaN() || pose.y.isNaN() || pose.rotation.radians.isNaN()
@@ -221,8 +223,8 @@ class CustomPedroLocalizer(
         pose = Pose(setPose.x, setPose.y, Angle.radians(setPose.heading))
 
         val poseMM = Pose(
-            Distance.inch(pose.x).mm,
             Distance.inch(pose.y).mm,
+            Distance.inch(pose.x).mm,
             pose.rotation,
         )
         virtualPose = computeVirtual(poseMM)

@@ -28,6 +28,7 @@ class SequentialCommandGroup(
         }
 
         action {
+            println("$name running ${currentCommand.name}")
             if (!currentCommand.running && commands.size > it.currentIndex + 1) {
                 it.currentIndex++
                 currentCommand = commands[it.currentIndex]

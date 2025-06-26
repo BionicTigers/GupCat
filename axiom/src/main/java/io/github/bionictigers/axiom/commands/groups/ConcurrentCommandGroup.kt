@@ -29,7 +29,9 @@ class ConcurrentCommandGroup(
             commands.forEach(Scheduler::schedule)
         }
 
-        action { state ->
+        action {
+            println("$name running ${commands.filter { it.running }.joinToString { it.name } }")
+
             val allFinished = commands.all { !it.running }
             val anyFinished = commands.any { !it.running }
 

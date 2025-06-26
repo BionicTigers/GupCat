@@ -50,10 +50,10 @@ class Pivot(hardwareMap: HardwareMap, telemetry: Telemetry? = null) : System, Co
         val MIN_ANGLE = Angle.degrees(-5)
 
         /** Motion Profiling Values in degrees */
-        val upProfile = MotionProfile(10.8, 17.2, 1.6, 12.41)
+        val upProfile = MotionProfile(67200.0, 6723.39, 198.43, 13.4)
 
         /** Motion Profiling Values in degrees */
-        val downProfile = MotionProfile(10.8, 23.7, 1.2, 12.41)
+        val downProfile = MotionProfile(67200.8, 3493.54, 198.43, 13.4)
     }
 
     interface Schema : ControlSchema {
@@ -100,15 +100,15 @@ class Pivot(hardwareMap: HardwareMap, telemetry: Telemetry? = null) : System, Co
 
         enter {
             motionResult = if (angle > dataState.angle)
-                raiseProfile.generate(dataState.angle.degrees, angle.degrees/*, dataState.velocity*/)
+                upProfile.generate(dataState.angle.degrees, angle.degrees/*, dataState.velocity*/)
             else
-                lowerProfile.generate(dataState.angle.degrees, angle.degrees/*, dataState.velocity*/)
+                downProfile.generate(dataState.angle.degrees, angle.degrees/*, dataState.velocity*/)
         }
 
         action {
             //No need to coerce as it's done before power is applied
             it.targetAngle = Angle.degrees(motionResult.getPosition(it.enteredAt?.elapsedNow() ?: return@action false))
-            it.targetAngle == Angle.degrees(motionResult.position.last().toInt())
+            motionResult.getPosition(it.enteredAt!!.elapsedNow()) == motionResult.position.last()
         }
     }
 
@@ -129,6 +129,12 @@ class Pivot(hardwareMap: HardwareMap, telemetry: Telemetry? = null) : System, Co
                 telemetry.addData("Pivot Angle", angle.degrees)
                 telemetry.addData("Pivot Target", targetingState.targetAngle.degrees)
                 telemetry.addData("Pivot Resting", dataState.isResting)
+
+//                telemetry.addData("Pivot minV", dataState.minVelocity)
+//                telemetry.addData("Pivot maxV", dataState.maxVelocity)
+//                telemetry.addData("Pivot minA", dataState.minAcceleration)
+//                telemetry.addData("Pivot maxA", dataState.maxAcceleration)
+
             })
         }
     }
@@ -154,7 +160,11 @@ class Pivot(hardwareMap: HardwareMap, telemetry: Telemetry? = null) : System, Co
 
             it.angle = angleFromTicks(it.encoder.ticks)
             it.velocity = (it.angle - lastAngle) / it.deltaTime.seconds
+            it.maxVelocity = it.velocity
+            it.minVelocity = it.velocity
             it.acceleration = (it.velocity - lastVelocity) / it.deltaTime.seconds
+            it.maxAcceleration = it.acceleration
+            it.minAcceleration = it.acceleration
 
             false
         }
@@ -222,7 +232,25 @@ class Pivot(hardwareMap: HardwareMap, telemetry: Telemetry? = null) : System, Co
         var velocity: Angle = Angle.radians(0),
         var acceleration: Angle = Angle.radians(0),
         var isResting: Boolean = false
-    ) : BaseCommandState()
+    ) : BaseCommandState() {
+        var maxVelocity = Angle.radians(0)
+            set(value) {
+                field = Angle.radians(field.radians.coerceAtLeast(value.radians))
+            }
+        var minVelocity = Angle.radians(0)
+            set(value) {
+                field = Angle.radians(field.radians.coerceAtMost(value.radians))
+            }
+
+        var maxAcceleration = Angle.radians(0)
+            set(value) {
+                field = Angle.radians(field.radians.coerceAtLeast(value.radians))
+            }
+        var minAcceleration = Angle.radians(0)
+            set(value) {
+                field = Angle.radians(field.radians.coerceAtMost(value.radians))
+            }
+    }
 
     data class TargetingState(
         val motor1: DcMotorEx,

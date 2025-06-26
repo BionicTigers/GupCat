@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.mechanisms
 
 import com.pedropathing.follower.Follower
+import com.pedropathing.localization.Pose
 import com.pedropathing.localization.PoseUpdater
 import com.pedropathing.util.Constants
 import com.qualcomm.robotcore.hardware.HardwareMap
@@ -20,8 +21,9 @@ import org.firstinspires.ftc.teamcode.input.types.Control
 import org.firstinspires.ftc.teamcode.motion.CustomPedroLocalizer
 import org.firstinspires.ftc.teamcode.pedro.FConstants
 import org.firstinspires.ftc.teamcode.pedro.LConstants
+import org.firstinspires.ftc.teamcode.utils.Angle
 
-class Drivetrain(hardwareMap: HardwareMap, telemetry: Telemetry? = null) : System, Controllable {
+class Drivetrain(hardwareMap: HardwareMap, telemetry: Telemetry? = null, startPose: Pose = Pose(0.0, 0.0, 0.0)) : System, Controllable {
     enum class DriveOrientation {
         /** Movement is relative to the robot */
         ROBOT,
@@ -51,21 +53,20 @@ class Drivetrain(hardwareMap: HardwareMap, telemetry: Telemetry? = null) : Syste
 
     override val name = "drivetrain"
 
-    val localizer = CustomPedroLocalizer(hardwareMap, telemetry = telemetry)
-    val follower = Follower(hardwareMap, localizer, FConstants::class.java, LConstants::class.java)
+    val follower = Follower(hardwareMap, FConstants::class.java, LConstants::class.java)
 
     val data = DrivetrainData()
 
     fun setXControl(x: Double): Command<DrivetrainData> = Command.instant("Set X Control", data) {
-        it.xControl = x
+        it.xControl = -x
     }
 
     fun setYControl(y: Double): Command<DrivetrainData> = Command.instant("Set Y Control", data) {
-        it.yControl = y
+        it.yControl = -y
     }
 
     fun setRotControl(rot: Double): Command<DrivetrainData> = Command.instant("Set Rot Control", data) {
-        it.rotControl = rot
+        it.rotControl = -rot
     }
 
     init {
@@ -74,12 +75,23 @@ class Drivetrain(hardwareMap: HardwareMap, telemetry: Telemetry? = null) : Syste
                 telemetry.addData("Drivetrain X", data.xControl)
                 telemetry.addData("Drivetrain Y", data.yControl)
                 telemetry.addData("Drivetrain Rot", data.rotControl)
+
+//                telemetry.addData("X Velocity", follower.velocity.xComponent)
+//                telemetry.addData("Y Velocity", follower.velocity.yComponent)
+//                telemetry.addData("R Velocity", follower.velocity.theta)
+
+                telemetry.addData("X Position", follower.pose.x)
+                telemetry.addData("Y Position", follower.pose.y)
+                telemetry.addData("R Angle", Angle.radians(follower.pose.heading).degrees)
             })
         }
+
+        follower.setStartingPose(startPose)
     }
 
     override val afterRun = Command.continuous("Drivetrain Update", data) {
         if (it.driveOrientation != null) {
+            //TODO: Add heading PID
             follower.setTeleOpMovementVectors(it.yControl, it.xControl, it.rotControl, it.driveOrientation == DriveOrientation.ROBOT)
         }
 

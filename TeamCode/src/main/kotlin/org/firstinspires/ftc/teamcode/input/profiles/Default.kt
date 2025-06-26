@@ -24,7 +24,7 @@ open class Default : Profile {
 
     override val slides = object : Slides.Schema {
         override val desiredGamepad = Gamepads.GAMEPAD_2
-        override val rate = 37600
+        override val rate = (Slides.MAX_TICKS * 1.25).toInt()
         override val raise: Control<*> = Digital.DPAD_UP.hold()
         override val lower: Control<*> = Digital.DPAD_DOWN.hold()
         override val min: Digital? = null

@@ -14,6 +14,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry
 import java.lang.reflect.Field
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentLinkedQueue
 import kotlin.collections.ArrayList
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
@@ -29,9 +30,9 @@ object Scheduler {
     private val systems = ConcurrentHashMap<Int, System>()
 //    private val systemsToCommands = ConcurrentHashMap<Int, Int>()
 
-    private val addQueue: ArrayList<GenericCommand> = ArrayList()
-    private val removeQueue: ArrayList<GenericCommand> = ArrayList()
-    private val editQueue: ArrayList<Pair<String, Any>> = ArrayList()
+    private val addQueue: ConcurrentLinkedQueue<GenericCommand> = ConcurrentLinkedQueue()
+    private val removeQueue: ConcurrentLinkedQueue<GenericCommand> = ConcurrentLinkedQueue()
+    private val editQueue: ConcurrentLinkedQueue<Pair<String, Any>> = ConcurrentLinkedQueue()
 
     val persistentStates = ConcurrentHashMap<String, BaseCommandState>()
 
@@ -253,11 +254,8 @@ object Scheduler {
         inUpdateCycle = true
 
         loopDeltaTime = measureTime {
-            editQueue.forEach(this::internalEdit)
-            editQueue.clear()
-
-            addQueue.forEach(this::internalAdd)
-            addQueue.clear()
+            editQueue.forEachAndRemove(this::internalEdit)
+            addQueue.forEachAndRemove(this::internalAdd)
 
             if (changed) {
                 sort()
@@ -266,8 +264,7 @@ object Scheduler {
 
             sortedCommands.forEach(GenericCommand::execute)
 
-            removeQueue.forEach(this::internalRemove)
-            removeQueue.clear()
+            removeQueue.forEachAndRemove(this::internalRemove)
         }
 
         if (telemetry != null) {
@@ -303,5 +300,11 @@ inline fun <reified T : BaseCommandState> persistentState(
     override fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
         cache = value
         persistentStates[name] = value
+    }
+}
+
+private fun <T> ConcurrentLinkedQueue<T>.forEachAndRemove(action: (T) -> Unit) {
+    while (isNotEmpty()) {
+        action(poll() ?: continue)
     }
 }

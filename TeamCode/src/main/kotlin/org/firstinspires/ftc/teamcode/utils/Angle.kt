@@ -52,6 +52,10 @@ class Angle private constructor(val radians: Double) : Comparable<Angle> {
         return radians.compareTo(other.radians)
     }
 
+    override fun toString(): String {
+        return "${degrees}°"
+    }
+
     val abs: Angle
         get() = degrees(this.degrees.absoluteValue)
     val sin = sin(radians)

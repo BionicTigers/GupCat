@@ -56,8 +56,7 @@ class StrafeVelocityTuner : OpMode() {
      */
     override fun init() {
         Constants.setConstants(FConstants::class.java, LConstants::class.java)
-        val localizer = CustomPedroLocalizer(hardwareMap)
-        poseUpdater = PoseUpdater(hardwareMap, localizer, FConstants::class.java, LConstants::class.java)
+        poseUpdater = PoseUpdater(hardwareMap, FConstants::class.java, LConstants::class.java)
 
         leftFront = hardwareMap.get(DcMotorEx::class.java, FollowerConstants.leftFrontMotorName)
         leftRear = hardwareMap.get(DcMotorEx::class.java, FollowerConstants.leftRearMotorName)

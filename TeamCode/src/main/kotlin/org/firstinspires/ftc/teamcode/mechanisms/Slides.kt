@@ -25,13 +25,14 @@ import org.firstinspires.ftc.teamcode.motion.MotionProfile
 import org.firstinspires.ftc.teamcode.motion.MotionResult
 import org.firstinspires.ftc.teamcode.motion.PID
 import org.firstinspires.ftc.teamcode.motion.PIDTerms
+import org.firstinspires.ftc.teamcode.utils.Angle
 import org.firstinspires.ftc.teamcode.utils.ControlHub
 import org.firstinspires.ftc.teamcode.utils.Encoder
 import org.firstinspires.ftc.teamcode.utils.Persistents
 import org.firstinspires.ftc.teamcode.utils.getByName
 import org.firstinspires.ftc.teamcode.utils.seconds
 
-class Slides(hardwareMap: HardwareMap, val pivot: Pivot? = null, telemetry: Telemetry? = null) : System, Controllable {
+class Slides(hardwareMap: HardwareMap, private val pivot: Pivot? = null, telemetry: Telemetry? = null) : System, Controllable {
     companion object {
         /** Max Ticks for the slide encoder */
         const val MAX_TICKS = 52500
@@ -46,10 +47,10 @@ class Slides(hardwareMap: HardwareMap, val pivot: Pivot? = null, telemetry: Tele
         const val RESTING_POWER = -0.02
 
         /** Motion profile for raising the slides */
-        val raiseProfile = MotionProfile(300_000, 1_120_130, 51_000)
+        val raiseProfile = MotionProfile(30000000, 2925264, 54886.41, 12.57)
 
         /** Motion profile for lowering the slides */
-        val lowerProfile = MotionProfile(300_000, 3_692_851, 59_948)
+        val lowerProfile = MotionProfile(17000000, 1656291, 88136, 12.57)
     }
 
     interface Schema : ControlSchema {
@@ -127,7 +128,7 @@ class Slides(hardwareMap: HardwareMap, val pivot: Pivot? = null, telemetry: Tele
 
     fun min(): Command<TargetingState> = moveTo(MIN_TICKS)
 
-    fun max(): Command<TargetingState> = moveTo(adjustedMaxTicks)
+    fun max(): Command<TargetingState> = moveTo(MAX_TICKS)
 
     init {
         if (telemetry != null) {
@@ -135,6 +136,11 @@ class Slides(hardwareMap: HardwareMap, val pivot: Pivot? = null, telemetry: Tele
                 telemetry.addData("Slide Ticks", dataState.ticks)
                 telemetry.addData("Slide Target", targetingState.targetTicks)
                 telemetry.addData("Slide Resting", dataState.isResting)
+
+                telemetry.addData("Slide minV", dataState.minVelocity)
+                telemetry.addData("Slide maxV", dataState.maxVelocity)
+                telemetry.addData("Slide minA", dataState.minAcceleration)
+                telemetry.addData("Slide maxA", dataState.maxAcceleration)
             })
         }
     }
@@ -160,7 +166,11 @@ class Slides(hardwareMap: HardwareMap, val pivot: Pivot? = null, telemetry: Tele
 
             it.ticks = it.encoder.ticks
             it.velocity = (it.ticks - lastTicks) / it.deltaTime.seconds
+            it.minVelocity = it.velocity
+            it.maxVelocity = it.velocity
             it.acceleration = (it.velocity - lastVelocity) / it.deltaTime.seconds
+            it.minAcceleration = it.acceleration
+            it.maxAcceleration = it.acceleration
 
             false
         }
@@ -229,7 +239,25 @@ class Slides(hardwareMap: HardwareMap, val pivot: Pivot? = null, telemetry: Tele
         var velocity: Double = 0.0,
         var acceleration: Double = 0.0,
         var isResting: Boolean = false
-    ) : BaseCommandState()
+    ) : BaseCommandState() {
+        var maxVelocity = 0.0
+            set(value) {
+                field = field.coerceAtLeast(value)
+            }
+        var minVelocity = 0.0
+            set(value) {
+                field = field.coerceAtMost(value)
+            }
+
+        var maxAcceleration = 0.0
+            set(value) {
+                field = field.coerceAtLeast(value)
+            }
+        var minAcceleration = 0.0
+            set(value) {
+                field = field.coerceAtMost(value)
+            }
+    }
 
     data class TargetingState(
         val motorL: DcMotorEx,

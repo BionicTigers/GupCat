@@ -26,19 +26,19 @@ import kotlin.time.Duration.Companion.seconds
 @Autonomous(name = "Sample")
 class Sample : LinearOpMode() {
     //Pedro Poses use inches
-    val startPose = Pose(9, 110.8, 270).toPedro()
-    val scorePose = Pose(18, 125, 315).toPedro()
-    val sample1Pose = Pose(36, 123, 0).toPedro() // Right
-    val sample2Pose = Pose(36, 130, 0).toPedro() // Middle
-    val sample3Pose = Pose(25.7, 129.6, 0).toPedro() // Left
+    private val startPose = Pose(9, 110.8, 270).toPedro()
+    private val scorePose = Pose(17.8, 121.7, 315).toPedro()
+    private val sample1Pose = Pose(30.5, 119, 0).toPedro() // Right
+    private val sample2Pose = Pose(30.5, 124, 0).toPedro() // Middle
+    private val sample3Pose = Pose(22, 124.5, 0).toPedro() // Left
 
-    fun createScoringPath(follower: Follower, startPose: PedroPose): PathChain =
+    private fun createScoringPath(follower: Follower, startPose: PedroPose): PathChain =
         follower.pathBuilder()
             .addPath(BezierLine(startPose, scorePose))
             .setConstantHeadingInterpolation(scorePose.heading)
             .build()
 
-    fun createPickupPath(follower: Follower, endPose: PedroPose): PathChain =
+    private fun createPickupPath(follower: Follower, endPose: PedroPose): PathChain =
         follower.pathBuilder()
             .addPath(BezierLine(scorePose, endPose))
             .setTangentHeadingInterpolation()
@@ -51,7 +51,7 @@ class Sample : LinearOpMode() {
         val claw = Claw(hardwareMap, telemetry)
         val pivot = Pivot(hardwareMap, telemetry)
         val slides = Slides(hardwareMap, pivot, telemetry)
-        val drivetrain = Drivetrain(hardwareMap, telemetry)
+        val drivetrain = Drivetrain(hardwareMap, telemetry, startPose)
 
         val follower = drivetrain.follower
 
@@ -61,36 +61,47 @@ class Sample : LinearOpMode() {
 
         Scheduler.addSystem(arm, claw, pivot, slides, drivetrain)
 
-        val score = concurrent("Score") {
-            add(slides.max())
+        val score = { concurrent("Score") {
+            add(arm.down())
             add(pivot.max())
             sequential {
-                waitUntil { pivot.angle > Angle.degrees(85) && slides.ticks > Slides.MAX_TICKS - 3000 && !follower.isBusy }
-                add(arm.up())
-                wait(.3.seconds)
-                add(claw.open())
+                waitUntil { pivot.angle > Angle.degrees(25) }
+                add(slides.max())
             }
-        }
+            sequential {
+                waitUntil { pivot.angle > Angle.degrees(85) && slides.ticks > Slides.MAX_TICKS - 3000 && follower.currentTValue > 0.9 }
+                add(arm.up())
+                wait(.575.seconds)
+                add(claw.open())
+                wait(.05.seconds)
+            }
+        } }
 
-        val reset = sequential("Reset") {
-            add(arm.down())
-            wait(.3.seconds)
-            add(slides.min())
-            wait(.1.seconds)
-            add(pivot.min())
+        val reset = {
+            sequential("Reset") {
+                add(arm.down())
+                wait(.2.seconds)
+                concurrent {
+                    add(slides.min())
+                    sequential {
+                        waitUntil { slides.ticks < Slides.MAX_TICKS - 24000 }
+                        add(pivot.min())
+                    }
+                }
+            }
         }
 
         val commandGroup = sequential("Sample Autonomous") {
             sequential("Score Preload") {
                 instant { follower.followPath(createScoringPath(follower, startPose)) }
                 waitUntil { follower.currentTValue > 0.7 }
-                add(score)
+                add(score())
             }
 
             sequential("Pickup First Sample") {
-                add(reset)
+                add(reset())
                 instant { follower.followPath(createPickupPath(follower, sample1Pose)) }
-                waitUntil { !follower.isBusy }
+                waitUntil { follower.currentTValue > 0.95 }
                 add(claw.close())
                 wait(.05.seconds)
             }
@@ -98,13 +109,13 @@ class Sample : LinearOpMode() {
             sequential("Score First Sample") {
                 instant { follower.followPath(createScoringPath(follower, sample1Pose)) }
                 waitUntil { follower.currentTValue > 0.7 }
-                add(score)
+                add(score())
             }
 
             sequential("Pickup Second Sample") {
-                add(reset)
+                add(reset())
                 instant { follower.followPath(createPickupPath(follower, sample2Pose)) }
-                waitUntil { !follower.isBusy }
+                waitUntil { follower.currentTValue > 0.95 }
                 add(claw.close())
                 wait(.05.seconds)
             }
@@ -112,33 +123,38 @@ class Sample : LinearOpMode() {
             sequential("Score Second Sample") {
                 instant { follower.followPath(createScoringPath(follower, sample2Pose)) }
                 waitUntil { follower.currentTValue > 0.7 }
-                add(score)
+                add(score())
             }
 
             sequential("Pickup Third Sample") {
-                add(reset)
+                add(reset())
                 instant { follower.followPath(createPickupPath(follower, sample3Pose)) }
-                add(slides.max())
-                waitUntil { slides.ticks < Slides.PIVOT_RESTING_MAX_TICKS - 3000 && !follower.isBusy }
+                add(slides.moveTo(20000))
+                waitUntil { slides.ticks < Slides.PIVOT_RESTING_MAX_TICKS - 3000 && follower.currentTValue > 0.95 }
                 add(claw.close())
                 wait(.05.seconds)
-                add(reset)
+                add(reset())
             }
 
             sequential("Score Third Sample") {
                 instant { follower.followPath(createScoringPath(follower, sample3Pose)) }
                 waitUntil { follower.currentTValue > 0.7 }
-                add(score)
+                add(score())
             }
+
+            add(reset())
         }
 
-        Scheduler.schedule(commandGroup)
 
         waitForStart()
+
+        Scheduler.schedule(commandGroup)
 
         while (opModeIsActive()) {
             Scheduler.update()
             telemetry.update()
         }
+
+        Scheduler.reset()
     }
 }

@@ -59,8 +59,7 @@ class LateralZeroPowerAccelerationTuner : OpMode() {
      */
     override fun init() {
         Constants.setConstants(FConstants::class.java, LConstants::class.java)
-        val localizer = CustomPedroLocalizer(hardwareMap)
-        poseUpdater = PoseUpdater(hardwareMap, localizer, FConstants::class.java, LConstants::class.java)
+        poseUpdater = PoseUpdater(hardwareMap, FConstants::class.java, LConstants::class.java)
 
         leftFront = hardwareMap.get(DcMotorEx::class.java, FollowerConstants.leftFrontMotorName)
         leftRear = hardwareMap.get(DcMotorEx::class.java, FollowerConstants.leftRearMotorName)
@@ -118,9 +117,11 @@ class LateralZeroPowerAccelerationTuner : OpMode() {
         }
 
         poseUpdater!!.update()
+
         val heading = Vector(1.0, poseUpdater!!.pose.heading - Math.PI / 2)
         if (!end) {
             if (!stopping) {
+                println(MathFunctions.dotProduct(poseUpdater!!.velocity, heading))
                 if (MathFunctions.dotProduct(poseUpdater!!.velocity, heading) > VELOCITY) {
                     previousVelocity = MathFunctions.dotProduct(poseUpdater!!.velocity, heading)
                     previousTimeNano = System.nanoTime()
