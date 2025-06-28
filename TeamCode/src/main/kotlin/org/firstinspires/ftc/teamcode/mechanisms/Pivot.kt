@@ -44,7 +44,7 @@ class Pivot(hardwareMap: HardwareMap, telemetry: Telemetry? = null) : System, Co
         const val RESTING_POWER = -0.2
 
         /** Maximum angle for the pivot */
-        val MAX_ANGLE = Angle.degrees(90)
+        val MAX_ANGLE = Angle.degrees(92.5)
 
         /** Minimum angle for the pivot */
         val MIN_ANGLE = Angle.degrees(-5)
@@ -191,11 +191,14 @@ class Pivot(hardwareMap: HardwareMap, telemetry: Telemetry? = null) : System, Co
         }
 
         action {
-            val power = if (dataState.isResting) RESTING_POWER
+            var power = if (dataState.isResting) RESTING_POWER
             else it.pid.calculate(it.targetAngle.degrees, dataState.angle.degrees)
 
-            it.motor1.power = power
-            it.motor2.power = power
+            if (dataState.angle > Angle.degrees(70))
+                power += .25
+
+            it.motor1.power = -power
+            it.motor2.power = -power
 
             false
         }

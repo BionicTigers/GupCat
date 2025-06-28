@@ -17,9 +17,10 @@ import org.firstinspires.ftc.teamcode.input.types.Digital
 
 class Arm(hardwareMap: HardwareMap, telemetry: Telemetry? = null) : System, Controllable {
     enum class Position(val target: Double) {
-        Down(.97),
-        Middle(.65),
-        Up(.15),
+        Down(.95),
+        Middle(.5),
+        Specimen(.48),
+        Up(.075),
     }
 
     interface Schema : ControlSchema {
@@ -28,6 +29,9 @@ class Arm(hardwareMap: HardwareMap, telemetry: Telemetry? = null) : System, Cont
 
         /** Move to up position */
         val up: Digital?
+
+        /** Move to specimen position */
+        val specimen: Digital?
 
         /** Move to middle position */
         val middle: Digital?
@@ -49,6 +53,8 @@ class Arm(hardwareMap: HardwareMap, telemetry: Telemetry? = null) : System, Cont
     fun up(): BaseCommand = Command.instant("Arm Up") { target = Position.Up }
 
     fun down(): BaseCommand = Command.instant("Arm Down") { target = Position.Down }
+
+    fun specimen(): BaseCommand = Command.instant("Arm Specimen") { target = Position.Specimen }
 
     fun middle(): BaseCommand = Command.instant("Arm Middle") { target = Position.Middle }
 
@@ -77,6 +83,7 @@ class Arm(hardwareMap: HardwareMap, telemetry: Telemetry? = null) : System, Cont
 
         toggleUpDown?.let { builder.register(it) { toggle() } }
         up?.let { builder.register(it) { up() } }
+        specimen?.let { builder.register(it) { specimen() } }
         middle?.let { builder.register(it) { middle() } }
         down?.let { builder.register(it) { down() } }
     }

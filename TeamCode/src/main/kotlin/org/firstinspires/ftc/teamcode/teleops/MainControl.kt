@@ -16,7 +16,7 @@ import org.firstinspires.ftc.teamcode.motion.CustomPedroLocalizer
 import org.firstinspires.ftc.teamcode.pedro.FConstants
 import org.firstinspires.ftc.teamcode.pedro.LConstants
 
-@TeleOp()
+@TeleOp
 class MainControl : LinearOpMode() {
     private val profileGP1 = Alex
     private val profileGP2 = Erin

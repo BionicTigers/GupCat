@@ -22,6 +22,9 @@ import org.firstinspires.ftc.teamcode.motion.CustomPedroLocalizer
 import org.firstinspires.ftc.teamcode.pedro.FConstants
 import org.firstinspires.ftc.teamcode.pedro.LConstants
 import org.firstinspires.ftc.teamcode.utils.Angle
+import kotlin.math.absoluteValue
+import kotlin.math.pow
+import kotlin.math.sqrt
 
 class Drivetrain(hardwareMap: HardwareMap, telemetry: Telemetry? = null, startPose: Pose = Pose(0.0, 0.0, 0.0)) : System, Controllable {
     enum class DriveOrientation {
@@ -92,7 +95,8 @@ class Drivetrain(hardwareMap: HardwareMap, telemetry: Telemetry? = null, startPo
     override val afterRun = Command.continuous("Drivetrain Update", data) {
         if (it.driveOrientation != null) {
             //TODO: Add heading PID
-            follower.setTeleOpMovementVectors(it.yControl, it.xControl, it.rotControl, it.driveOrientation == DriveOrientation.ROBOT)
+            val rotMulti = 1 - (it.xControl.absoluteValue.coerceAtLeast(it.yControl.absoluteValue) * .6)
+            follower.setTeleOpMovementVectors(it.yControl, it.xControl, it.rotControl * rotMulti, it.driveOrientation == DriveOrientation.ROBOT)
         }
 
         follower.update()

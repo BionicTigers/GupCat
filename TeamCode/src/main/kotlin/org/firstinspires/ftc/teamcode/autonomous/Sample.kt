@@ -26,8 +26,8 @@ import kotlin.time.Duration.Companion.seconds
 @Autonomous(name = "Sample")
 class Sample : LinearOpMode() {
     //Pedro Poses use inches
-    private val startPose = Pose(9, 110.8, 270).toPedro()
-    private val scorePose = Pose(17.8, 121.7, 315).toPedro()
+    private val startPose = Pose(9, 110.4, 270).toPedro()
+    private val scorePose = Pose(18.5, 122.5, 315).toPedro()
     private val sample1Pose = Pose(30.5, 119, 0).toPedro() // Right
     private val sample2Pose = Pose(30.5, 124, 0).toPedro() // Middle
     private val sample3Pose = Pose(22, 124.5, 0).toPedro() // Left
@@ -143,6 +143,8 @@ class Sample : LinearOpMode() {
             }
 
             add(reset())
+
+            add(arm.middle())
         }
 
 

@@ -35,7 +35,8 @@ open class Default : Profile {
         override val desiredGamepad = Gamepads.GAMEPAD_2
         override val toggleUpDown = Digital.B.press()
         override val up = null
-        override val middle = Digital.Y.press()
+        override val specimen = Digital.Y.press()
+        override val middle = null
         override val down = null
     }
 
