@@ -32,6 +32,14 @@ class PID(
 
     private val elapsedTime = ElapsedTime(ElapsedTime.Resolution.MILLISECONDS)
 
+    var pidTerms: PIDTerms
+        set(newTerms) {
+            kP = newTerms.kP
+            tI = newTerms.tI
+            tD = newTerms.tD
+        }
+        get() = PIDTerms(kP, tI, tD)
+
     //Expose P, I, D, E, CV variables to outside the class for logging
     var p: Double = 0.0
         internal set

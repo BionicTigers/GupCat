@@ -27,9 +27,9 @@ import kotlin.time.Duration.Companion.seconds
 class Sample : LinearOpMode() {
     //Pedro Poses use inches
     private val startPose = Pose(9, 110.4, 270).toPedro()
-    private val scorePose = Pose(18.5, 122.5, 315).toPedro()
-    private val sample1Pose = Pose(30.5, 119, 0).toPedro() // Right
-    private val sample2Pose = Pose(30.5, 124, 0).toPedro() // Middle
+    private val scorePose = Pose(18.2, 122.3, 315).toPedro()
+    private val sample1Pose = Pose(22, 121.2, 0).toPedro() // Right
+    private val sample2Pose = Pose(30.5, 125, 0).toPedro() // Middle
     private val sample3Pose = Pose(22, 124.5, 0).toPedro() // Left
 
     private fun createScoringPath(follower: Follower, startPose: PedroPose): PathChain =
@@ -50,7 +50,7 @@ class Sample : LinearOpMode() {
         val arm = Arm(hardwareMap, telemetry)
         val claw = Claw(hardwareMap, telemetry)
         val pivot = Pivot(hardwareMap, telemetry)
-        val slides = Slides(hardwareMap, pivot, telemetry)
+        val slides = Slides(hardwareMap, pivot, telemetry, arm)
         val drivetrain = Drivetrain(hardwareMap, telemetry, startPose)
 
         val follower = drivetrain.follower
@@ -73,7 +73,7 @@ class Sample : LinearOpMode() {
                 add(arm.up())
                 wait(.575.seconds)
                 add(claw.open())
-                wait(.05.seconds)
+                wait(.1.seconds)
             }
         } }
 
@@ -84,7 +84,7 @@ class Sample : LinearOpMode() {
                 concurrent {
                     add(slides.min())
                     sequential {
-                        waitUntil { slides.ticks < Slides.MAX_TICKS - 24000 }
+                        waitUntil { slides.ticks < Slides.MAX_TICKS - 20000 }
                         add(pivot.min())
                     }
                 }
@@ -100,15 +100,20 @@ class Sample : LinearOpMode() {
 
             sequential("Pickup First Sample") {
                 add(reset())
-                instant { follower.followPath(createPickupPath(follower, sample1Pose)) }
-                waitUntil { follower.currentTValue > 0.95 }
+                concurrent {
+                    instant { follower.followPath(createPickupPath(follower, sample1Pose)) }
+                    add(slides.moveTo(15000))
+                }
+                waitUntil { follower.currentTValue > 0.95 && slides.ticks > 14000 }
+                wait(.05.seconds)
                 add(claw.close())
                 wait(.05.seconds)
+                add(slides.moveTo(4000))
             }
 
             sequential("Score First Sample") {
                 instant { follower.followPath(createScoringPath(follower, sample1Pose)) }
-                waitUntil { follower.currentTValue > 0.7 }
+                waitUntil { follower.currentTValue > 0.3 }
                 add(score())
             }
 
@@ -122,7 +127,7 @@ class Sample : LinearOpMode() {
 
             sequential("Score Second Sample") {
                 instant { follower.followPath(createScoringPath(follower, sample2Pose)) }
-                waitUntil { follower.currentTValue > 0.7 }
+                waitUntil { follower.currentTValue > 0.3 }
                 add(score())
             }
 
@@ -130,7 +135,7 @@ class Sample : LinearOpMode() {
                 add(reset())
                 instant { follower.followPath(createPickupPath(follower, sample3Pose)) }
                 add(slides.moveTo(20000))
-                waitUntil { slides.ticks < Slides.PIVOT_RESTING_MAX_TICKS - 3000 && follower.currentTValue > 0.95 }
+                waitUntil { slides.ticks < Slides.PIVOT_RESTING_MAX_TICKS - 3000 && follower.currentTValue > 0.9 }
                 add(claw.close())
                 wait(.05.seconds)
                 add(reset())
@@ -138,7 +143,7 @@ class Sample : LinearOpMode() {
 
             sequential("Score Third Sample") {
                 instant { follower.followPath(createScoringPath(follower, sample3Pose)) }
-                waitUntil { follower.currentTValue > 0.7 }
+                waitUntil { follower.currentTValue > 0.3 }
                 add(score())
             }
 

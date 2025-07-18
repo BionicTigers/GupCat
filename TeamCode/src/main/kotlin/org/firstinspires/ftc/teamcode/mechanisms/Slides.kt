@@ -32,7 +32,7 @@ import org.firstinspires.ftc.teamcode.utils.Persistents
 import org.firstinspires.ftc.teamcode.utils.getByName
 import org.firstinspires.ftc.teamcode.utils.seconds
 
-class Slides(hardwareMap: HardwareMap, private val pivot: Pivot? = null, telemetry: Telemetry? = null) : System, Controllable {
+class Slides(hardwareMap: HardwareMap, private val pivot: Pivot? = null, telemetry: Telemetry? = null, private val arm: Arm? = null) : System, Controllable {
     companion object {
         /** Max Ticks for the slide encoder */
         const val MAX_TICKS = 52500
@@ -51,6 +51,10 @@ class Slides(hardwareMap: HardwareMap, private val pivot: Pivot? = null, telemet
 
         /** Motion profile for lowering the slides */
         val lowerProfile = MotionProfile(17000000, 1656291, 88136, 12.57)
+
+        val groundPIDTerms = PIDTerms(4.0, 50.0, 0.0)
+
+        val pivotedPidTerms = PIDTerms(7.0, 50.0, 0.0)
     }
 
     interface Schema : ControlSchema {
@@ -172,6 +176,11 @@ class Slides(hardwareMap: HardwareMap, private val pivot: Pivot? = null, telemet
             it.minAcceleration = it.acceleration
             it.maxAcceleration = it.acceleration
 
+            if (pivot != null && arm != null)
+                if (arm.target == Arm.Position.FullDown || arm.target == Arm.Position.Down) {
+                    arm.target = if (pivot.angle < Angle.degrees(4.5)) Arm.Position.FullDown else Arm.Position.Down
+                }
+
             false
         }
     }
@@ -196,6 +205,9 @@ class Slides(hardwareMap: HardwareMap, private val pivot: Pivot? = null, telemet
 
         action {
             it.targetTicks = it.targetTicks.coerceIn(MIN_TICKS, adjustedMaxTicks)
+
+            val isPivoted = (pivot?.angle ?: Angle.ZERO) > Angle.degrees(55)
+            it.manualPid.pidTerms = if (isPivoted) pivotedPidTerms else groundPIDTerms
 
             val power = if (dataState.isResting) RESTING_POWER
             else it.manualPid.calculate(it.targetTicks.toDouble(), dataState.ticks.toDouble())
@@ -264,7 +276,7 @@ class Slides(hardwareMap: HardwareMap, private val pivot: Pivot? = null, telemet
         val motorR: DcMotorEx,
         var targetTicks: Int = 0,
         @Editable
-        val manualPid: PID = PID(PIDTerms(7.0, 50.0, 0.0), 0.0, MAX_TICKS.toDouble(), -1.0, 1.0),
+        val manualPid: PID = PID(groundPIDTerms, 0.0, MAX_TICKS.toDouble(), -1.0, 1.0),
         @Editable
         val motionPid: PID = PID(PIDTerms(18.0, 30.0, 0.0), 0.0, MAX_TICKS.toDouble(), -1.0, 1.0)
     ) : BaseCommandState()

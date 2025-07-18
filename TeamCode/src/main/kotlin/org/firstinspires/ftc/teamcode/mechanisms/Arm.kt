@@ -17,9 +17,11 @@ import org.firstinspires.ftc.teamcode.input.types.Digital
 
 class Arm(hardwareMap: HardwareMap, telemetry: Telemetry? = null) : System, Controllable {
     enum class Position(val target: Double) {
-        Down(.95),
+        FullDown(1.0),
+        Down(.925),
         Middle(.5),
         Specimen(.48),
+        Bar(.65),
         Up(.075),
     }
 
@@ -45,12 +47,14 @@ class Arm(hardwareMap: HardwareMap, telemetry: Telemetry? = null) : System, Cont
     private val arm = hardwareMap.get(Servo::class.java, "arm")
 
     var target = Position.Up
-        private set(value) {
+        set(value) {
             arm.position = value.target
             field = value
         }
 
     fun up(): BaseCommand = Command.instant("Arm Up") { target = Position.Up }
+
+    fun fullDown(): BaseCommand = Command.instant("Arm Full Down") { target = Position.FullDown }
 
     fun down(): BaseCommand = Command.instant("Arm Down") { target = Position.Down }
 
@@ -58,8 +62,10 @@ class Arm(hardwareMap: HardwareMap, telemetry: Telemetry? = null) : System, Cont
 
     fun middle(): BaseCommand = Command.instant("Arm Middle") { target = Position.Middle }
 
+    fun bar(): BaseCommand = Command.instant("Arm Middle") { target = Position.Bar }
+
     fun toggle(): BaseCommand = Command.instant("Arm Toggle") {
-        target = if (target != Position.Down) {
+        target = if (target != Position.Down && target != Position.FullDown) {
             Position.Down
         } else {
             Position.Up
@@ -84,7 +90,7 @@ class Arm(hardwareMap: HardwareMap, telemetry: Telemetry? = null) : System, Cont
         toggleUpDown?.let { builder.register(it) { toggle() } }
         up?.let { builder.register(it) { up() } }
         specimen?.let { builder.register(it) { specimen() } }
-        middle?.let { builder.register(it) { middle() } }
+        middle?.let { builder.register(it) { bar() } }
         down?.let { builder.register(it) { down() } }
     }
 }

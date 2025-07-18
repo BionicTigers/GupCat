@@ -49,7 +49,7 @@ class Specimen : LinearOpMode()  {
         val arm = Arm(hardwareMap, telemetry)
         val claw = Claw(hardwareMap, telemetry)
         val pivot = Pivot(hardwareMap, telemetry)
-        val slides = Slides(hardwareMap, pivot, telemetry)
+        val slides = Slides(hardwareMap, pivot, telemetry, arm)
         val drivetrain = Drivetrain(hardwareMap, telemetry, startPose)
 
         val follower = drivetrain.follower
