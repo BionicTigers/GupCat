@@ -92,7 +92,7 @@ class Slides(hardwareMap: HardwareMap, private val pivot: Pivot? = null, telemet
             val slope = (MAX_TICKS - PIVOT_RESTING_MAX_TICKS).toDouble()
             val pivotPercentFromMax =
                 pivot?.let { it.angle.degrees / Pivot.MAX_ANGLE.degrees } ?: 1.0
-//            println("s: $slope, p: ${pivotPercentFromMax * 100}, c: ${slope * pivotPercentFromMax}")
+            println("s: $slope, p: ${pivotPercentFromMax * 100}, c: ${slope * pivotPercentFromMax}")
             return (PIVOT_RESTING_MAX_TICKS + slope * pivotPercentFromMax).toInt()
         }
 

@@ -3,6 +3,10 @@ package org.firstinspires.ftc.teamcode.utils
 import com.sun.tools.doclint.Entity.theta
 import io.github.bionictigers.axiom.web.Editable
 import io.github.bionictigers.io.github.bionictigers.axiom.web.Display
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D
+import org.firstinspires.ftc.teamcode.vision.toRadians
 import kotlin.math.absoluteValue
 import com.pedropathing.localization.Pose as PedroPose
 
@@ -62,6 +66,8 @@ class Pose(@Editable @Display val x: Double, @Editable @Display val y: Double, @
     }
 
     fun toPedro(): PedroPose = PedroPose(x, y, radians)
+
+    fun toPose2D(): Pose2D = Pose2D(DistanceUnit.MM, x, y, AngleUnit.RADIANS, radians)
 }
 
 fun PedroPose.toPose() = Pose(x, y, Math.toDegrees(heading))

@@ -17,7 +17,7 @@ import org.firstinspires.ftc.teamcode.input.types.Digital
 
 class Arm(hardwareMap: HardwareMap, telemetry: Telemetry? = null) : System, Controllable {
     enum class Position(val target: Double) {
-        Down(.95),
+        Down(1.0),
         Middle(.5),
         Specimen(.48),
         Up(.075),
