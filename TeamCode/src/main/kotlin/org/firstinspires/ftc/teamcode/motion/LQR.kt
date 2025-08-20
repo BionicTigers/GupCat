@@ -1,10 +1,5 @@
 package org.firstinspires.ftc.teamcode.motion
 
-import edu.wpi.first.math.DARE
-import edu.wpi.first.math.Matrix
-import edu.wpi.first.math.Nat
-import edu.wpi.first.math.Num
-import org.jetbrains.kotlinx.multik.api.linalg.eig
 import org.jetbrains.kotlinx.multik.api.linalg.inv
 import org.jetbrains.kotlinx.multik.api.mk
 import org.jetbrains.kotlinx.multik.api.ndarray
@@ -54,46 +49,77 @@ class LQR(
 
     fun computeK(): D2Array<Double> {
         val (a, b) = linearize()
-        val p = DARE.dareNoPrecond(
-            a.toWpiMatrix(),
-            b.toWpiMatrix(),
-            q.toWpiMatrix(),
-            r.toWpiMatrix(),
-        ).toMultiK()
 
-        var newK = -mk.linalg.inv(r + b.transpose() * p * b) * (b.transpose() * p * a)
+        // Convert to EJML
+        val A = a.toSimple()
+        val B = b.toSimple()
+        val Q = q.toSimple()
+        val Rm = r.toSimple()
 
-        if (mk.linalg.eig(a - b * newK).first.any { it.re >= 0 }) {
-            // If the eigenvalues are not all negative, we need to recompute K
-            // This is a fallback to ensure stability
-            newK = k!!
-        }
+        val (K, P) = dare(A, B, Q, Rm)
+
+        var newK = (K.negative()).toMK() // your code uses K with a leading minus: u = -Kx
+
+        // Optional conservative stability check (no eigenvalues):
+        val acl = (A.minus(B.mult(K))).toMK()
+        val stableEnough = acl.spectralNorm() < 1.0   // from my earlier message
+        if (!stableEnough && k != null) newK = k!!
 
         return newK
     }
 }
 
+/** Approx spectral norm ||A||_2 via power iteration on A^T A */
+private fun D2Array<Double>.spectralNorm(maxIters: Int = 200, tol: Double = 1e-8): Double {
+    val (m, n) = this.shape
+    fun matmulAtA(x: DoubleArray): DoubleArray {
+        // y = A^T (A x)
+        val Ax = DoubleArray(m)
+        for (i in 0 until m) {
+            var s = 0.0
+            for (j in 0 until n) s += this[i, j] * x[j]
+            Ax[i] = s
+        }
+        val y = DoubleArray(n)
+        for (j in 0 until n) {
+            var s = 0.0
+            for (i in 0 until m) s += this[i, j] * Ax[i]
+            y[j] = s
+        }
+        return y
+    }
+    var v = DoubleArray(n) { if (it % 2 == 0) 1.0 else -1.0 }
+    fun normalize(a: DoubleArray): DoubleArray {
+        var s = 0.0; for (z in a) s += z*z
+        val r = kotlin.math.sqrt(s); if (r == 0.0) return a
+        for (i in a.indices) a[i] /= r
+        return a
+    }
+    v = normalize(v)
+    var lambda = 0.0
+    repeat(maxIters) {
+        val w = matmulAtA(v)
+        val wn = normalize(w)
+        val num = w.indices.sumOf { w[it] * wn[it] }
+        if (kotlin.math.abs(num - lambda) < tol) {
+            lambda = num; return@repeat
+        }
+        lambda = num; v = wn
+    }
+    return kotlin.math.sqrt(lambda.coerceAtLeast(0.0))
+}
+
+
 private fun D2Array<Double>.isPositiveDefinite(tol: Double = 1e-8): Boolean {
     if (!this.isSymmetric(tol)) return false
-    val eig = mk.linalg.eig(this).first
-
-    val realParts = DoubleArray(eig.size) { idx ->
-        eig[idx].re
-    }
-
-    return realParts.all { it > tol }
+    return this.isPD_Cholesky(tol)
 }
 
 private fun D2Array<Double>.isPositiveSemiDefinite(tol: Double = 1e-8): Boolean {
     if (!this.isSymmetric(tol)) return false
-    val eig = mk.linalg.eig(this).first
-
-    val realParts = DoubleArray(eig.size) { idx ->
-        eig[idx].re
-    }
-
-    return realParts.all { it >= tol }
+    return this.isPSD_LDLt(tol)
 }
+
 
 private fun D2Array<Double>.isSymmetric(tol: Double = 1e-8): Boolean {
     val rows = this.shape[0]
@@ -110,50 +136,6 @@ private fun D2Array<Double>.isSymmetric(tol: Double = 1e-8): Boolean {
     return true
 }
 
-private fun <R: Num, C: Num> D2Array<Double>.toWpiMatrix(): Matrix<R, C> {
-    val (rows, cols) = this.shape
-    val wpiMatrix = Matrix(rows.toNat(), cols.toNat())
-
-    for (i in 0 until rows) {
-        for (j in 0 until cols) {
-            wpiMatrix.set(i, j, this[i, j])
-        }
-    }
-    @Suppress("UNCHECKED_CAST")
-    return wpiMatrix as Matrix<R, C>
-}
-
-private fun Int.toNat(): Nat<*> {
-    return when (this) {
-        0 -> Nat.N0()
-        1 -> Nat.N1()
-        2 -> Nat.N2()
-        3 -> Nat.N3()
-        4 -> Nat.N4()
-        5 -> Nat.N5()
-        6 -> Nat.N6()
-        7 -> Nat.N7()
-        8 -> Nat.N8()
-        9 -> Nat.N9()
-        10 -> Nat.N10()
-        else -> throw IllegalArgumentException("Unsupported size: $this")
-    }
-}
-
-private fun Matrix<*, *>.toMultiK(): D2Array<Double> {
-    val rows = this.numRows
-    val cols = this.numCols
-    val data = Array(rows) { DoubleArray(cols) }
-
-    for (i in 0 until rows) {
-        for (j in 0 until cols) {
-            data[i][j] = this.get(i, j)
-        }
-    }
-
-    return mk.ndarray(data)
-}
-
 fun DoubleArray.toMK2D(): D2Array<Double> {
     return mk.ndarray(this).reshape(this.size, 1)
 }
@@ -168,3 +150,51 @@ fun createTuningMatrix(vararg stateCosts: Double) : D2Array<Double> =
             if (row == col) stateCosts[row] else 0.0
         }
     }.toMK2D()
+
+private fun D2Array<Double>.isPD_Cholesky(tol: Double = 1e-10): Boolean =
+    choleskyLowerOrNull(this, tol) != null
+
+private fun D2Array<Double>.isPSD_LDLt(tol: Double = 1e-10): Boolean =
+    ldltOrNull(this, tol)?.let { (_, D, _) -> D.all { it >= -tol } } ?: false
+
+private fun choleskyLowerOrNull(A: D2Array<Double>, tol: Double = 1e-12): Array<DoubleArray>? {
+    val n = A.shape[0]; if (n != A.shape[1]) return null
+    val L = Array(n) { DoubleArray(n) }
+    for (i in 0 until n) {
+        for (j in 0..i) {
+            var s = 0.0
+            for (k in 0 until j) s += L[i][k]*L[j][k]
+            val v = A[i, j] - s
+            if (i == j) {
+                if (v <= tol) return null
+                L[i][j] = kotlin.math.sqrt(v)
+            } else {
+                L[i][j] = v / L[j][j]
+            }
+        }
+    }
+    return L
+}
+
+/** Very small/no-pivot LDLᵀ good enough for small symmetric Q. */
+private fun ldltOrNull(A: D2Array<Double>, tol: Double = 1e-12): Triple<Array<DoubleArray>, DoubleArray, Array<DoubleArray>>? {
+    val n = A.shape[0]; if (n != A.shape[1]) return null
+    val L = Array(n) { DoubleArray(n) }
+    val D = DoubleArray(n)
+    for (i in 0 until n) L[i][i] = 1.0
+
+    for (j in 0 until n) {
+        var dj = A[j, j]
+        for (k in 0 until j) dj -= D[k]*L[j][k]*L[j][k]
+        D[j] = dj
+        // If dj ~ 0, allow semidefinite; if strongly negative, fail.
+        if (dj < -1e6*tol) return null
+        val denom = if (kotlin.math.abs(dj) < tol) Double.POSITIVE_INFINITY else dj
+        for (i in j+1 until n) {
+            var lij = A[i, j]
+            for (k in 0 until j) lij -= D[k]*L[i][k]*L[j][k]
+            L[i][j] = if (denom.isInfinite()) 0.0 else lij / denom
+        }
+    }
+    return Triple(L, D, L) // return L, D, (implicitly Lᵀ)
+}

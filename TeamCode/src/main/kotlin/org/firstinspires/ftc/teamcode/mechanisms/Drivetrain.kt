@@ -166,7 +166,7 @@ class Drivetrain(hardwareMap: HardwareMap, telemetry: Telemetry? = null, private
 
     override val afterRun = Command.continuous("Drivetrain Update", data) {
         if (it.isInTeleop) {
-            rotMulti = 1 - (it.xControl.absoluteValue.coerceAtLeast(it.yControl.absoluteValue) * .6)
+
         } else {
             motors.setPower(state.controlMatrix)
         }
@@ -262,7 +262,8 @@ class Drivetrain(hardwareMap: HardwareMap, telemetry: Telemetry? = null, private
 
     fun setYControl(y: Double): Command<DrivetrainData> = Command.instant("Set Y Control", data) { it.yControl = -y }
 
-    private var rotMulti = 1 - (data.xControl.absoluteValue.coerceAtLeast(data.yControl.absoluteValue) * .6)
+    private val rotMulti: Double
+        get() = 1 - (data.xControl.absoluteValue.coerceAtLeast(data.yControl.absoluteValue) * .6)
     fun setRotControl(rot: Double): Command<DrivetrainData> = Command.instant("Set Rot Control", data) { it.rotControl = -rot * rotMulti }
 
     override fun bindControls(

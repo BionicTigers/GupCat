@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.teleops
 
-import com.pedropathing.localization.PoseUpdater
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import io.github.bionictigers.axiom.commands.Scheduler

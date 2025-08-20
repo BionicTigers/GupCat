@@ -8,7 +8,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D
 import org.firstinspires.ftc.teamcode.vision.toRadians
 import kotlin.math.absoluteValue
-import com.pedropathing.localization.Pose as PedroPose
 
 class Pose(@Editable @Display val x: Double, @Editable @Display val y: Double, @Editable @Display private val rot: Double) {
     constructor(x: Number, y: Number, rot: Number) : this(x.toDouble(), y.toDouble(), rot.toDouble())
@@ -64,10 +63,6 @@ class Pose(@Editable @Display val x: Double, @Editable @Display val y: Double, @
     operator fun div(scalar: Double): Pose {
         return Pose(x / scalar, y / scalar, rot / scalar)
     }
-
-    fun toPedro(): PedroPose = PedroPose(x, y, radians)
-
     fun toPose2D(): Pose2D = Pose2D(DistanceUnit.MM, x, y, AngleUnit.RADIANS, radians)
 }
 
-fun PedroPose.toPose() = Pose(x, y, Math.toDegrees(heading))

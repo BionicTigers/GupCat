@@ -20,17 +20,15 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.2.0'
 
     // User Dependencies
-    implementation 'com.pedropathing:pedro:1.0.9'
-    implementation 'com.acmerobotics.dashboard:dashboard:0.4.16'
+//    implementation 'com.pedropathing:pedro:1.0.9'
+//    implementation 'com.acmerobotics.dashboard:dashboard:0.4.16'
 
-    implementation 'edu.wpi.first.wpimath:wpimath-java:2025.3.2'
-    implementation 'edu.wpi.first.wpimath:wpimath-java:2025.3.2'
-    runtimeOnly 'edu.wpi.first.wpimath:wpimath-jni:2025.3.2'
-    implementation "edu.wpi.first.wpiutil:wpiutil-java:2025.3.2"
-    runtimeOnly "edu.wpi.first.wpiutil:wpiutil-jni:2025.3.2"
+    implementation("org.ejml:ejml-simple:0.43.1")
+    implementation("org.ejml:ejml-ddense:0.43.1")
+    implementation("org.ejml:ejml-core:0.43.1")
 
     implementation "org.jetbrains.kotlinx:multik-core:0.2.3"
-
+    implementation "org.jetbrains.kotlinx:multik-kotlin:0.2.3"
     implementation 'androidx.core:core-ktx:1.15.0'
     implementation 'org.openftc:easyopencv:1.7.3'
     implementation "org.jetbrains.kotlin:kotlin-reflect:2.0.21"
